@@ -1,0 +1,65 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.282319078947368,
+        "y": 5.400904605263158
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.5106913449424555,
+        "y": 5.930232470478624
+      },
+      "isLocked": false,
+      "linkedName": "Outside First Coral Endpoint"
+    },
+    {
+      "anchor": {
+        "x": 1.23825,
+        "y": 7.106
+      },
+      "prevControl": {
+        "x": 1.035185605000828,
+        "y": 7.251824728642368
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Oustside 1R"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 4.017,
+        "y": 4.503
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.9084821428571406,
+      "maxWaypointRelativePos": 0.4316964285714327,
+      "name": "Point Towards Zone"
+    }
+  ],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -53.13010235415596
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -120.3432488842395
+  },
+  "useDefaultConstraints": true
+}

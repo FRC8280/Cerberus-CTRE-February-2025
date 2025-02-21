@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.916036184210526,
+        "y": 5.5356085526315795
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.30996546382589,
+        "y": 5.209015480540741
+      },
+      "isLocked": false,
+      "linkedName": "Outside 2S"
+    },
+    {
+      "anchor": {
+        "x": 1.23825,
+        "y": 7.106
+      },
+      "prevControl": {
+        "x": 0.9926372252396678,
+        "y": 7.299901626693311
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Oustside 1R"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -53.13010235415596
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -60.70863782901576
+  },
+  "useDefaultConstraints": true
+}

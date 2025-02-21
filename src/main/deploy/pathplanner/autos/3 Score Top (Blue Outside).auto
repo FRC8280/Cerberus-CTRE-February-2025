@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outside First Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outside Auton 1st Reload"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outside Auton Second Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outside 2R"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outside Score 3rd Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outside 3rd Reload"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

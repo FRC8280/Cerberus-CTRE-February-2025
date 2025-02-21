@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom First Score"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 1R"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 2S"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 2R"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 3S"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 3R"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
