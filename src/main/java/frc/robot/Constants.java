@@ -24,20 +24,13 @@
 
  package frc.robot;
 
- import com.ctre.phoenix6.configs.TalonFXConfiguration;
- import com.ctre.phoenix6.signals.GravityTypeValue;
- import com.ctre.phoenix6.signals.InvertedValue;
- import com.ctre.phoenix6.signals.NeutralModeValue;
- 
  import edu.wpi.first.apriltag.AprilTagFieldLayout;
  import edu.wpi.first.apriltag.AprilTagFields;
  import edu.wpi.first.math.Matrix;
  import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
  import edu.wpi.first.math.geometry.Rotation3d;
  import edu.wpi.first.math.geometry.Transform3d;
- import edu.wpi.first.math.geometry.Translation2d;
  import edu.wpi.first.math.geometry.Translation3d;
  import edu.wpi.first.math.numbers.N1;
  import edu.wpi.first.math.numbers.N3;
@@ -51,11 +44,22 @@ import edu.wpi.first.math.util.Units;
         public static double TARGET_HEIGHT_METERS = Units.inchesToMeters(51.875);
         public static double CAMERA_PITCH_RADIANS = Units.degreesToRadians(45);
 
-         public static final String kCameraName = "Arducam";
+         
+        public static final String kCameraName = "FrontLeftCamera";
+        public static final String[] CamNames = {
+            "FrontRightCamera", "FrontLeftCamera"
+        };
          // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
          public static final Transform3d kRobotToCam =
                 new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-45), Units.degreesToRadians(0)));
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0)));
+
+        public static final Transform3d[] cameraTransforms = {
+            new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
+            new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0)))
+        };
          // The layout of the AprilTags on the field
          public static final AprilTagFieldLayout kTagLayout =
                  AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
@@ -85,6 +89,7 @@ import edu.wpi.first.math.util.Units;
 
     public static final class Effector{
         public static final int kMotorCanId = 16;
+        public static final int kAlgeaMotorCandID = 17;
         public static final double kCurrentLimit = 60;
         public static final double kVoltageComp = 12;
         public static final double kSpeed = 50;

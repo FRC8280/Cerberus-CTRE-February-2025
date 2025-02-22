@@ -1,37 +1,16 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.*;
 import com.ctre.phoenix6.signals.*;
-import com.ctre.phoenix6.controls.*;
-import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
-
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.measure.*;
-
-import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import au.grapplerobotics.LaserCan;
-
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 //import frc.robot.subsystems.RobotMap.mapElevator;
 
@@ -103,6 +82,28 @@ public class Elevator extends SubsystemBase {
   public void Stow(){
     setPosition(Constants.Elevator.kStowed);
     targetElevatorPosition = Constants.Elevator.kStowed;
+  }
+
+  public void SetLevel(int level){
+
+    switch(level){
+      case 1:
+       setPosition(Constants.Elevator.levelOne);
+        targetElevatorPosition = Constants.Elevator.levelOne;
+        break;
+      case 2:
+        setPosition(Constants.Elevator.levelTwo);
+        targetElevatorPosition = Constants.Elevator.levelTwo;
+        break;
+      case 3:
+        setPosition(Constants.Elevator.levelThree);
+        targetElevatorPosition = Constants.Elevator.levelThree;
+        break;
+      case 4:
+        setPosition(Constants.Elevator.levelFour);
+        targetElevatorPosition = Constants.Elevator.levelFour;
+        break;
+    }
   }
 
   public void LevelOne()
@@ -208,7 +209,7 @@ public void checkAndFix(){
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator/Rear/Pos",  m_RearMotor.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());
+    //SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Elevator Sensor", m_BottomSensor.getMeasurement().distance_mm);
     
   }

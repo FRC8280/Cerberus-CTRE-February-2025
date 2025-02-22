@@ -25,9 +25,6 @@
 package frc.robot;
 
 import static frc.robot.Constants.Vision.*;
-import frc.robot.RobotContainer;
-import frc.robot.Robot;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -47,25 +44,18 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Vision {
     public final PhotonCamera camera;
+    public final PhotonCamera[] Cams;
     private final PhotonPoseEstimator photonEstimator;
     private Matrix<N3, N1> curStdDevs;
 
     // Simulation
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
-
-
-
 
     Pose2d leftTarget, rightTarget;
     public void CalculateAutoReefTarget(int aprilTag){
@@ -132,6 +122,10 @@ public class Vision {
 
     public Vision() {
         camera = new PhotonCamera(kCameraName);
+        Cams = new PhotonCamera[Constants.Vision.CamNames.length];
+        for (int i = 0; i < Cams.length; i++){
+            Cams[i] = new PhotonCamera(Constants.Vision.CamNames[i]);
+        }
 
         photonEstimator =
                 new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);
@@ -159,9 +153,6 @@ public class Vision {
             cameraSim.enableDrawWireframe(true);
         }
     }
-
-
-   
 
     /**
      * The latest estimated robot pose on the field from vision data. This may be empty. This should

@@ -1,5 +1,4 @@
 package frc.robot.subsystems;
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -9,9 +8,6 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-
-import au.grapplerobotics.LaserCan;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,6 +25,7 @@ public class Effector extends SubsystemBase  {
     
     private EffectorState m_EffectorState;
     private TalonFX m_EffectorMotor;
+    private TalonFX m_algeaArm;
 
     private CANrange m_FrontSensor;
     private CANrange m_RearSensor;
@@ -46,6 +43,14 @@ public class Effector extends SubsystemBase  {
     private static final Slot0Configs slot0Configs = new Slot0Configs();
     final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
+    //AlgeaArm configs
+    TalonFXConfiguration talonFXConfigsAlgea;
+    TalonFXConfigurator TalonFXConfiguratorAlgea;
+    MotorOutputConfigs motorConfigsAlgea;
+
+    private static final Slot0Configs slot0ConfigsAlgea = new Slot0Configs();
+    final VelocityVoltage m_requestAlgea = new VelocityVoltage(0).withSlot(0);
+
     public Effector() {
         
         m_EffectorMotor = new TalonFX(Constants.Effector.kMotorCanId);
@@ -58,11 +63,6 @@ public class Effector extends SubsystemBase  {
         talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         m_EffectorMotor.getConfigurator().apply(talonFXConfigs);
 
-        /*slot0Configs.kP = 0;
-        slot0Configs.kI = 0;//0.12;
-        slot0Configs.kD = 0;//0.11;
-        slot0Configs.kS = 0;
-        slot0Configs.kV = 50;*/
         slot0Configs.kS = 0.1; // Add 0.1 V output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
         slot0Configs.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
@@ -70,12 +70,30 @@ public class Effector extends SubsystemBase  {
         slot0Configs.kD = 0; // no output for error derivative
         m_EffectorMotor.getConfigurator().apply(slot0Configs);
 
+        //Range sensors
         m_FrontSensor = new CANrange(Constants.Effector.kFrontLaserCanId);//new LaserCan();
         m_RearSensor = new CANrange(Constants.Effector.kRearLaserCanId);
         m_EffectorTimer = new Timer();
         m_EffectorState = EffectorState.None;
 
+        /*Algea arm */
+       /* m_algeaArm = new TalonFX(Constants.Effector.kAlgeaMotorCandID);
+        CurrentLimitsConfigs currentLimitsAlgea = new CurrentLimitsConfigs();
+        currentLimitsAlgea.SupplyCurrentLimitEnable = true;
+        currentLimitsAlgea.SupplyCurrentLimit = 30;
+        m_algeaArm.getConfigurator().apply(currentLimitsAlgea);
 
+        talonFXConfigsAlgea = new TalonFXConfiguration();
+        talonFXConfigsAlgea.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        m_algeaArm.getConfigurator().apply(talonFXConfigsAlgea);
+
+        slot0Configs.kS = 0.1; // Add 0.1 V output to overcome static friction
+        slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        slot0Configs.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
+        slot0Configs.kI = 0; // no output for integrated error
+        slot0Configs.kD = 0; // no output for error derivative
+        m_algeaArm.getConfigurator().apply(slot0Configs);
+        m_algeaArm.setPosition(0); */
     }
 
     public void RunEffector(double speed) {
@@ -172,6 +190,7 @@ public class Effector extends SubsystemBase  {
         SmartDashboard.putNumber("Rear Sensor: ", m_RearDistanceValue);
         SmartDashboard.putBoolean("CoralDetected", DetectCoral());
         SmartDashboard.putNumber("Effector Velocity", m_EffectorMotor.getVelocity().getValueAsDouble());
+        //SmartDashboard.putNumber("Algea Effector Position", m_algeaArm.getPosition().getValueAsDouble());
     }
 
 }
