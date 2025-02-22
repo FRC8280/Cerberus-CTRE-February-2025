@@ -5,9 +5,6 @@ import au.grapplerobotics.LaserCan;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-//import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
-
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
 
@@ -104,7 +101,7 @@ public class Algae extends SubsystemBase {
 @Override
   public void periodic() {
 
-    m_pidController.setReference(0.1, ControlType.kPosition);
+    //m_pidController.setReference(0.1, ControlType.kPosition);
     //SmartDashboard.putNumber("AlgaePivot/Distance",   m_DistanceSensor.getMeasurement().distance_mm);
     SmartDashboard.putNumber("AlgaePivot Position",   m_encoder.getPosition());
 

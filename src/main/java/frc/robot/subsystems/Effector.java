@@ -25,7 +25,7 @@ public class Effector extends SubsystemBase  {
     
     private EffectorState m_EffectorState;
     private TalonFX m_EffectorMotor;
-    private TalonFX m_algeaArm;
+    //private TalonFX m_algeaArm;
 
     private CANrange m_FrontSensor;
     private CANrange m_RearSensor;

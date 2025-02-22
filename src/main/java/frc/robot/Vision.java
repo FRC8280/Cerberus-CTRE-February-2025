@@ -42,14 +42,13 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.PhotonPipelineResult;
+//import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Vision {
     public final PhotonCamera camera;
-    public final PhotonCamera[] Cams;
     private final PhotonPoseEstimator photonEstimator;
     private Matrix<N3, N1> curStdDevs;
 
@@ -57,78 +56,98 @@ public class Vision {
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
 
-    Pose2d leftTarget, rightTarget;
-    public void CalculateAutoReefTarget(int aprilTag){
-        //aprilTag = Robot.aprilTagId;
+    public ReefTargets CalculateAutoReefTarget(int aprilTag) {
+        // aprilTag = Robot.aprilTagId;
         Optional<Alliance> ally = DriverStation.getAlliance();
-        if(ally.get() == Alliance.Red){
-            switch(aprilTag){
+        ReefTargets returnTargets = new ReefTargets();
+        if (ally.get() == Alliance.Red) {
+            switch (aprilTag) {
                 case 6:
-                    leftTarget = new Pose2d(11.356, 6.121, Rotation2d.fromDegrees(-54.893));
-                    rightTarget = new Pose2d(13.825, 2.631, Rotation2d.fromDegrees(-49.185));
+                    returnTargets.leftTarget = new Pose2d(11.356, 6.121, Rotation2d.fromDegrees(-54.893));
+                    returnTargets.rightTarget = new Pose2d(13.825, 2.631, Rotation2d.fromDegrees(-49.185));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 7:
-                    leftTarget = new Pose2d(15.5, 3.6925, Rotation2d.fromDegrees(174.06));
-                    rightTarget = new Pose2d(15.5, 4.355, Rotation2d.fromDegrees(174.06));
+                    returnTargets.leftTarget = new Pose2d(15.5, 3.6925, Rotation2d.fromDegrees(174.06));
+                    returnTargets.rightTarget = new Pose2d(15.5, 4.355, Rotation2d.fromDegrees(174.06));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 8:
-                    leftTarget = new Pose2d(11.3, 0.408, Rotation2d.fromDegrees(-110.383));
-                    rightTarget = new Pose2d(13.523, 5.566, Rotation2d.fromDegrees(-110.383));
+                    returnTargets.leftTarget = new Pose2d(11.3, 0.408, Rotation2d.fromDegrees(-110.383));
+                    returnTargets.rightTarget = new Pose2d(13.523, 5.566, Rotation2d.fromDegrees(-110.383));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 9:
-                    leftTarget = new Pose2d(12.314, 5.371, Rotation2d.fromDegrees(-58.392));
-                    rightTarget = new Pose2d(12.207, 5.322, Rotation2d.fromDegrees(-58.392));
+                    returnTargets.leftTarget = new Pose2d(12.314, 5.371, Rotation2d.fromDegrees(-58.392));
+                    returnTargets.rightTarget = new Pose2d(12.207, 5.322, Rotation2d.fromDegrees(-58.392));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 10:
-                    leftTarget = new Pose2d(11.459, 3.890, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.leftTarget = new Pose2d(11.459, 3.890, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 11:
-                    leftTarget = new Pose2d(12.268, 2.688, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.leftTarget = new Pose2d(12.268, 2.688, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
+                default:
+                    returnTargets.leftTarget = null;
+                    returnTargets.rightTarget = null;
+                    returnTargets.centerTarget = null;
+                    break;
+
             }
         }
 
-        else if(ally.get() == Alliance.Blue){
-            switch(aprilTag){
+        else if (ally.get() == Alliance.Blue) {
+            switch (aprilTag) {
                 case 17:
-                    leftTarget =  new Pose2d(3.695, 2.726, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(13.932, 2.736, Rotation2d.fromDegrees(85.601));
+                    returnTargets.leftTarget = new Pose2d(3.695, 2.726, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(13.932, 2.736, Rotation2d.fromDegrees(85.601));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 18:
-                    leftTarget = new Pose2d(2.906, 3.938, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(14.515, 4.044, Rotation2d.fromDegrees(-165.174));
+                    returnTargets.leftTarget = new Pose2d(2.906, 3.938, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(14.515, 4.044, Rotation2d.fromDegrees(-165.174));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 19:
-                    leftTarget = new Pose2d(3.685, 5.362, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(13.759, 5.449, Rotation2d.fromDegrees(-110.61));
+                    returnTargets.leftTarget = new Pose2d(3.685, 5.362, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(13.759, 5.449, Rotation2d.fromDegrees(-110.61));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 20:
-                    leftTarget = new Pose2d(5.263, 5.314, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.leftTarget = new Pose2d(5.263, 5.314, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 21:
-                    leftTarget = new Pose2d(5.985, 4.063, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.leftTarget = new Pose2d(5.985, 4.063, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 22:
-                    leftTarget = new Pose2d(5.186, 2.716, Rotation2d.fromDegrees(-25.0));
-                    rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.leftTarget = new Pose2d(5.186, 2.716, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.rightTarget = new Pose2d(14.515, 4.002, Rotation2d.fromDegrees(-25.0));
+                    returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+                    break;
+                default:
+                    returnTargets.leftTarget = null;
+                    returnTargets.rightTarget = null;
+                    returnTargets.centerTarget = null;
                     break;
             }
         }
+        return returnTargets;
     }
 
-    public Vision() {
-        camera = new PhotonCamera(kCameraName);
-        Cams = new PhotonCamera[Constants.Vision.CamNames.length];
-        for (int i = 0; i < Cams.length; i++){
-            Cams[i] = new PhotonCamera(Constants.Vision.CamNames[i]);
-        }
+    public Vision(int index) {
+        camera = new PhotonCamera(Constants.Vision.CamNames[index]);
 
         photonEstimator =
-                new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kRobotToCam);
+                new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraTransforms[index]);
         photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         // ----- Simulation
@@ -148,7 +167,7 @@ public class Vision {
             // targets.
             cameraSim = new PhotonCameraSim(camera, cameraProp);
             // Add the simulated camera to view the targets on this simulated field.
-            visionSim.addCamera(cameraSim, kRobotToCam);
+            visionSim.addCamera(cameraSim, cameraTransforms[index]);
 
             cameraSim.enableDrawWireframe(true);
         }

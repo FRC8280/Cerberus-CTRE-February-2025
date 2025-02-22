@@ -22,7 +22,6 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -44,11 +43,12 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Algae;
 
 public class RobotContainer {
-    public Vision vision;
+    public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
     public final Algae m_Algae = new Algae();
     public final Climber m_Climber = new Climber();
     public final Elevator m_Elevator = new Elevator();
     public final Effector m_Effector = new Effector();
+    public ReefTargets m_ReefTargets = new ReefTargets();
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
@@ -59,13 +59,13 @@ public class RobotContainer {
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    //private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     //private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController driverController = new CommandXboxController(0);
     // private final CommandXboxController operator = new CommandXboxController(1);
 
     private final Joystick CoralOperator = new Joystick(1);
@@ -78,7 +78,10 @@ public class RobotContainer {
     public Command automaticPath = null;
 
     public RobotContainer() {
-        // vision = new Vision();
+        // Initialize each element of the vision array
+        for (int i = 0; i < vision.length; i++) {
+            vision[i] = new Vision(i);
+        }
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -87,14 +90,11 @@ public class RobotContainer {
 
     private void leftAlign() {
         Pose2d currentPose = drivetrain.getState().Pose;
-        Pose2d destinationPos = vision.leftTarget;
-        // Pose2d destinationPos = new Pose2d(14.8, 4.355,
-        // Rotation2d.fromDegrees(174.06));
+        Pose2d destinationPos = m_ReefTargets.leftTarget; 
+        //Pose2d destinationPos = new Pose2d(14.8, 4.355, Rotation2d.fromDegrees(174.06));
         if (destinationPos == null)
             return;
 
-        // Pose2d destinationPos = new Pose2d(14.6, 4.24, new
-        // Rotation2d(Units.degreesToRadians(-177.8)));
         // The rotation component in these poses represents the direction of travel
         Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
 
@@ -118,13 +118,10 @@ public class RobotContainer {
 
     private void rightAlign() {
         Pose2d currentPose = drivetrain.getState().Pose;
-        Pose2d destinationPos = vision.rightTarget;
-        // Pose2d destinationPos = new Pose2d(14.8, 3.4,
-        // Rotation2d.fromDegrees(174.06));
+        Pose2d destinationPos = m_ReefTargets.rightTarget;
+        //Pose2d destinationPos = new Pose2d(14.8, 3.4,Rotation2d.fromDegrees(174.06));
         if (destinationPos == null)
             return;
-        // Pose2d destinationPos = new Pose2d(14.6, 4.24, new
-        // Rotation2d(Units.degreesToRadians(-177.8)));
         // The rotation component in these poses represents the direction of travel
         Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
 
@@ -189,18 +186,19 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+                drivetrain.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with
                                                                                                    // negative Y
                                                                                                    // (forward)
-                        .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with
+                        .withVelocityY(-driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with
                                                                                     // negative X (left)
                 ));
 
         // operator.y().onTrue(new InstantCommand(()->this.leftAlign()));
         // operator.a().onTrue(new InstantCommand(() -> this.rightAlign()));
-        joystick.x().onTrue(new InstantCommand(() -> this.CancelAutomaticMovement()));
+        driverController.x().onTrue(new InstantCommand(() -> this.CancelAutomaticMovement()));
 
+        driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
         /*
          * joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
          * joystick.b().whileTrue(drivetrain.applyRequest(() ->
@@ -209,19 +207,19 @@ public class RobotContainer {
          * ));
          */
 
-        joystick.pov(0).whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(0.5).withVelocityY(0)));
-        joystick.pov(180)
+         driverController.pov(0).whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(0.5).withVelocityY(0)));
+         driverController.pov(180)
                 .whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(-0.5).withVelocityY(0)));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        driverController.back().and(driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        driverController.back().and(driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        driverController.start().and(driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        driverController.start().and(driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         // Winch Code
         new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)

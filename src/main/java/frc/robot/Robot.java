@@ -38,19 +38,24 @@ public class Robot extends TimedRobot {
   }
 
  public void processAprilTags() {
-    PhotonPipelineResult camera1Result= m_robotContainer.vision.Cams[0].getLatestResult();
-    PhotonPipelineResult camera2Result = m_robotContainer.vision.Cams[1].getLatestResult();
+    PhotonPipelineResult camera1Result= m_robotContainer.vision[0].camera.getLatestResult();
+    PhotonPipelineResult camera2Result = m_robotContainer.vision[1].camera.getLatestResult();
+
+    for(int i=0;i<2;i++){
     if (camera1Result.hasTargets() || camera2Result.hasTargets()) {
         PhotonPipelineResult result = camera1Result.hasTargets() ? camera1Result : camera2Result;
         for (PhotonTrackedTarget target : result.getTargets()) {
             int aprilTagId = target.getFiducialId();
-            m_robotContainer.vision.CalculateAutoReefTarget(aprilTagId);
+
+
+            m_robotContainer.m_ReefTargets = m_robotContainer.vision[0].CalculateAutoReefTarget(aprilTagId);
             SmartDashboard.putNumber("Detected April Tag", aprilTagId);
             //System.out.println("Detected AprilTag ID: " + aprilTagId);
         }
     } else {
         //System.out.println("No targets detected.");
     }
+  }
 }
 
   @Override
@@ -58,15 +63,19 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     // Correct pose estimate with vision measurements
-    var visionEst = m_robotContainer.vision.getEstimatedGlobalPose();
-    visionEst.ifPresent(
-            est -> {
-                // Change our trust in the measurement based on the tags we can see
-                var estStdDevs = m_robotContainer.vision.getEstimationStdDevs();
+    for (int i=0; i < m_robotContainer.vision.length; i++) {
+      var visionEst = m_robotContainer.vision[i].getEstimatedGlobalPose();
+      int index = i;
+      visionEst.ifPresent(
+          est -> {
+            // Change our trust in the measurement based on the tags we can see
+            var estStdDevs = m_robotContainer.vision[index].getEstimationStdDevs();
 
-                m_robotContainer.drivetrain.addVisionMeasurement(
-                        est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-            });
+            m_robotContainer.drivetrain.addVisionMeasurement(
+                est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+          });
+    }
+
     processAprilTags();    
     m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
     SmartDashboard.putNumber("Current Drive X", m_robotContainer.drivetrain.getState().Pose.getX());

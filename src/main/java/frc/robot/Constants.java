@@ -44,16 +44,11 @@ import edu.wpi.first.math.util.Units;
         public static double TARGET_HEIGHT_METERS = Units.inchesToMeters(51.875);
         public static double CAMERA_PITCH_RADIANS = Units.degreesToRadians(45);
 
-         
-        public static final String kCameraName = "FrontLeftCamera";
         public static final String[] CamNames = {
             "FrontRightCamera", "FrontLeftCamera"
         };
-         // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-         public static final Transform3d kRobotToCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0)));
 
+       /* // example Cam mounted facing forward, half a meter forward of center, half a meter up from center*/
         public static final Transform3d[] cameraTransforms = {
             new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
