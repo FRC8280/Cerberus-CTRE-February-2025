@@ -86,6 +86,7 @@ public class Algae extends SubsystemBase {
 
   public void GroundPivot(){
     currentPivotPosition = AlgaeConstants.kIntakePosition;
+    intakeAlgae();
   }
 
   public void intakeAlgae(){
@@ -101,7 +102,7 @@ public class Algae extends SubsystemBase {
 @Override
   public void periodic() {
 
-    //m_pidController.setReference(0.1, ControlType.kPosition);
+    m_pidController.setReference(0, ControlType.kPosition);
     //SmartDashboard.putNumber("AlgaePivot/Distance",   m_DistanceSensor.getMeasurement().distance_mm);
     SmartDashboard.putNumber("AlgaePivot Position",   m_encoder.getPosition());
 

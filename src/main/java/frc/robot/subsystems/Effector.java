@@ -41,7 +41,7 @@ public class Effector extends SubsystemBase  {
     TalonFXConfigurator TalonFXConfigurator;
     MotorOutputConfigs motorConfigs;
 
-    private static final Slot0Configs slot0Configs = new Slot0Configs();
+    private static final Slot0Configs EffectorGains = new Slot0Configs();
     final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
     //AlgeaArm configs
@@ -49,7 +49,7 @@ public class Effector extends SubsystemBase  {
     TalonFXConfigurator TalonFXConfiguratorAlgea;
     MotorOutputConfigs motorConfigsAlgea;
 
-    private static final Slot0Configs slot0ConfigsAlgea = new Slot0Configs();
+    private static final Slot0Configs AlgaeArmGains = new Slot0Configs();
     final VelocityVoltage m_requestAlgea = new VelocityVoltage(0).withSlot(0);
 
     public Effector() {
@@ -64,12 +64,12 @@ public class Effector extends SubsystemBase  {
         talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         m_EffectorMotor.getConfigurator().apply(talonFXConfigs);
 
-        slot0Configs.kS = 0.1; // Add 0.1 V output to overcome static friction
-        slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0; // no output for error derivative
-        m_EffectorMotor.getConfigurator().apply(slot0Configs);
+        EffectorGains.kS = 0.1; // Add 0.1 V output to overcome static friction
+        EffectorGains.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        EffectorGains.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
+        EffectorGains.kI = 0; // no output for integrated error
+        EffectorGains.kD = 0; // no output for error derivative
+        m_EffectorMotor.getConfigurator().apply(EffectorGains);
 
         //Range sensors
         m_FrontSensor = new CANrange(Constants.Effector.kFrontLaserCanId);//new LaserCan();
@@ -88,15 +88,16 @@ public class Effector extends SubsystemBase  {
         talonFXConfigsAlgea.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         m_algeaArm.getConfigurator().apply(talonFXConfigsAlgea);
 
-        slot0ConfigsAlgea.kS = 0.1; // Add 0.1 V output to overcome static friction
-        slot0ConfigsAlgea.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        slot0ConfigsAlgea.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
-        slot0ConfigsAlgea.kI = 0; // no output for integrated error
-        slot0ConfigsAlgea.kD = 0; // no output for error derivative
-        m_algeaArm.getConfigurator().apply(slot0ConfigsAlgea);
+        AlgaeArmGains.kS = 0; // Add 0.1 V output to overcome static friction
+        AlgaeArmGains.kV = 0; // A velocity target of 1 rps results in 0.12 V output
+        AlgaeArmGains.kP = 1;//0.11; // An error of 1 rps results in 0.11 V output
+        AlgaeArmGains.kI = 0; // no output for integrated error
+        AlgaeArmGains.kD = 0.1; // no output for error derivative
+        m_algeaArm.getConfigurator().apply(AlgaeArmGains);
         m_algeaArm.setPosition(0); 
     }
 
+    //New arm attachment to effectorn
     public void ResetAlgeaArm()
     {
         m_EffectorMotor.set(0);

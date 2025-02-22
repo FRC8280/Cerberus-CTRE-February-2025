@@ -68,8 +68,8 @@ public class Vision {
                     returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 7:
-                    returnTargets.leftTarget = new Pose2d(15.5, 3.6925, Rotation2d.fromDegrees(174.06));
-                    returnTargets.rightTarget = new Pose2d(15.5, 4.355, Rotation2d.fromDegrees(174.06));
+                    returnTargets.leftTarget = new Pose2d(14.42, 3.6925, Rotation2d.fromDegrees(174.06));
+                    returnTargets.rightTarget = new Pose2d(14.42, 4.355, Rotation2d.fromDegrees(174.06));
                     returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 8:

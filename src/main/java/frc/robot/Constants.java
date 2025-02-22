@@ -50,9 +50,9 @@ import edu.wpi.first.math.util.Units;
 
        /* // example Cam mounted facing forward, half a meter forward of center, half a meter up from center*/
         public static final Transform3d[] cameraTransforms = {
-            new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
+            new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
-            new Transform3d(new Translation3d(Units.inchesToMeters(13), Units.inchesToMeters(2.5), Units.inchesToMeters(11.5)),
+            new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(8.75), Units.inchesToMeters(8.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0)))
         };
          // The layout of the AprilTags on the field
@@ -89,8 +89,8 @@ import edu.wpi.first.math.util.Units;
         public static final double kVoltageComp = 12;
         public static final double kSpeed = 50;
         
-        public static final int kFrontLaserCanId = 40;
-        public static final int kRearLaserCanId = 39;
+        public static final int kFrontLaserCanId = 39;
+        public static final int kRearLaserCanId = 40;
         public static final int kCoralDetectionRange = 70;
         public static final int intakeTimerMax = 3;
         public static final double intakeSpeed = 2;//50;//300; //0.5;

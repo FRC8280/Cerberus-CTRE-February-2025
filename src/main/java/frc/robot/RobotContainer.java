@@ -88,6 +88,12 @@ public class RobotContainer {
         configureBindings();
     }
 
+    public enum Alignment {
+        LEFT,
+        RIGHT,
+        CENTER
+    }
+
     private void leftAlign() {
         Pose2d currentPose = drivetrain.getState().Pose;
         Pose2d destinationPos = m_ReefTargets.leftTarget; 
@@ -142,6 +148,32 @@ public class RobotContainer {
         automaticPath.schedule();
     }
 
+    private void centerAlign() {
+        Pose2d currentPose = drivetrain.getState().Pose;
+        Pose2d destinationPos = m_ReefTargets.centerTarget;
+        //Pose2d destinationPos = new Pose2d(14.8, 3.4,Rotation2d.fromDegrees(174.06));
+        if (destinationPos == null)
+            return;
+        // The rotation component in these poses represents the direction of travel
+        Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
+
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPos, destinationPos);
+        PathPlannerPath path = new PathPlannerPath(
+                waypoints,
+                new PathConstraints(
+                        2.5, 2.5,
+                        Units.degreesToRadians(360), Units.degreesToRadians(540)),
+                null, // Ideal starting state can be null for on-the-fly paths
+                new GoalEndState(0.0, destinationPos.getRotation())// currentPose.getRotation())
+        );
+
+        // Prevent this path from being flipped on the red alliance, since the given
+        // positions are already correct
+        path.preventFlipping = true;
+        automaticPath = AutoBuilder.followPath(path);
+        automaticPath.schedule();
+    }
+
     private void CancelAutomaticMovement() {
         if ((automaticPath == null) || (!automaticPath.isScheduled()))
             return;
@@ -154,7 +186,7 @@ public class RobotContainer {
         return (automaticPath != null) && (automaticPath.isScheduled());
     }
 
-    private Command ElevatorAutoScore(boolean useLeftAlign, int level) {
+    private Command ElevatorAutoScore(Alignment alignment, int level) {
 
         // Todo add movement command
         // Todo may need special sequence for level 1
@@ -162,12 +194,19 @@ public class RobotContainer {
         return new SequentialCommandGroup(
 
                 //new command to move use left or right align.
-                new InstantCommand(() -> {
-                    if (useLeftAlign)
-                        this.leftAlign();
-                    else
-                        this.rightAlign();
-                }),
+                /*new InstantCommand(() -> {
+                    switch (alignment) {
+                        case LEFT:
+                            this.leftAlign();
+                            break;
+                        case RIGHT:
+                            this.rightAlign();
+                            break;
+                        case CENTER:
+                            this.centerAlign();
+                            break;
+                    }
+                }),*/
                 new InstantCommand(() -> m_Elevator.SetLevel(level)),
                 new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
                 new WaitCommand(0.1),
@@ -245,26 +284,94 @@ public class RobotContainer {
 
         // Because Dr. Lapetina says write pseudo code
         // Bindings to control Elevator Level, wait until it aligns, then runs sequential command gorup to score
+        /*new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL4)
+        .onTrue(new InstantCommand(() -> ElevatorAutoScore(Alignment.LEFT, 4)));*/
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL4)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(true, 4)));
+                .onTrue(new InstantCommand(() -> leftAlign())
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelFour()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.1))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.25))
+                        .andThen(m_Elevator.RunCurrentZeroing()));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL4)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(false, 4)));
+                .onTrue(new InstantCommand(() -> rightAlign())
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelFour()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.1))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.25))
+                        .andThen(m_Elevator.RunCurrentZeroing()));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL3)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(true, 3)));
+                .onTrue(new InstantCommand(() -> leftAlign())
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelThree()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.1))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.25))
+                        .andThen(m_Elevator.RunCurrentZeroing()));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL3)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(false, 3)));
+                .onTrue(new InstantCommand(() -> rightAlign())
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelThree()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.1))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.25))
+                        .andThen(m_Elevator.RunCurrentZeroing()));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL2)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(true, 2)));
+                .onTrue(new InstantCommand(() -> leftAlign())
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.1))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.25))
+                        .andThen(m_Elevator.RunCurrentZeroing()));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL2)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(false, 2)));
+                .onTrue(new InstantCommand(() -> rightAlign())
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.1))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new WaitCommand(0.25))
+                        .andThen(m_Elevator.RunCurrentZeroing()));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
-        .onTrue(new InstantCommand(() -> ElevatorAutoScore(false, 1)));
+        .onTrue(new InstantCommand(() -> ElevatorAutoScore(Alignment.CENTER, 1)));
 
         new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.MANUAL_BUTTON)
                 .onTrue(m_Elevator.RunCurrentZeroing());

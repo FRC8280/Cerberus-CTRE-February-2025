@@ -59,11 +59,12 @@ public class Elevator extends SubsystemBase {
     
     elevatorGains.kP = 2.4;
     elevatorGains.kI = 0;
-    elevatorGains.kD = 0.25;
+    elevatorGains.kD = 0.35;//0.25;
     elevatorGains.kG = 0.09;
     elevatorGains.kV = 3.01;
     elevatorGains.kA = 0.01;
     m_RearMotor.getConfigurator().apply(elevatorGains);
+    ResetEncoders();
   }
 
   //manual pivot commands to test launcher

@@ -32,7 +32,6 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     CanBridge.runTCP();
-    //vision = new Vision();
     m_robotContainer = new RobotContainer();
     SmartDashboard.putData("Field", m_field);
   }
@@ -82,6 +81,17 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Current Drive Y", m_robotContainer.drivetrain.getState().Pose.getY());
     SmartDashboard.putNumber("Current Yaw", m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
     
+    if(m_robotContainer.m_ReefTargets.leftTarget!=null){
+    SmartDashboard.putNumber("Target Left X", m_robotContainer.m_ReefTargets.leftTarget.getX());
+    SmartDashboard.putNumber("Target Left Y", m_robotContainer.m_ReefTargets.leftTarget.getY());
+    SmartDashboard.putNumber("Target Left Yaw", m_robotContainer.m_ReefTargets.leftTarget.getRotation().getDegrees());
+    }
+
+    if(m_robotContainer.m_ReefTargets.rightTarget!=null){
+    SmartDashboard.putNumber("Target Right X", m_robotContainer.m_ReefTargets.rightTarget.getX());
+    SmartDashboard.putNumber("Target Right Y", m_robotContainer.m_ReefTargets.rightTarget.getY());
+    SmartDashboard.putNumber("Target Right Yaw", m_robotContainer.m_ReefTargets.rightTarget.getRotation().getDegrees());
+    }
     //Todo add smart dashbaord for vision targets .
   }
 
