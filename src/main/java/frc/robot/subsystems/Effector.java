@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -25,7 +26,7 @@ public class Effector extends SubsystemBase  {
     
     private EffectorState m_EffectorState;
     private TalonFX m_EffectorMotor;
-    //private TalonFX m_algeaArm;
+    private TalonFX m_algeaArm;
 
     private CANrange m_FrontSensor;
     private CANrange m_RearSensor;
@@ -77,7 +78,7 @@ public class Effector extends SubsystemBase  {
         m_EffectorState = EffectorState.None;
 
         /*Algea arm */
-       /* m_algeaArm = new TalonFX(Constants.Effector.kAlgeaMotorCandID);
+       m_algeaArm = new TalonFX(Constants.Effector.kAlgeaMotorCandID);
         CurrentLimitsConfigs currentLimitsAlgea = new CurrentLimitsConfigs();
         currentLimitsAlgea.SupplyCurrentLimitEnable = true;
         currentLimitsAlgea.SupplyCurrentLimit = 30;
@@ -87,13 +88,23 @@ public class Effector extends SubsystemBase  {
         talonFXConfigsAlgea.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         m_algeaArm.getConfigurator().apply(talonFXConfigsAlgea);
 
-        slot0Configs.kS = 0.1; // Add 0.1 V output to overcome static friction
-        slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0; // no output for error derivative
-        m_algeaArm.getConfigurator().apply(slot0Configs);
-        m_algeaArm.setPosition(0); */
+        slot0ConfigsAlgea.kS = 0.1; // Add 0.1 V output to overcome static friction
+        slot0ConfigsAlgea.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        slot0ConfigsAlgea.kP = 0.11;//0.11; // An error of 1 rps results in 0.11 V output
+        slot0ConfigsAlgea.kI = 0; // no output for integrated error
+        slot0ConfigsAlgea.kD = 0; // no output for error derivative
+        m_algeaArm.getConfigurator().apply(slot0ConfigsAlgea);
+        m_algeaArm.setPosition(0); 
+    }
+
+    public void ResetAlgeaArm()
+    {
+        m_EffectorMotor.set(0);
+    }
+    public void MoveAlgeaArm()
+    {
+        final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+        m_algeaArm.setControl(positionRequest.withPosition(Constants.Effector.algeaArmScorePosition));
     }
 
     public void RunEffector(double speed) {

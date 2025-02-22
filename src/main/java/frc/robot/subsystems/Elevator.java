@@ -32,7 +32,7 @@ public class Elevator extends SubsystemBase {
     STOWED
   }
 
-  private ElevatorState elevatorState = ElevatorState.STOWED;
+  //private ElevatorState elevatorState = ElevatorState.STOWED;
   private double targetElevatorPosition = Constants.Elevator.kStowed;
 
   private static final Slot0Configs elevatorGains = new Slot0Configs();
@@ -65,8 +65,6 @@ public class Elevator extends SubsystemBase {
     elevatorGains.kA = 0.01;
     m_RearMotor.getConfigurator().apply(elevatorGains);
   }
-
-
 
   //manual pivot commands to test launcher
   //Function to set up position control of motors
@@ -129,7 +127,6 @@ public class Elevator extends SubsystemBase {
      setPosition(Constants.Elevator.levelFour);
      targetElevatorPosition = Constants.Elevator.levelFour;
   }
-
 
   //Functions to check if the elevator has reached the set position
   public boolean aboveThreshold(double value, double constant) {

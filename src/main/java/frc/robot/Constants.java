@@ -97,6 +97,8 @@ import edu.wpi.first.math.util.Units;
         public static final int ejectSpeed = -10;
         public static final int scoreSpeed = 10;
 
+        public static final int algeaArmScorePosition = 1;
+
     }
 
     public static final class ClimberConstants {
