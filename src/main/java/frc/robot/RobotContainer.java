@@ -40,11 +40,11 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Effector;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Algae;
+//import frc.robot.subsystems.Algae;
 
 public class RobotContainer {
         public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
-        public final Algae m_Algae = new Algae();
+        //public final Algae m_Algae = new Algae();
         public final Climber m_Climber = new Climber();
         public final Elevator m_Elevator = new Elevator();
         public final Effector m_Effector = new Effector();
