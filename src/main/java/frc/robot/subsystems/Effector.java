@@ -1,4 +1,5 @@
 package frc.robot.subsystems;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -88,11 +89,21 @@ public class Effector extends SubsystemBase  {
         talonFXConfigsAlgea.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         m_algeaArm.getConfigurator().apply(talonFXConfigsAlgea);
 
-        AlgaeArmGains.kS = 0; // Add 0.1 V output to overcome static friction
-        AlgaeArmGains.kV = 0; // A velocity target of 1 rps results in 0.12 V output
-        AlgaeArmGains.kP = 1;//0.11; // An error of 1 rps results in 0.11 V output
+        /*AlgaeArmGains.kS = 0.1; // Add 0.1 V output to overcome static friction
+        AlgaeArmGains.kV = 0.06; // A velocity target of 1 rps results in 0.12 V output
+        AlgaeArmGains.kA = 0.03;
+        AlgaeArmGains.kG = 1.0;
+
+        AlgaeArmGains.kP = 5;//0.11; // An error of 1 rps results in 0.11 V output
         AlgaeArmGains.kI = 0; // no output for integrated error
-        AlgaeArmGains.kD = 0.1; // no output for error derivative
+        AlgaeArmGains.kD = 0.1; // no output for error derivative*/
+        AlgaeArmGains.kS = 0.1; // Add 0.1 V output to overcome static friction
+        AlgaeArmGains.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        AlgaeArmGains.kG = 1;
+        AlgaeArmGains.kP = 5.11;//0.11; // An error of 1 rps results in 0.11 V output
+        AlgaeArmGains.kI = .5; // no output for integrated error
+        AlgaeArmGains.kD = 0; // no output for error derivative
+
         m_algeaArm.getConfigurator().apply(AlgaeArmGains);
         m_algeaArm.setPosition(0); 
     }
@@ -100,12 +111,17 @@ public class Effector extends SubsystemBase  {
     //New arm attachment to effectorn
     public void ResetAlgeaArm()
     {
+        final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+        m_algeaArm.setControl(positionRequest.withPosition(0));
         m_EffectorMotor.set(0);
     }
+
     public void MoveAlgeaArm()
     {
+        System.out.println("Moving Algea arm.");
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
         m_algeaArm.setControl(positionRequest.withPosition(Constants.Effector.algeaArmScorePosition));
+        m_EffectorMotor.set(0);
     }
 
     public void RunEffector(double speed) {
@@ -155,13 +171,21 @@ public class Effector extends SubsystemBase  {
         m_EffectorState = EffectorState.None;
         m_EffectorMotor.set(0);
         m_EffectorTimer.stop();
-        m_EffectorTimer.reset();
+        //m_EffectorTimer.reset();
     }
 
     public boolean DetectCoral()
     {    
        if((m_FrontDistanceValue <= Constants.Effector.kCoralDetectionRange) || 
            (m_RearDistanceValue <= Constants.Effector.kCoralDetectionRange))
+          return true;
+        else
+          return false; 
+    }
+
+    public boolean DetectCoralRear(){
+
+        if(m_RearDistanceValue <= Constants.Effector.kCoralDetectionRange) 
           return true;
         else
           return false; 
@@ -189,20 +213,23 @@ public class Effector extends SubsystemBase  {
         m_FrontDistanceValue = m_FrontSensor.getDistance().refresh().getValueAsDouble()*1000;
         m_RearDistanceValue = m_RearSensor.getDistance().refresh().getValueAsDouble()*1000;
 
-        if(m_EffectorState == EffectorState.Intaking && IntakeComplete())
+        if(m_EffectorState == EffectorState.Intaking && DetectCoralFront())
             Stop();
-        
-        if(m_EffectorState == EffectorState.Scoring && !DetectCoralFront())
+        else if(m_EffectorState == EffectorState.Intaking && IntakeComplete())
             Stop();
-
-        if(m_EffectorTimer.isRunning() && m_EffectorTimer.hasElapsed(Constants.Effector.intakeTimerMax))  //emergency shutdown if timer expires
+        else if(m_EffectorState == EffectorState.Scoring && !DetectCoralFront())
+            Stop();
+        //emergency measure
+        else if(m_EffectorTimer.isRunning() && m_EffectorTimer.hasElapsed(Constants.Effector.intakeTimerMax))  //emergency shutdown if timer expires
            Stop();
 
         SmartDashboard.putNumber("Front Sensor: ", m_FrontDistanceValue);
         SmartDashboard.putNumber("Rear Sensor: ", m_RearDistanceValue);
-        SmartDashboard.putBoolean("CoralDetected", DetectCoral());
-        SmartDashboard.putNumber("Effector Velocity", m_EffectorMotor.getVelocity().getValueAsDouble());
-        //SmartDashboard.putNumber("Algea Effector Position", m_algeaArm.getPosition().getValueAsDouble());
+        //SmartDashboard.putBoolean("CoralDetected", DetectCoral());
+        //SmartDashboard.putNumber("Effector Velocity", m_EffectorMotor.getVelocity().getValueAsDouble());
+        //SmartDashboard.putBoolean("Effector Timer Running",m_EffectorTimer.isRunning());
+        //SmartDashboard.putNumber("Effector Timer Elapsed", m_EffectorTimer.get());
+        SmartDashboard.putNumber("Effector Arm Position", m_algeaArm.getPosition().getValueAsDouble());
     }
 
 }

@@ -104,7 +104,7 @@ public class Algae extends SubsystemBase {
 
     m_pidController.setReference(0, ControlType.kPosition);
     //SmartDashboard.putNumber("AlgaePivot/Distance",   m_DistanceSensor.getMeasurement().distance_mm);
-    SmartDashboard.putNumber("AlgaePivot Position",   m_encoder.getPosition());
+    //SmartDashboard.putNumber("AlgaePivot Position",   m_encoder.getPosition());
 
 
   }

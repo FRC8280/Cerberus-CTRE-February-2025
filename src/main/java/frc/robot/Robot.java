@@ -10,7 +10,8 @@ import au.grapplerobotics.CanBridge;
 /*import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;*/
-
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose3d;
 //import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -27,8 +28,8 @@ public class Robot extends TimedRobot {
   public static int aprilTagId;
 
   private final RobotContainer m_robotContainer;
-  //private Vision vision;
-   private final Field2d m_field = new Field2d();
+  // private Vision vision;
+  private final Field2d m_field = new Field2d();
 
   public Robot() {
     CanBridge.runTCP();
@@ -36,33 +37,56 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Field", m_field);
   }
 
- public void processAprilTags() {
-    PhotonPipelineResult camera1Result= m_robotContainer.vision[0].camera.getLatestResult();
+  public void processAprilTags() {
+    PhotonPipelineResult camera1Result = m_robotContainer.vision[0].camera.getLatestResult();
     PhotonPipelineResult camera2Result = m_robotContainer.vision[1].camera.getLatestResult();
 
-    for(int i=0;i<2;i++){
-    if (camera1Result.hasTargets() || camera2Result.hasTargets()) {
+    double LowestDistance = 9999.0;
+    double distance = 0;
+
+    for (int i = 0; i < 2; i++) {
+      if (camera1Result.hasTargets() || camera2Result.hasTargets()) {
         PhotonPipelineResult result = camera1Result.hasTargets() ? camera1Result : camera2Result;
         for (PhotonTrackedTarget target : result.getTargets()) {
-            int aprilTagId = target.getFiducialId();
+          int aprilTagId = target.getFiducialId();
+          if (m_robotContainer.vision[0].CheckValidAprilTag(aprilTagId)) {
 
+               distance = m_robotContainer.vision[0].calculateDistanceBetweenPoseAndTransform(
+                m_robotContainer.drivetrain.getState().Pose,target.getBestCameraToTarget());
+                //System.out.println("AprilTag ID: " + aprilTagId +" At Distance: " + distance);
 
-            m_robotContainer.m_ReefTargets = m_robotContainer.vision[0].CalculateAutoReefTarget(aprilTagId);
-            SmartDashboard.putNumber("Detected April Tag", aprilTagId);
-            //System.out.println("Detected AprilTag ID: " + aprilTagId);
+            if (distance < LowestDistance) {
+              m_robotContainer.m_ReefTargets = m_robotContainer.vision[0].CalculateAutoReefTarget(aprilTagId);
+              SmartDashboard.putNumber("Detected April Tag", aprilTagId);
+              
+              if(m_robotContainer.m_ReefTargets.leftTarget!=null)
+                LowestDistance = distance;
+            }
+          }
         }
-    } else {
-        //System.out.println("No targets detected.");
+      } else {
+        // System.out.println("No targets detected.");
+      }
     }
   }
-}
+
+  @Override
+  public void robotInit() {
+    // Clear the CommandScheduler of all commands
+    CommandScheduler.getInstance().cancelAll();
+  }
 
   @Override
   public void robotPeriodic() {
+    /*
+     * if(m_robotContainer!=null)
+     * m_robotContainer.Periodic();
+     */
+
     CommandScheduler.getInstance().run();
 
     // Correct pose estimate with vision measurements
-    for (int i=0; i < m_robotContainer.vision.length; i++) {
+    for (int i = 0; i < m_robotContainer.vision.length; i++) {
       var visionEst = m_robotContainer.vision[i].getEstimatedGlobalPose();
       int index = i;
       visionEst.ifPresent(
@@ -75,37 +99,55 @@ public class Robot extends TimedRobot {
           });
     }
 
-    processAprilTags();    
+    processAprilTags();
     m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
-    SmartDashboard.putNumber("Current Drive X", m_robotContainer.drivetrain.getState().Pose.getX());
-    SmartDashboard.putNumber("Current Drive Y", m_robotContainer.drivetrain.getState().Pose.getY());
-    SmartDashboard.putNumber("Current Yaw", m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
-    
-    if(m_robotContainer.m_ReefTargets.leftTarget!=null){
-    SmartDashboard.putNumber("Target Left X", m_robotContainer.m_ReefTargets.leftTarget.getX());
-    SmartDashboard.putNumber("Target Left Y", m_robotContainer.m_ReefTargets.leftTarget.getY());
-    SmartDashboard.putNumber("Target Left Yaw", m_robotContainer.m_ReefTargets.leftTarget.getRotation().getDegrees());
-    }
 
-    if(m_robotContainer.m_ReefTargets.rightTarget!=null){
-    SmartDashboard.putNumber("Target Right X", m_robotContainer.m_ReefTargets.rightTarget.getX());
-    SmartDashboard.putNumber("Target Right Y", m_robotContainer.m_ReefTargets.rightTarget.getY());
-    SmartDashboard.putNumber("Target Right Yaw", m_robotContainer.m_ReefTargets.rightTarget.getRotation().getDegrees());
-    }
-    //Todo add smart dashbaord for vision targets .
+    /*
+     * SmartDashboard.putNumber("Current Drive X",
+     * m_robotContainer.drivetrain.getState().Pose.getX());
+     * SmartDashboard.putNumber("Current Drive Y",
+     * m_robotContainer.drivetrain.getState().Pose.getY());
+     * SmartDashboard.putNumber("Current Yaw",
+     * m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
+     * 
+     * if(m_robotContainer.m_ReefTargets.leftTarget!=null){
+     * SmartDashboard.putNumber("Target Left X",
+     * m_robotContainer.m_ReefTargets.leftTarget.getX());
+     * SmartDashboard.putNumber("Target Left Y",
+     * m_robotContainer.m_ReefTargets.leftTarget.getY());
+     * SmartDashboard.putNumber("Target Left Yaw",
+     * m_robotContainer.m_ReefTargets.leftTarget.getRotation().getDegrees());
+     * }
+     * 
+     * if(m_robotContainer.m_ReefTargets.rightTarget!=null){
+     * SmartDashboard.putNumber("Target Right X",
+     * m_robotContainer.m_ReefTargets.rightTarget.getX());
+     * SmartDashboard.putNumber("Target Right Y",
+     * m_robotContainer.m_ReefTargets.rightTarget.getY());
+     * SmartDashboard.putNumber("Target Right Yaw",
+     * m_robotContainer.m_ReefTargets.rightTarget.getRotation().getDegrees());
+     * }
+     */
+    // Todo add smart dashbaord for vision targets .
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+  }
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+  }
 
   @Override
   public void autonomousInit() {
+    // Clear the CommandScheduler of all commands
+    CommandScheduler.getInstance().cancelAll();
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
@@ -114,10 +156,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+  }
 
   @Override
   public void teleopInit() {
@@ -127,22 +171,28 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
-  public void teleopExit() {}
+  public void teleopExit() {
+  }
 
   @Override
   public void testInit() {
+
     CommandScheduler.getInstance().cancelAll();
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   @Override
-  public void testExit() {}
+  public void testExit() {
+  }
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+  }
 }

@@ -38,6 +38,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
  
  public class Constants {
+     public static class AutoAlignment{
+        public static double maxVelocity = 2.25;//2.5;
+        public static double maxAcceleration = 2.25;//2.5;
+        public static double MaxAngularRate = Units.degreesToRadians(200);//360;
+        public static double MaxAngularAcceleration = Units.degreesToRadians(300) ;//540; 
+     }
      public static class Vision {
 
         public static double CAMERA_HEIGHT_METERS = Units.inchesToMeters(11.5);
@@ -87,17 +93,18 @@ import edu.wpi.first.math.util.Units;
         public static final int kAlgeaMotorCandID = 17;
         public static final double kCurrentLimit = 60;
         public static final double kVoltageComp = 12;
-        public static final double kSpeed = 50;
+        public static final double kSpeed = 40;
+        public static final double kAdjustIntakeSpeed = -25;
         
         public static final int kFrontLaserCanId = 39;
         public static final int kRearLaserCanId = 40;
-        public static final int kCoralDetectionRange = 70;
+        public static final int kCoralDetectionRange = 100;//70;
         public static final int intakeTimerMax = 3;
         public static final double intakeSpeed = 2;//50;//300; //0.5;
         public static final int ejectSpeed = -10;
         public static final int scoreSpeed = 10;
 
-        public static final int algeaArmScorePosition = 1;
+        public static final double algeaArmScorePosition = -0.8;
 
     }
 
@@ -163,10 +170,14 @@ import edu.wpi.first.math.util.Units;
         public static final int CORAL_RL2 = 6;
         public static final int CORAL_L1 = 7;
         public static final int MANUAL_BUTTON = 8;
+        public static final int REVERSE_BUTTON = 9;
         public static final int CORAL_INTAKE_BUTTON = 10;
      }
 
      public static final class AlgaeClimberOperatorConstants{
+        public static final int ALGAE_HIGH = 1;
+        public static final int ALGAE_LOW = 2;
+        public static final int ALGAE_EJECT = 3;
         public static final int CLIMBER_BUTTON_UP = 6;
         public static final int CLIMBER_BUTTON_DN = 7;
      }

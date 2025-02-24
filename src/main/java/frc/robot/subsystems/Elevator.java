@@ -20,8 +20,6 @@ public class Elevator extends SubsystemBase {
   private TalonFX m_FrontMotor;
   private TalonFX m_RearMotor;
 
-  private LaserCan m_BottomSensor;
-
   //Control for elevator
 
   public enum ElevatorState {
@@ -40,8 +38,6 @@ public class Elevator extends SubsystemBase {
   /** Creates a new ShooterSubsystem. */
   public Elevator() {
 
-    m_BottomSensor = new LaserCan(Constants.Elevator.kBottomLaserCanId);
-
     //*/ create new TalonFXs and configure them
     m_FrontMotor = new TalonFX(Constants.Elevator.kFrontCanId);
     m_RearMotor = new TalonFX(Constants.Elevator.kRearCanId);
@@ -58,13 +54,18 @@ public class Elevator extends SubsystemBase {
     m_RearMotor.getConfigurator().apply(currentLimits);
     
     elevatorGains.kP = 2.4;
-    elevatorGains.kI = 0;
-    elevatorGains.kD = 0.35;//0.25;
+    elevatorGains.kI = 0.0;
+    elevatorGains.kD = 0.25;
     elevatorGains.kG = 0.09;
-    elevatorGains.kV = 3.01;
-    elevatorGains.kA = 0.01;
+    //elevatorGains.kV = 7.52;
+    //elevatorGains.kA = 0.01;
     m_RearMotor.getConfigurator().apply(elevatorGains);
     ResetEncoders();
+  }
+
+  public boolean ElevatorAtZero()
+  {
+    return m_RearMotor.getPosition().getValueAsDouble() > -1 && m_FrontMotor.getPosition().getValueAsDouble() <1;
   }
 
   //manual pivot commands to test launcher
@@ -83,11 +84,70 @@ public class Elevator extends SubsystemBase {
     targetElevatorPosition = Constants.Elevator.kStowed;
   }
 
+  public void UpLevel()
+  {
+      if(targetElevatorPosition < Constants.Elevator.levelOne)
+      {
+        SetLevel(1);
+        return;
+      }
+
+      else if((targetElevatorPosition >= Constants.Elevator.levelOne) && (targetElevatorPosition < Constants.Elevator.levelTwo))
+      {
+        SetLevel(2);
+        return;
+      }
+
+      else if((targetElevatorPosition == Constants.Elevator.levelTwo) && (targetElevatorPosition < Constants.Elevator.levelThree))
+      {
+        SetLevel(3);
+        return;
+      }
+
+      else if((targetElevatorPosition == Constants.Elevator.levelThree) && (targetElevatorPosition < Constants.Elevator.levelFour))
+      {
+        SetLevel(4);
+        return;
+      }
+      
+      return;
+  }
+
+  public void DownLevel()
+  {
+      if(targetElevatorPosition <= Constants.Elevator.levelOne)
+      {
+        Stow();
+        return;
+      }
+
+      if( (targetElevatorPosition > Constants.Elevator.levelOne) && (targetElevatorPosition <= Constants.Elevator.levelTwo))
+      {
+        SetLevel(1);
+        return;
+      }
+
+      if((targetElevatorPosition > Constants.Elevator.levelTwo) && (targetElevatorPosition <= Constants.Elevator.levelThree))
+      {
+        SetLevel(2);
+        return;
+      }
+
+      if((targetElevatorPosition > Constants.Elevator.levelThree) && (targetElevatorPosition <= Constants.Elevator.levelFour))
+      {
+        SetLevel(3);
+        return;
+      }
+      
+      return;
+  }
+
+
   public void SetLevel(int level){
 
     switch(level){
       case 1:
-       setPosition(Constants.Elevator.levelOne);
+        setPosition(Constants.Elevator.levelOne);
         targetElevatorPosition = Constants.Elevator.levelOne;
         break;
       case 2:
@@ -192,23 +252,11 @@ public void checkAndFix(){
   @Override
   public void periodic() {
     
-    /*LaserCan.Measurement elevatorMeasurement = m_BottomSensor.getMeasurement();
-    if(elevatorMeasurement.distance_mm > Constants.Elevator.kElevatorDetectionRange && targetElevatorPosition
-     == Constants.Elevator.kStowed && reachedSetState() == true){
-      Reset();
-    }
-    else if (elevatorMeasurement.distance_mm <= Constants.Elevator.kElevatorDetectionRange && targetElevatorPosition
-     == Constants.Elevator.kStowed && reachedSetState() == true){
-      SetPower(0);
-      m_RearMotor.setPosition(0);
-      m_FrontMotor.setPosition(0);
-    }*/
-    
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator/Rear/Pos",  m_RearMotor.getPosition().getValueAsDouble());
     //SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Sensor", m_BottomSensor.getMeasurement().distance_mm);
+    SmartDashboard.putBoolean("Elevator Jacked Up", atStowed() && !ElevatorAtZero());
     
   }
 }

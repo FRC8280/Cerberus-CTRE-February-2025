@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
@@ -21,6 +22,9 @@ public class Climber extends SubsystemBase {
         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
         currentLimits.SupplyCurrentLimitEnable = true;
         currentLimits.SupplyCurrentLimit = ClimberConstants.CLIMBER_MOTOR_CURRENT_LIMIT;
+        
+        // Set the neutral mode to Brake
+        m_ClimbMotor.setNeutralMode(NeutralModeValue.Brake);
         m_ClimbMotor.getConfigurator().apply(currentLimits);
     }
 

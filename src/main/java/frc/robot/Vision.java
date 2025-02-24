@@ -28,12 +28,21 @@ import static frc.robot.Constants.Vision.*;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
+
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -56,20 +65,94 @@ public class Vision {
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
 
+    public static double angleBetweenPoses(Pose2d pose1, Pose2d pose2) {
+        // Calculate the direction vectors
+        Translation2d direction1 = new Translation2d(Math.cos(pose1.getRotation().getRadians()),
+                Math.sin(pose1.getRotation().getRadians()));
+        Translation2d direction2 = new Translation2d(Math.cos(pose2.getRotation().getRadians()),
+                Math.sin(pose2.getRotation().getRadians()));
+
+        // Calculate the dot product of the direction vectors
+        double dotProduct = direction1.getX() * direction2.getX() + direction1.getY() * direction2.getY();
+
+        // Calculate the magnitudes of the direction vectors
+        double magnitude1 = direction1.getNorm();
+        double magnitude2 = direction2.getNorm();
+
+        // Calculate the angle between the vectors using the dot product formula
+        double angle = Math.acos(dotProduct / (magnitude1 * magnitude2));
+
+        // Convert the angle to degrees
+        return Math.toDegrees(angle);
+    }
+
+    public Pose2d addXYToPose(Pose2d originalPose, double x, double y, double angle) {
+        // Create a Transform2d object with the desired translation
+        Transform2d translationTransform = new Transform2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
+
+        // Apply the transformation to the original pose
+        Pose2d newPose = originalPose.plus(translationTransform);
+
+        return newPose;
+    }
+
+    public double calculateDistanceBetweenPoseAndTransform(Pose2d pose2d, Transform3d transform3d) {
+        // Convert Pose2d to Pose3d by adding a zero z-coordinate
+        Pose3d pose2dAsPose3d = new Pose3d(pose2d);
+        // Apply the transformation to the Pose3d
+        Pose3d transformedPose = pose2dAsPose3d.transformBy(transform3d);
+
+        // Get the translation components of the poses
+        Translation3d translation1 = pose2dAsPose3d.getTranslation();
+        Translation3d translation2 = transformedPose.getTranslation();
+
+        // Calculate the Euclidean distance between the translations
+        double distance = translation1.getDistance(translation2);
+
+        return distance;
+    }
+    
+    public boolean isIntegerInList(int number, List<Integer> list) {
+        return list.contains(number);
+    }
+
+    public boolean CheckValidAprilTag(int aprilTag) {
+        // List of valid AprilTag IDs
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        if (ally.get() == Alliance.Red) {
+            if (aprilTag >= 6 && aprilTag <= 11) {
+                return true;
+            }
+        } else if (ally.get() == Alliance.Blue) {
+            if (aprilTag >= 17 && aprilTag <= 22) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ReefTargets CalculateAutoReefTarget(int aprilTag) {
         // aprilTag = Robot.aprilTagId;
+
+        int trimX = 0;
+        int trimY = 0;
+        double trimTheta = 0.0;
+
         Optional<Alliance> ally = DriverStation.getAlliance();
         ReefTargets returnTargets = new ReefTargets();
         if (ally.get() == Alliance.Red) {
             switch (aprilTag) {
                 case 6:
-                    returnTargets.leftTarget = new Pose2d(11.356, 6.121, Rotation2d.fromDegrees(-54.893));
-                    returnTargets.rightTarget = new Pose2d(13.825, 2.631, Rotation2d.fromDegrees(-49.185));
+                    returnTargets.leftTarget = new Pose2d(13.524, 2.66, Rotation2d.fromDegrees(119.78));
+                    returnTargets.rightTarget = new Pose2d(13.799, 2.927, Rotation2d.fromDegrees(119.9));
                     returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 7:
-                    returnTargets.leftTarget = new Pose2d(14.42, 3.6925, Rotation2d.fromDegrees(174.06));
-                    returnTargets.rightTarget = new Pose2d(14.42, 4.355, Rotation2d.fromDegrees(174.06));
+                    returnTargets.leftTarget = new Pose2d(14.437, 3.742, Rotation2d.fromDegrees(179.311));
+
+                    // returnTargets.leftTarget = new Pose2d(14.42, 3.6925,
+                    // Rotation2d.fromDegrees(174.06));
+                    returnTargets.rightTarget = new Pose2d(14.437, 4.06, Rotation2d.fromDegrees(178.02));
                     returnTargets.centerTarget = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
                     break;
                 case 8:
@@ -97,7 +180,6 @@ public class Vision {
                     returnTargets.rightTarget = null;
                     returnTargets.centerTarget = null;
                     break;
-
             }
         }
 
@@ -139,31 +221,41 @@ public class Vision {
                     returnTargets.centerTarget = null;
                     break;
             }
-        }
+        }   
+
+        //Adjustment code for trimming fields. 
+       /* returnTargets.leftTarget = addXYToPose(returnTargets.leftTarget, trimX, trimY, trimTheta);
+        returnTargets.rightTarget = addXYToPose(returnTargets.rightTarget, trimX, trimY, trimTheta);
+        returnTargets.centerTarget = addXYToPose(returnTargets.centerTarget, trimX, trimY, trimTheta);
+ */
         return returnTargets;
     }
 
     public Vision(int index) {
         camera = new PhotonCamera(Constants.Vision.CamNames[index]);
 
-        photonEstimator =
-                new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraTransforms[index]);
+        photonEstimator = new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                cameraTransforms[index]);
         photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         // ----- Simulation
         if (Robot.isSimulation()) {
-            // Create the vision system simulation which handles cameras and targets on the field.
+            // Create the vision system simulation which handles cameras and targets on the
+            // field.
             visionSim = new VisionSystemSim("main");
-            // Add all the AprilTags inside the tag layout as visible targets to this simulated field.
+            // Add all the AprilTags inside the tag layout as visible targets to this
+            // simulated field.
             visionSim.addAprilTags(kTagLayout);
-            // Create simulated camera properties. These can be set to mimic your actual camera.
+            // Create simulated camera properties. These can be set to mimic your actual
+            // camera.
             var cameraProp = new SimCameraProperties();
             cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
             cameraProp.setCalibError(0.35, 0.10);
             cameraProp.setFPS(15);
             cameraProp.setAvgLatencyMs(50);
             cameraProp.setLatencyStdDevMs(15);
-            // Create a PhotonCameraSim which will update the linked PhotonCamera's values with visible
+            // Create a PhotonCameraSim which will update the linked PhotonCamera's values
+            // with visible
             // targets.
             cameraSim = new PhotonCameraSim(camera, cameraProp);
             // Add the simulated camera to view the targets on this simulated field.
@@ -174,14 +266,18 @@ public class Vision {
     }
 
     /**
-     * The latest estimated robot pose on the field from vision data. This may be empty. This should
+     * The latest estimated robot pose on the field from vision data. This may be
+     * empty. This should
      * only be called once per loop.
      *
-     * <p>Also includes updates for the standard deviations, which can (optionally) be retrieved with
+     * <p>
+     * Also includes updates for the standard deviations, which can (optionally) be
+     * retrieved with
      * {@link getEstimationStdDevs}
      *
-     * @return An {@link EstimatedRobotPose} with an estimated pose, estimate timestamp, and targets
-     *     used for estimation.
+     * @return An {@link EstimatedRobotPose} with an estimated pose, estimate
+     *         timestamp, and targets
+     *         used for estimation.
      */
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
@@ -191,10 +287,9 @@ public class Vision {
 
             if (Robot.isSimulation()) {
                 visionEst.ifPresentOrElse(
-                        est ->
-                                getSimDebugField()
-                                        .getObject("VisionEstimation")
-                                        .setPose(est.estimatedPose.toPose2d()),
+                        est -> getSimDebugField()
+                                .getObject("VisionEstimation")
+                                .setPose(est.estimatedPose.toPose2d()),
                         () -> {
                             getSimDebugField().getObject("VisionEstimation").setPoses();
                         });
@@ -204,11 +299,13 @@ public class Vision {
     }
 
     /**
-     * Calculates new standard deviations This algorithm is a heuristic that creates dynamic standard
-     * deviations based on number of tags, estimation strategy, and distance from the tags.
+     * Calculates new standard deviations This algorithm is a heuristic that creates
+     * dynamic standard
+     * deviations based on number of tags, estimation strategy, and distance from
+     * the tags.
      *
      * @param estimatedPose The estimated pose to guess standard deviations for.
-     * @param targets All targets in this camera frame
+     * @param targets       All targets in this camera frame
      */
     private void updateEstimationStdDevs(
             Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
@@ -222,17 +319,18 @@ public class Vision {
             int numTags = 0;
             double avgDist = 0;
 
-            // Precalculation - see how many tags we found, and calculate an average-distance metric
+            // Precalculation - see how many tags we found, and calculate an
+            // average-distance metric
             for (var tgt : targets) {
                 var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
-                if (tagPose.isEmpty()) continue;
+                if (tagPose.isEmpty())
+                    continue;
                 numTags++;
-                avgDist +=
-                        tagPose
-                                .get()
-                                .toPose2d()
-                                .getTranslation()
-                                .getDistance(estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+                avgDist += tagPose
+                        .get()
+                        .toPose2d()
+                        .getTranslation()
+                        .getDistance(estimatedPose.get().estimatedPose.toPose2d().getTranslation());
             }
 
             if (numTags == 0) {
@@ -242,11 +340,13 @@ public class Vision {
                 // One or more tags visible, run the full heuristic.
                 avgDist /= numTags;
                 // Decrease std devs if multiple targets are visible
-                if (numTags > 1) estStdDevs = kMultiTagStdDevs;
+                if (numTags > 1)
+                    estStdDevs = kMultiTagStdDevs;
                 // Increase std devs based on (average) distance
                 if (numTags == 1 && avgDist > 4)
                     estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-                else estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+                else
+                    estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
                 curStdDevs = estStdDevs;
             }
         }
@@ -255,7 +355,8 @@ public class Vision {
     /**
      * Returns the latest standard deviations of the estimated pose from {@link
      * #getEstimatedGlobalPose()}, for use with {@link
-     * edu.wpi.first.math.estimator.SwerveDrivePoseEstimator SwerveDrivePoseEstimator}. This should
+     * edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
+     * SwerveDrivePoseEstimator}. This should
      * only be used when there are targets visible.
      */
     public Matrix<N3, N1> getEstimationStdDevs() {
@@ -270,12 +371,14 @@ public class Vision {
 
     /** Reset pose history of the robot in the vision system simulation. */
     public void resetSimPose(Pose2d pose) {
-        if (Robot.isSimulation()) visionSim.resetRobotPose(pose);
+        if (Robot.isSimulation())
+            visionSim.resetRobotPose(pose);
     }
 
     /** A Field2d for visualizing our robot and objects on the field. */
     public Field2d getSimDebugField() {
-        if (!Robot.isSimulation()) return null;
+        if (!Robot.isSimulation())
+            return null;
         return visionSim.getDebugField();
     }
 }
