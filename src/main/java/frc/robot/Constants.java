@@ -104,7 +104,7 @@ import edu.wpi.first.math.util.Units;
         public static final int ejectSpeed = -10;
         public static final int scoreSpeed = 10;
 
-        public static final double algeaArmScorePosition = -0.8;
+        public static final double algeaArmScorePosition = -1.34;
 
     }
 
@@ -175,9 +175,11 @@ import edu.wpi.first.math.util.Units;
      }
 
      public static final class AlgaeClimberOperatorConstants{
-        public static final int ALGAE_HIGH = 1;
-        public static final int ALGAE_LOW = 2;
+        public static final int CLEAR_HIGH = 1;
+        public static final int CLEAR_LOW = 2;
         public static final int ALGAE_EJECT = 3;
+        public static final int L_IN = 4;
+        public static final int L_OUT = 5;
         public static final int CLIMBER_BUTTON_UP = 6;
         public static final int CLIMBER_BUTTON_DN = 7;
      }

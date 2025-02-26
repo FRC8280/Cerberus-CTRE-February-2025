@@ -74,6 +74,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Clear the CommandScheduler of all commands
     CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.RobotInit();
   }
 
   @Override
@@ -102,14 +103,14 @@ public class Robot extends TimedRobot {
     processAprilTags();
     m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
 
-    /*
-     * SmartDashboard.putNumber("Current Drive X",
-     * m_robotContainer.drivetrain.getState().Pose.getX());
-     * SmartDashboard.putNumber("Current Drive Y",
-     * m_robotContainer.drivetrain.getState().Pose.getY());
-     * SmartDashboard.putNumber("Current Yaw",
-     * m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
-     * 
+    
+     SmartDashboard.putNumber("Current Drive X",
+     m_robotContainer.drivetrain.getState().Pose.getX());
+     SmartDashboard.putNumber("Current Drive Y",
+     m_robotContainer.drivetrain.getState().Pose.getY());
+     SmartDashboard.putNumber("Current Yaw",
+     m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
+     /* 
      * if(m_robotContainer.m_ReefTargets.leftTarget!=null){
      * SmartDashboard.putNumber("Target Left X",
      * m_robotContainer.m_ReefTargets.leftTarget.getX());

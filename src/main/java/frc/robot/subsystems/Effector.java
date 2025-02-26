@@ -97,12 +97,15 @@ public class Effector extends SubsystemBase  {
         AlgaeArmGains.kP = 5;//0.11; // An error of 1 rps results in 0.11 V output
         AlgaeArmGains.kI = 0; // no output for integrated error
         AlgaeArmGains.kD = 0.1; // no output for error derivative*/
+        //AlgaeArmGains.kS = 0.1; // Add 0.1 V output to overcome static friction
+        //AlgaeArmGains.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+
         AlgaeArmGains.kS = 0.1; // Add 0.1 V output to overcome static friction
-        AlgaeArmGains.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        AlgaeArmGains.kG = 1;
-        AlgaeArmGains.kP = 5.11;//0.11; // An error of 1 rps results in 0.11 V output
-        AlgaeArmGains.kI = .5; // no output for integrated error
-        AlgaeArmGains.kD = 0; // no output for error derivative
+        AlgaeArmGains.kV = 0.06; // A velocity target of 1 rps results in 0.12 V output
+        AlgaeArmGains.kG = 0.09;
+        AlgaeArmGains.kP = 2.4;//0.11; // An error of 1 rps results in 0.11 V output
+        AlgaeArmGains.kI = 0.0; // no output for integrated error
+        AlgaeArmGains.kD = 0.25; // no output for error derivative
 
         m_algeaArm.getConfigurator().apply(AlgaeArmGains);
         m_algeaArm.setPosition(0); 
@@ -120,8 +123,8 @@ public class Effector extends SubsystemBase  {
     {
         System.out.println("Moving Algea arm.");
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
-        m_algeaArm.setControl(positionRequest.withPosition(Constants.Effector.algeaArmScorePosition));
-        m_EffectorMotor.set(0);
+        m_algeaArm.setControl(positionRequest.withPosition(-1.76));//Constants.Effector.algeaArmScorePosition));
+        m_EffectorMotor.set(-50);
     }
 
     public void RunEffector(double speed) {
@@ -131,6 +134,18 @@ public class Effector extends SubsystemBase  {
         //m_EffectorMotor.set(speed);
         m_EffectorTimer.reset();
         m_EffectorTimer.start();
+    }
+
+    public void RunEffectorAuton(double speed) {
+
+        final VelocityVoltage testRequest = new VelocityVoltage(0).withSlot(0);
+        m_EffectorMotor.setControl(testRequest.withVelocity(speed));
+        //m_EffectorMotor.set(speed);
+    }
+
+    public void autonIntake(){
+        m_EffectorState = EffectorState.Intaking;
+        RunEffectorAuton(Constants.Effector.kSpeed);
     }
 
     public void IntakeCoral()
@@ -171,6 +186,7 @@ public class Effector extends SubsystemBase  {
         m_EffectorState = EffectorState.None;
         m_EffectorMotor.set(0);
         m_EffectorTimer.stop();
+        ResetAlgeaArm();
         //m_EffectorTimer.reset();
     }
 

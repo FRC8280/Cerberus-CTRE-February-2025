@@ -53,8 +53,8 @@ public class Elevator extends SubsystemBase {
     m_FrontMotor.getConfigurator().apply(currentLimits);
     m_RearMotor.getConfigurator().apply(currentLimits);
     
-    elevatorGains.kP = 2.4;
-    elevatorGains.kI = 0.0;
+    elevatorGains.kP = 2.5;
+    elevatorGains.kI = 0.6;//0.0;
     elevatorGains.kD = 0.25;
     elevatorGains.kG = 0.09;
     //elevatorGains.kV = 7.52;
@@ -165,6 +165,23 @@ public class Elevator extends SubsystemBase {
     }
   }
 
+  public void AlgeaHigh()
+  {
+    setPosition(19.07);
+    targetElevatorPosition = 19.07;
+  }
+
+  public void AlgeaLow()
+  {
+    setPosition(9.036);
+    targetElevatorPosition = 9.036;
+  }
+
+  public void AlgaeCheckpoint(){
+    setPosition(2.279);
+    targetElevatorPosition = 2.279;
+  }
+
   public void LevelOne()
   {
     setPosition(Constants.Elevator.levelOne);
@@ -189,9 +206,13 @@ public class Elevator extends SubsystemBase {
      targetElevatorPosition = Constants.Elevator.levelFour;
   }
 
+  public void LevelFourReset(){
+    m_RearMotor.setPosition(Constants.Elevator.levelFour);
+  }
+
   //Functions to check if the elevator has reached the set position
   public boolean aboveThreshold(double value, double constant) {
-    return value >= 0.95 * constant;
+    return value >= Math.abs(0.95 * constant);
 }
 
 public boolean reachedSetState() {

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 14.720901639344262,
-        "y": 4.210809426229508
+        "x": 12.54671052631579,
+        "y": 5.554851973684211
       },
       "prevControl": null,
       "nextControl": {
-        "x": 15.72090163934426,
-        "y": 4.210809426229508
+        "x": 13.546710526315783,
+        "y": 5.554851973684211
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RR 1S"
     },
     {
       "anchor": {
-        "x": 2014.69,
-        "y": 4.03
+        "x": 16.243499999999997,
+        "y": 7.115749999999999
       },
       "prevControl": {
-        "x": 2013.69,
-        "y": 4.03
+        "x": 15.243499999999997,
+        "y": 7.115749999999999
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -126.43085812016226
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -60.572543596810604
   },
   "useDefaultConstraints": true
 }

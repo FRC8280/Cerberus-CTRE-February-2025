@@ -11,21 +11,30 @@ import java.util.List;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import frc.robot.Constants.AlgaeClimberOperatorConstants;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
+
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -83,6 +92,20 @@ public class RobotContainer {
         public Command automaticPath = null;
 
         public RobotContainer() {
+
+                // Register Named Commands
+                NamedCommands.registerCommand("Score Coral", new InstantCommand(()->m_Effector.ScoreCoral()));
+                NamedCommands.registerCommand("Done Scoring", new WaitUntilCommand(() -> !m_Effector.Scoring()));
+                NamedCommands.registerCommand("Intake", new InstantCommand(() -> m_Effector.IntakeCoral()));
+                     
+                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.Stow())); 
+                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.LevelOne())); 
+                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.LevelTwo())); 
+                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.LevelThree())); 
+                NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(()->m_Elevator.LevelFour()));
+                NamedCommands.registerCommand("Reached Set State", new WaitUntilCommand(() -> m_Elevator.reachedSetState()));
+                NamedCommands.registerCommand("Reset Elevator Zero", new InstantCommand(() ->m_Elevator.RunCurrentZeroing()));
+                
                 // Initialize each element of the vision array
                 for (int i = 0; i < vision.length; i++) {
                         vision[i] = new Vision(i);
@@ -91,6 +114,11 @@ public class RobotContainer {
                 SmartDashboard.putData("Auto Mode", autoChooser);
 
                 configureBindings();
+        }
+
+        public void RobotInit()
+        {
+                m_Elevator.RunCurrentZeroing();
         }
 
         public enum Alignment {
@@ -156,9 +184,23 @@ public class RobotContainer {
                 automaticPath.schedule();
         }
 
-        private void centerAlign() {
+        private void backUp(double distance) {
                 Pose2d currentPose = drivetrain.getState().Pose;
-                Pose2d destinationPos = m_ReefTargets.centerTarget;
+
+                //try to calculate
+                
+                double x = currentPose.getX();
+                double y = currentPose.getY();
+                Rotation2d heading = currentPose.getRotation();
+                double newX = x - distance *Math.cos(heading.getRadians());
+                double newY = y - distance*Math.sin(heading.getRadians());
+
+                Pose2d destinationPos = new Pose2d(newX,newY,heading);
+
+               /*Pose2d destinationPos = new Pose2d(
+                                currentPose.getTranslation()
+                                                .plus(new Translation2d(0.1524, 0).rotateBy(currentPose.getRotation())),
+                                currentPose.getRotation()); */ 
                 // Pose2d destinationPos = new Pose2d(14.8, 3.4,Rotation2d.fromDegrees(174.06));
                 if (destinationPos == null)
                         return;
@@ -184,6 +226,7 @@ public class RobotContainer {
                 automaticPath.schedule();
         }
 
+
         private void CancelAutomaticMovement() {
                 if ((automaticPath == null) || (!automaticPath.isScheduled()))
                         return;
@@ -195,41 +238,6 @@ public class RobotContainer {
                 return (automaticPath != null) && (automaticPath.isScheduled());
         }
 
-        private Command ElevatorAutoScore(Alignment alignment, int level) {
-
-                // Todo add movement command
-                // Todo may need special sequence for level 1
-
-                return new SequentialCommandGroup(
-
-                                // new command to move use left or right align.
-                                /*
-                                 * new InstantCommand(() -> {
-                                 * switch (alignment) {
-                                 * case LEFT:
-                                 * this.leftAlign();
-                                 * break;
-                                 * case RIGHT:
-                                 * this.rightAlign();
-                                 * break;
-                                 * case CENTER:
-                                 * this.centerAlign();
-                                 * break;
-                                 * }
-                                 * }),
-                                 */
-                                new InstantCommand(() -> m_Elevator.SetLevel(level)),
-                                new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
-                                new WaitCommand(0.1),
-                                new WaitUntilCommand(() -> !autoPathActive()),
-                                new InstantCommand(() -> m_Effector.ScoreCoral()),
-                                new WaitUntilCommand(() -> !m_Effector.Scoring()),
-                                new WaitCommand(0.15),
-                                new InstantCommand(() -> m_Elevator.Stow()),
-                                new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
-                                new WaitCommand(0.25),
-                                m_Elevator.RunCurrentZeroing());
-        }
 
         private void configureBindings() {
                 // Note that X is defined as forward according to WPILib convention,
@@ -240,7 +248,7 @@ public class RobotContainer {
                 new Trigger(() -> driverController.getLeftTriggerAxis() > 0.25)
                                 .whileTrue(new InstantCommand(() -> m_SlowSpeedMod = 0.5))
                                 .onFalse(new InstantCommand(() -> m_SlowSpeedMod = 1));
-
+                
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
                                 drivetrain.applyRequest(
@@ -268,19 +276,16 @@ public class RobotContainer {
                 new Trigger(() -> driverController.getRightTriggerAxis() > 0.25)
                                 .whileTrue(drivetrain.applyRequest(() -> brake));
 
-                // operator.y().onTrue(new InstantCommand(()->this.leftAlign()));
-                // operator.a().onTrue(new InstantCommand(() -> this.rightAlign()));
-                // driverController.x().onTrue(new InstantCommand(() ->
-                // this.CancelAutomaticMovement()));
-
                 // Binding to call CancelAutomaticMovement() if any analog stick is over 50%
-                new Trigger(() -> Math.abs(driverController.getLeftX()) > 0.5 ||
-                                Math.abs(driverController.getLeftY()) > 0.5 ||
-                                Math.abs(driverController.getRightX()) > 0.5 ||
-                                Math.abs(driverController.getRightY()) > 0.5)
+                new Trigger(() -> Math.abs(driverController.getLeftX()) > 0.4 ||
+                                Math.abs(driverController.getLeftY()) > 0.4 ||
+                                Math.abs(driverController.getRightX()) > 0.4 ||
+                                Math.abs(driverController.getRightY()) > 0.4)
                                 .onTrue(new InstantCommand(() -> this.CancelAutomaticMovement())
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                                                .andThen(new InstantCommand(() -> m_Effector.Stop())));
+                                        .andThen(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()))
+                                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                        .andThen(new InstantCommand(() -> m_Effector.Stop()))
+                                        );
 
                 driverController.pov(0)
                                 .whileTrue(drivetrain.applyRequest(
@@ -303,17 +308,16 @@ public class RobotContainer {
                 // operator code
                 // New trigger for when the elevator is atStowed() is true but ElevatorAtZero()
                 // is false
-                new Trigger(() -> m_Elevator.atStowed() && !m_Elevator.ElevatorAtZero())
-                                .onTrue(new InstantCommand(() -> {
-                                        // Add the action you want to perform when the trigger condition is met
-                                        System.out.println("Elevator is at stowed position but not at zero.");
-                                }));
+                /*new Trigger(() -> m_Elevator.atStowed() && !m_Elevator.ElevatorAtZero())
+                                .onTrue(new InstantCommand(() -> System.out.println("Elevator is at stowed position but not at zero."))
+                                //.andThen(m_Elevator.RunCurrentZeroing())
+                                );*/
 
                 // Winch Code
-                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)
+                /*new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)
                                 .whileTrue(new ClimberDownCommand(m_Climber));
                 new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_UP)
-                                .whileTrue(new ClimberUpCommand(m_Climber));
+                                .whileTrue(new ClimberUpCommand(m_Climber));*/
 
                 // Bindings to control Elevator Level, wait until it aligns, then runs
                 // sequential command gorup to score
@@ -326,7 +330,13 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow())));
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                
+                                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL4)
                                 .onTrue(new InstantCommand(() -> rightAlign())
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
@@ -336,7 +346,13 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow())));
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                
+                                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL3)
                                 .onTrue(new InstantCommand(() -> leftAlign())
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
@@ -346,7 +362,13 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow())));
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                                
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                 
+                                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL3)
                                 .onTrue(new InstantCommand(() -> rightAlign())
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
@@ -356,7 +378,13 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow())));
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                
+                                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL2)
                                 .onTrue(new InstantCommand(() -> leftAlign())
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
@@ -366,7 +394,13 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow())));
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                                
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                
+                                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL2)
                                 .onTrue(new InstantCommand(() -> rightAlign())
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
@@ -376,8 +410,15 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow())));
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                                
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                
+                                                );
 
+                
                 // New trigger to call UpLevel once when the vertical joystick value is over 25%
                 new Trigger(() -> CoralOperator.getY() >= 0.75)
                                 .onTrue(m_Elevator.runOnce(() -> m_Elevator.UpLevel()));
@@ -394,8 +435,8 @@ public class RobotContainer {
                 new Trigger(() -> CoralOperator.getX() < -0.75)
                                 .onTrue(m_Elevator.runOnce(() -> m_Elevator.IncrementDecrease()));
 
-                new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
-                                .onTrue(new InstantCommand(() -> ElevatorAutoScore(Alignment.CENTER, 1)));
+                //new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
+                //                .onTrue(new InstantCommand(() -> ElevatorAutoScore(Alignment.CENTER, 1)));
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.REVERSE_BUTTON)
                                 .onTrue(m_Elevator.RunCurrentZeroing()); // Todo make a proper reverse.
@@ -403,12 +444,30 @@ public class RobotContainer {
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.MANUAL_BUTTON)
                                 .onTrue(new InstantCommand(() -> m_Effector.ScoreCoral()));
 
-                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.ALGAE_HIGH)
-                                .onTrue(new InstantCommand(() -> m_Effector.MoveAlgeaArm()));
-                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.ALGAE_LOW)
-                                .onTrue(new InstantCommand(() -> m_Effector.MoveAlgeaArm()));
-                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.ALGAE_EJECT)
-                                .onTrue(new InstantCommand(() -> m_Effector.ResetAlgeaArm()));
+                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLEAR_HIGH)
+                                .onTrue(new InstantCommand(() -> m_Elevator.AlgeaHigh())
+                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm())
+                                .andThen(new WaitCommand(0.5))
+                                .andThen(new InstantCommand(()->m_Effector.Stop()))
+                                .andThen(new InstantCommand(() -> this.backUp(0.5)))
+                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                ));
+                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLEAR_LOW)
+                                .onTrue(new InstantCommand(() -> m_Elevator.AlgaeCheckpoint())
+                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm())
+                                .andThen(new InstantCommand(() -> m_Elevator.AlgeaLow())
+                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                .andThen(new WaitCommand(0.5))
+                                .andThen(new InstantCommand(()->m_Effector.Stop()))
+                                .andThen(new InstantCommand(() -> this.backUp(0.5)))
+                                .andThen(new InstantCommand(() -> m_Elevator.Stow())))
+                                ));
+                        new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.ALGAE_EJECT)
+                                .onTrue(new InstantCommand(()-> backUp(0.5)));
+
+                //.onTrue(new InstantCommand(() -> m_Effector.ResetAlgeaArm()));
 
                 // Turn on coral intake with left button press
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON)
@@ -418,12 +477,15 @@ public class RobotContainer {
                                                 .andThen(new InstantCommand(() -> m_Elevator.RunCurrentZeroing()))
                                                 .andThen(new InstantCommand(() -> m_Effector.IntakeCoral())));
 
+                /*JoystickButton coralIntakeButton = new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON);
+                
+                coralIntakeButton.
+                coralIntakeButton.whenPressed(new InstantCommand(() -> m_effector.intake()))
+                                        .whileHeld(new InstantCommand(() -> m_effector.EjectCoral()))
+                                        .whenReleased(new InstantCommand(() -> m_effector.stop()));*/
+
                 // .whileTrue(new InstantCommand(() -> System.out.println("Button 8 pressed")));
 
-                // operator.pov(0).whileTrue(new InstantCommand(() ->
-                // m_Elevator.IncrementIncrease()));
-                // operator.pov(180).whileTrue(new InstantCommand(() ->
-                // m_Elevator.IncrementDecrease()));
 
                 // operator.getLeftY().whileActiveContinuous(() -> m_Elevator.SetPower());
                 //
@@ -433,9 +495,7 @@ public class RobotContainer {
                 // m_Elevator.SetPower((float)-0.15)));
 
                 // drivetrain.registerTelemetry(logger::telemeterize);
-
         }
-
         public void Periodic() {
                 // SmartDashboard.putNumber("Operator Joystick Y", CoralOperator.getY());
                 // SmartDashboard.putNumber("Operator Joystick X",CoralOperator.getX());
@@ -445,5 +505,4 @@ public class RobotContainer {
                 /* Run the path selected from the auto chooser */
                 return autoChooser.getSelected();
         }
-
 }
