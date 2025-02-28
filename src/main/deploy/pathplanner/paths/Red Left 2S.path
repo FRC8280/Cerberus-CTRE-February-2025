@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 12.54671052631579,
-        "y": 5.554851973684211
+        "x": 16.0095,
+        "y": 0.75875
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.546710526315783,
-        "y": 5.554851973684211
+        "x": 16.49954558339058,
+        "y": 0.37953482448666437
       },
       "isLocked": false,
-      "linkedName": "RR 1S"
+      "linkedName": "Red Left 1R"
     },
     {
       "anchor": {
-        "x": 16.243499999999997,
-        "y": 7.115749999999999
+        "x": 13.524,
+        "y": 2.66
       },
       "prevControl": {
-        "x": 15.243499999999997,
-        "y": 7.115749999999999
+        "x": 13.770871798534213,
+        "y": 2.4743157211963287
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Red Left 2S"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Elevator Level 4",
+      "waypointRelativePos": 0.7482142857142873,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -42,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -126.43085812016226
+    "rotation": 121.60750224624871
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -60.572543596810604
+    "rotation": 126.6070748126074
   },
   "useDefaultConstraints": true
 }

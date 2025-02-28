@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RR 1st Score"
+            "pathName": "Red Left 1S"
           }
         },
         {
@@ -79,7 +79,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 1R"
+                  "pathName": "Red Left 1R"
                 }
               }
             ]
@@ -107,7 +107,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Right 2S"
+            "pathName": "Red Left 2S"
           }
         },
         {
@@ -156,12 +156,6 @@
                       }
                     },
                     {
-                      "type": "named",
-                      "data": {
-                        "name": "Reached Set State"
-                      }
-                    },
-                    {
                       "type": "wait",
                       "data": {
                         "waitTime": 0.6
@@ -179,7 +173,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 2R"
+                  "pathName": "Red Left 2R"
                 }
               }
             ]
@@ -207,7 +201,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Right 3S"
+            "pathName": "Red Left 3S"
           }
         },
         {
@@ -256,12 +250,6 @@
                       }
                     },
                     {
-                      "type": "named",
-                      "data": {
-                        "name": "Reached Set State"
-                      }
-                    },
-                    {
                       "type": "wait",
                       "data": {
                         "waitTime": 0.6
@@ -279,7 +267,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 3R"
+                  "pathName": "Red Left 3R"
                 }
               }
             ]

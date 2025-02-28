@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import frc.robot.Constants.AlgaeClimberOperatorConstants;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
+import frc.robot.commands.IntakeReverse;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -49,12 +50,12 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Effector;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
-//import frc.robot.subsystems.Algae;
+import frc.robot.subsystems.AlgaeArm;
 
 public class RobotContainer {
         public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
-        //public final Algae m_Algae = new Algae();
-        public final Climber m_Climber = new Climber();
+        public final AlgaeArm m_Algae = new AlgaeArm();
+        //public final Climber m_Climber = new Climber();
         public final Elevator m_Elevator = new Elevator();
         public final Effector m_Effector = new Effector();
         public ReefTargets m_ReefTargets = new ReefTargets();
@@ -95,13 +96,14 @@ public class RobotContainer {
 
                 // Register Named Commands
                 NamedCommands.registerCommand("Score Coral", new InstantCommand(()->m_Effector.ScoreCoral()));
+                NamedCommands.registerCommand("Intake Complete", new WaitUntilCommand (() -> m_Effector.IntakeComplete()));
                 NamedCommands.registerCommand("Done Scoring", new WaitUntilCommand(() -> !m_Effector.Scoring()));
-                NamedCommands.registerCommand("Intake", new InstantCommand(() -> m_Effector.IntakeCoral()));
+                NamedCommands.registerCommand("Intake", new InstantCommand(() -> m_Effector.autonIntake()));
                      
                 NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.Stow())); 
-                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.LevelOne())); 
-                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.LevelTwo())); 
-                NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.LevelThree())); 
+                NamedCommands.registerCommand("Level 1", new InstantCommand(()->m_Elevator.LevelOne())); 
+                NamedCommands.registerCommand("Level 2", new InstantCommand(()->m_Elevator.LevelTwo())); 
+                NamedCommands.registerCommand("Level 3", new InstantCommand(()->m_Elevator.LevelThree())); 
                 NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(()->m_Elevator.LevelFour()));
                 NamedCommands.registerCommand("Reached Set State", new WaitUntilCommand(() -> m_Elevator.reachedSetState()));
                 NamedCommands.registerCommand("Reset Elevator Zero", new InstantCommand(() ->m_Elevator.RunCurrentZeroing()));
@@ -314,7 +316,7 @@ public class RobotContainer {
                                 );*/
 
                 // Winch Code
-                /*new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)
+               /*  new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)
                                 .whileTrue(new ClimberDownCommand(m_Climber));
                 new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_UP)
                                 .whileTrue(new ClimberUpCommand(m_Climber));*/
@@ -438,7 +440,7 @@ public class RobotContainer {
                 //new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
                 //                .onTrue(new InstantCommand(() -> ElevatorAutoScore(Alignment.CENTER, 1)));
 
-                new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.REVERSE_BUTTON)
+                new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.RESET_BUTTON)
                                 .onTrue(m_Elevator.RunCurrentZeroing()); // Todo make a proper reverse.
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.MANUAL_BUTTON)
@@ -476,6 +478,9 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.RunCurrentZeroing()))
                                                 .andThen(new InstantCommand(() -> m_Effector.IntakeCoral())));
+
+                new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.REVERSE_INTAKE)
+                                        .whileTrue(new IntakeReverse(m_Effector));
 
                 /*JoystickButton coralIntakeButton = new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON);
                 

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.23825,
-        "y": 7.106
+        "x": 1.5972039473684208,
+        "y": 7.315625
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.570625504767528,
-        "y": 6.9175051739908
+        "x": 2.128828551601849,
+        "y": 6.758281812369605
       },
       "isLocked": false,
       "linkedName": "Oustside 1R"
     },
     {
       "anchor": {
-        "x": 3.771710526315789,
-        "y": 5.429769736842105
+        "x": 3.889,
+        "y": 5.0256
       },
       "prevControl": {
-        "x": 3.465137686456398,
-        "y": 5.599281880023741
+        "x": 3.6747852144462345,
+        "y": 5.249981637742243
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Elevator Level 4",
+      "waypointRelativePos": 0.7459821428571336,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

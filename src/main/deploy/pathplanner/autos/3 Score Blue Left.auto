@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RR 1st Score"
+            "pathName": "Outside First Coral"
           }
         },
         {
@@ -79,7 +79,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 1R"
+                  "pathName": "Outside Auton 1st Reload"
                 }
               }
             ]
@@ -107,7 +107,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Right 2S"
+            "pathName": "Outside Auton Second Coral"
           }
         },
         {
@@ -179,7 +179,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 2R"
+                  "pathName": "Outside 2R"
                 }
               }
             ]
@@ -207,7 +207,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Right 3S"
+            "pathName": "Outside Score 3rd Coral"
           }
         },
         {
@@ -279,7 +279,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 3R"
+                  "pathName": "Outside 3rd Reload"
                 }
               }
             ]

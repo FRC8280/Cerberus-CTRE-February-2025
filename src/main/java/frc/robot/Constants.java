@@ -51,15 +51,25 @@ import edu.wpi.first.math.util.Units;
         public static double CAMERA_PITCH_RADIANS = Units.degreesToRadians(45);
 
         public static final String[] CamNames = {
-            "FrontRightCamera", "FrontLeftCamera"
+            "FrontRightCamera", "FrontLeftCamera" //"LeftSideCam", "RearAngle" /*See if you can change */, 
+            //"RightSideCam", "RearNormal" /*See if you can change*/
         };
 
        /* // example Cam mounted facing forward, half a meter forward of center, half a meter up from center*/
         public static final Transform3d[] cameraTransforms = {
+            //FrontRightCamera
             new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
             new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(8.75), Units.inchesToMeters(8.5)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0)))
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
+            /*new Transform3d(new Translation3d(Units.inchesToMeters(3), Units.inchesToMeters(7), Units.inchesToMeters(35)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(270))),
+            new Transform3d(new Translation3d(Units.inchesToMeters(-6), Units.inchesToMeters(3), Units.inchesToMeters(22)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(180))),
+            new Transform3d(new Translation3d(Units.inchesToMeters(8), Units.inchesToMeters(-12.5), Units.inchesToMeters(9.5)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(90))),
+            new Transform3d(new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-30), Units.degreesToRadians(180))),*/
         };
          // The layout of the AprilTags on the field
          public static final AprilTagFieldLayout kTagLayout =
@@ -150,8 +160,8 @@ import edu.wpi.first.math.util.Units;
          public static final double TrapezoidProfileMaxAcc = 2.0;
  
          public static final double kHomePosition = 0.0;
-         public static final double kIntakePosition = 0.0;
-         public static final double kScoringPosition = 0.0;
+         public static final double kIntakePosition = 0.209;
+         public static final double kScoringPosition = 0.1;
  
          public static final double kSoftLimitReverse = 0; //-140;
          public static final double kSoftLimitForward = 4.77;//4.6 or 143.878
@@ -170,8 +180,9 @@ import edu.wpi.first.math.util.Units;
         public static final int CORAL_RL2 = 6;
         public static final int CORAL_L1 = 7;
         public static final int MANUAL_BUTTON = 8;
-        public static final int REVERSE_BUTTON = 9;
+        public static final int RESET_BUTTON = 9;
         public static final int CORAL_INTAKE_BUTTON = 10;
+        public static final int REVERSE_INTAKE = 11;
      }
 
      public static final class AlgaeClimberOperatorConstants{

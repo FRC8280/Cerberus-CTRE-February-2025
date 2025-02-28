@@ -154,7 +154,7 @@ public class Effector extends SubsystemBase  {
         RunEffector(Constants.Effector.kSpeed);
     }
 
-    private Boolean IntakeComplete()
+    public Boolean IntakeComplete()
     {
         if(m_EffectorState == EffectorState.Intaking && DetectCoralFront())
             return true;
@@ -178,7 +178,7 @@ public class Effector extends SubsystemBase  {
     public void EjectCoral()
     {
         m_EffectorState = EffectorState.Ejecting;
-        RunEffector(-Constants.Effector.kSpeed);
+        RunEffector(-Constants.Effector.kSpeed/2);
     }
 
     public void Stop()

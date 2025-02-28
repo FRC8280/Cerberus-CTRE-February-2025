@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RR 1st Score"
+            "pathName": "Bottom First Score"
           }
         },
         {
@@ -79,7 +79,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 1R"
+                  "pathName": "Bottom 1R"
                 }
               }
             ]
@@ -107,7 +107,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Right 2S"
+            "pathName": "Bottom 2S"
           }
         },
         {
@@ -179,7 +179,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 2R"
+                  "pathName": "Bottom 2R"
                 }
               }
             ]
@@ -207,7 +207,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Right 3S"
+            "pathName": "Bottom 3S"
           }
         },
         {
@@ -279,7 +279,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Red Right 3R"
+                  "pathName": "Bottom 3R"
                 }
               }
             ]
