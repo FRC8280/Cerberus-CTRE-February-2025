@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.380028098411113,
-        "y": 1.987978400271333
+        "x": 14.37286917104617,
+        "y": 1.976667756621084
       },
       "isLocked": false,
       "linkedName": "Red Left 2S"
@@ -20,8 +20,8 @@
         "y": 0.75875
       },
       "prevControl": {
-        "x": 15.415491725236466,
-        "y": 1.2141991252356208
+        "x": 15.436802445340113,
+        "y": 1.2423881190440242
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,9 +34,9 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -45,7 +45,7 @@
     "rotation": 126.6070748126074
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Old Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 121.60750224624871

@@ -118,6 +118,17 @@ public class Effector extends SubsystemBase  {
         m_algeaArm.setControl(positionRequest.withPosition(0));
         m_EffectorMotor.set(0);
     }
+    public void MoveAlgeaArmAuton()
+    {
+        System.out.println("Moving Algea arm Auton version.");
+        final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+        m_algeaArm.setControl(positionRequest.withPosition(-1.76));//Constants.Effector.algeaArmScorePosition));
+        m_EffectorMotor.set(-50);
+
+        m_EffectorTimer.reset();
+        m_EffectorTimer.start();
+
+    }
 
     public void MoveAlgeaArm()
     {
@@ -125,6 +136,14 @@ public class Effector extends SubsystemBase  {
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
         m_algeaArm.setControl(positionRequest.withPosition(-1.76));//Constants.Effector.algeaArmScorePosition));
         m_EffectorMotor.set(-50);
+    }
+
+    public void StopNewArm()
+    {
+        final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+        m_algeaArm.setControl(positionRequest.withPosition(0));
+        m_EffectorMotor.set(0);
+        System.out.println("Stopping Algea arm.");
     }
 
     public void RunEffector(double speed) {
@@ -172,7 +191,7 @@ public class Effector extends SubsystemBase  {
     public void ScoreCoral()
     {
         m_EffectorState = EffectorState.Scoring;
-        RunEffector(Constants.Effector.kSpeed);
+        RunEffector(Constants.Effector.kSpeed+10);
     }
 
     public void EjectCoral()
@@ -237,7 +256,10 @@ public class Effector extends SubsystemBase  {
             Stop();
         //emergency measure
         else if(m_EffectorTimer.isRunning() && m_EffectorTimer.hasElapsed(Constants.Effector.intakeTimerMax))  //emergency shutdown if timer expires
-           Stop();
+        {
+            System.out.println("Emergency Stop.");
+            Stop();
+        }   
 
         SmartDashboard.putNumber("Front Sensor: ", m_FrontDistanceValue);
         SmartDashboard.putNumber("Rear Sensor: ", m_RearDistanceValue);

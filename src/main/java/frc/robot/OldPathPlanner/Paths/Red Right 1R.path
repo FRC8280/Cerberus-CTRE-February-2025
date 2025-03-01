@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 12.208,
+        "y": 5.3488
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 12.992054350391848,
+        "y": 5.864035034431585
+      },
+      "isLocked": false,
+      "linkedName": "RR 1S"
+    },
+    {
+      "anchor": {
+        "x": 16.243499999999997,
+        "y": 7.115749999999999
+      },
+      "prevControl": {
+        "x": 15.35751213826751,
+        "y": 6.682979183146264
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "RRed 1R"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -126.43085812016226
+  },
+  "reversed": false,
+  "folder": "Old Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -60.572543596810604
+  },
+  "useDefaultConstraints": true
+}

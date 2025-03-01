@@ -72,9 +72,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    // Clear the CommandScheduler of all commands
-    CommandScheduler.getInstance().cancelAll();
-    m_robotContainer.RobotInit();
+
   }
 
   @Override
@@ -169,6 +167,10 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    // Clear the CommandScheduler of all commands
+    CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.RobotInit();
   }
 
   @Override

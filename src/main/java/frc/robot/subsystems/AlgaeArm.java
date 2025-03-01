@@ -81,6 +81,7 @@ public class AlgaeArm extends SubsystemBase {
 
   public void stowPivot(){
     currentPivotPosition = AlgaeConstants.kHomePosition;
+    setVelocity(0);
   }
 
   public void scorePivot(){
@@ -105,8 +106,8 @@ public class AlgaeArm extends SubsystemBase {
 
     m_DistanceValue = m_DistanceSensor.getDistance().refresh().getValueAsDouble()*1000;
         
-
-    m_ArmpidController.setReference(currentPivotPosition, ControlType.kPosition);
+//currentPivotPosition
+    m_ArmpidController.setReference(.01, ControlType.kPosition);
     SmartDashboard.putNumber("AlgaePivot/Distance",  m_DistanceValue);
     //SmartDashboard.putNumber("AlgaePivot Position",   m_encoder.getPosition());
 

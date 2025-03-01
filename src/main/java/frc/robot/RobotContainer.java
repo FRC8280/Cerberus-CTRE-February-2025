@@ -9,9 +9,11 @@ import static edu.wpi.first.units.Units.*;
 import java.util.List;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import frc.robot.Constants.AlgaeClimberOperatorConstants;
+import frc.robot.commands.AlgeaArmCommand;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
 import frc.robot.commands.IntakeReverse;
@@ -88,6 +90,7 @@ public class RobotContainer {
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+
         /* Path follower */
         private final SendableChooser<Command> autoChooser;
         public Command automaticPath = null;
@@ -104,10 +107,17 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Level 1", new InstantCommand(()->m_Elevator.LevelOne())); 
                 NamedCommands.registerCommand("Level 2", new InstantCommand(()->m_Elevator.LevelTwo())); 
                 NamedCommands.registerCommand("Level 3", new InstantCommand(()->m_Elevator.LevelThree())); 
-                NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(()->m_Elevator.LevelFour()));
+                NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(() -> m_Elevator.LevelFour()));
                 NamedCommands.registerCommand("Reached Set State", new WaitUntilCommand(() -> m_Elevator.reachedSetState()));
                 NamedCommands.registerCommand("Reset Elevator Zero", new InstantCommand(() ->m_Elevator.RunCurrentZeroing()));
                 
+                NamedCommands.registerCommand("Algae CheckPoint", new InstantCommand(() -> m_Elevator.AlgaeCheckpoint()));
+                NamedCommands.registerCommand("Move Algae Arm", new InstantCommand(() -> m_Effector.MoveAlgeaArm()));
+                NamedCommands.registerCommand("Algae Low", new InstantCommand(() -> m_Elevator.AlgeaLow()));
+                NamedCommands.registerCommand("Effector Stop", new InstantCommand(() -> m_Effector.Stop()));
+                NamedCommands.registerCommand("Back Up", new InstantCommand(() -> this.backUp(0.5)));
+
+                NamedCommands.registerCommand("STOPNOW", new InstantCommand(() -> m_Effector.StopNewArm()));
                 // Initialize each element of the vision array
                 for (int i = 0; i < vision.length; i++) {
                         vision[i] = new Vision(i);
@@ -474,13 +484,16 @@ public class RobotContainer {
                 // Turn on coral intake with left button press
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON)
                                 .onTrue(new InstantCommand(() -> m_Elevator.Stow())
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.RunCurrentZeroing()))
                                                 .andThen(new InstantCommand(() -> m_Effector.IntakeCoral())));
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.REVERSE_INTAKE)
                                         .whileTrue(new IntakeReverse(m_Effector));
+
+                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.L_IN)
+                                        .whileTrue(new AlgeaArmCommand(m_Algae));
 
                 /*JoystickButton coralIntakeButton = new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON);
                 
@@ -501,6 +514,21 @@ public class RobotContainer {
 
                 // drivetrain.registerTelemetry(logger::telemeterize);
         }
+
+        private SequentialCommandGroup AlgeaLowSequence() {
+                return new SequentialCommandGroup(
+                    new InstantCommand(() -> m_Elevator.AlgaeCheckpoint()),
+                    new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
+                    new InstantCommand(() -> m_Effector.MoveAlgeaArm()),
+                    new InstantCommand(() -> m_Elevator.AlgeaLow()),
+                    new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
+                    new WaitCommand(0.5),
+                    new InstantCommand(() -> m_Effector.Stop()),
+                    new InstantCommand(() -> this.backUp(0.5)),
+                    new InstantCommand(() -> m_Elevator.Stow())
+                );
+            }
+
         public void Periodic() {
                 // SmartDashboard.putNumber("Operator Joystick Y", CoralOperator.getY());
                 // SmartDashboard.putNumber("Operator Joystick X",CoralOperator.getX());

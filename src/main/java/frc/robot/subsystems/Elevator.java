@@ -276,6 +276,7 @@ public void checkAndFix(){
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator/Rear/Pos",  m_RearMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator Target",targetElevatorPosition);
     //SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putBoolean("Elevator Jacked Up", atStowed() && !ElevatorAtZero());
     

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.49954558339058,
-        "y": 0.37953482448666437
+        "x": 16.513332301544974,
+        "y": 0.3783622897712895
       },
       "isLocked": false,
       "linkedName": "Red Left 1R"
@@ -20,8 +20,8 @@
         "y": 2.66
       },
       "prevControl": {
-        "x": 13.770871798534213,
-        "y": 2.4743157211963287
+        "x": 13.648167755867599,
+        "y": 2.443015280715889
       },
       "nextControl": null,
       "isLocked": false,
@@ -41,9 +41,9 @@
   ],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -52,7 +52,7 @@
     "rotation": 121.60750224624871
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Old Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 126.6070748126074

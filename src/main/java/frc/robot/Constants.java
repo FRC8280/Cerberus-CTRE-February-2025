@@ -144,8 +144,8 @@ import edu.wpi.first.math.util.Units;
  
      
          // Intake speeds
-         public static final double k_intakeSpeed = 0;
-         public static final double k_EjectSpeed = 0;
+         public static final double k_intakeSpeed = 50;
+         public static final double k_EjectSpeed = -50;
         
          /*New commit from REV */
          public static final double kArmGearRatio = 1.0 / (100); 

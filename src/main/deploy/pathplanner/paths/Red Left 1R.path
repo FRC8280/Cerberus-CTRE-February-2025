@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 12.558,
-        "y": 2.726
+        "x": 12.416,
+        "y": 2.802
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.339902542019606,
-        "y": 2.2158884415881794
+        "x": 13.188822478466014,
+        "y": 2.2952673606328355
       },
       "isLocked": false,
       "linkedName": "Red Left 1S"
@@ -20,8 +20,8 @@
         "y": 0.75875
       },
       "prevControl": {
-        "x": 15.462289407221519,
-        "y": 1.2429232391852958
+        "x": 15.500514397801187,
+        "y": 1.2266266558148269
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,9 +34,9 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -45,7 +45,7 @@
     "rotation": 126.6070748126074
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Old Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 59.23728046576099

@@ -28,14 +28,16 @@ public class AlgeaArmCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    m_AlgaeArm.GroundPivot();
     //m_AlgaeArm.EjectCoral();
+
   }
 
   // Called once the command ends or is interrupted.. Here we ensure the climber is not
   // running once we let go of the button
   @Override
   public void end(boolean interrupted) {
-    //m_Effector.Stop();
+    m_AlgaeArm.stowPivot();
   }
 
   // Returns true when the command should end.

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.476445261662416,
-        "y": 2.2354367435315896
+        "x": 14.478499451987336,
+        "y": 2.2356138230417777
       },
       "isLocked": false,
       "linkedName": "Red Left 3S"
@@ -20,8 +20,8 @@
         "y": 0.75875
       },
       "prevControl": {
-        "x": 15.70744434169589,
-        "y": 1.0766993969383694
+        "x": 15.703954537308302,
+        "y": 1.0731276305103714
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,9 +34,9 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -45,7 +45,7 @@
     "rotation": 126.6070748126074
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Old Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 120.96375653207372
