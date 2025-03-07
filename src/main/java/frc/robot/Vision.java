@@ -189,27 +189,30 @@ public class Vision {
                 case 17:
                     returnTargets.leftTarget = new Pose2d(3.624, 2.9964, Rotation2d.fromDegrees(60.35/*53.6*/));
                     returnTargets.rightTarget = new Pose2d(3.950, 2.793, Rotation2d.fromDegrees(61.35));
+                    
                     returnTargets.centerTarget = new Pose2d(3.810, 2.899, Rotation2d.fromDegrees(60.715));
                     break;
                 case 18:
-                    returnTargets.leftTarget = new Pose2d(3.92, 4.27, Rotation2d.fromDegrees(-3.02));
-                    returnTargets.rightTarget = new Pose2d(3.25798, 3.9374, Rotation2d.fromDegrees(-2.9));
+                    returnTargets.leftTarget = new Pose2d(3.02, 4.25, Rotation2d.fromDegrees(2.4));
+                    returnTargets.rightTarget = new Pose2d(3.1, 3.9350, Rotation2d.fromDegrees(2.0));
+                    
                     returnTargets.centerTarget = new Pose2d(3.175, 4.112, Rotation2d.fromDegrees(-2.96));
                     break;
                 case 19:
-                    returnTargets.leftTarget = new Pose2d(4.0596, 5.15, Rotation2d.fromDegrees(-60.999));
-                    returnTargets.rightTarget = new Pose2d(3.737354424938496, 4.940004156734, Rotation2d.fromDegrees(-61.54));
+                    returnTargets.leftTarget = new Pose2d(3.99474, 5.34948, Rotation2d.fromDegrees(-57.4));
+                    returnTargets.rightTarget = new Pose2d(3.6625, 5.2106, Rotation2d.fromDegrees(-56.982));
+                    
                     returnTargets.centerTarget = new Pose2d(3.737354424938496, 4.940004156734, Rotation2d.fromDegrees(-61.2695));
                     break;
                 case 20:
-                    returnTargets.leftTarget = new Pose2d(5.27, 4.98, Rotation2d.fromDegrees(-122.76));
-                    returnTargets.rightTarget = new Pose2d(5.10, 5.15, Rotation2d.fromDegrees(-122.76));
+                    returnTargets.leftTarget = new Pose2d(5.37180, 5.095107, Rotation2d.fromDegrees(-121.58));
+                    returnTargets.rightTarget = new Pose2d(5.12041, 5.28087, Rotation2d.fromDegrees(-119.38));
                     
                     returnTargets.centerTarget = new Pose2d(5.225, 5.122, Rotation2d.fromDegrees(-122.065));
                     break;
                 case 21:
-                    returnTargets.leftTarget = new Pose2d(5.864, 3.78, Rotation2d.fromDegrees(-176.6));
-                    returnTargets.rightTarget = new Pose2d(5.865, 4.10, Rotation2d.fromDegrees(-179.78));
+                    returnTargets.leftTarget = new Pose2d(5.87825, 3.762089, Rotation2d.fromDegrees(178.718));
+                    returnTargets.rightTarget = new Pose2d(5.867954, 4.10801, Rotation2d.fromDegrees(-177.0344));
 
                     returnTargets.centerTarget = new Pose2d(5.8, 3.958, Rotation2d.fromDegrees(-178.19));
                     break;

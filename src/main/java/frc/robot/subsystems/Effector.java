@@ -25,6 +25,7 @@ public class Effector extends SubsystemBase  {
         Ejecting
       }
     
+      public boolean debugSpew = false;
     private EffectorState m_EffectorState;
     private TalonFX m_EffectorMotor;
     private TalonFX m_algeaArm;
@@ -75,6 +76,7 @@ public class Effector extends SubsystemBase  {
         //Range sensors
         m_FrontSensor = new CANrange(Constants.Effector.kFrontLaserCanId);//new LaserCan();
         m_RearSensor = new CANrange(Constants.Effector.kRearLaserCanId);
+        
         m_EffectorTimer = new Timer();
         m_EffectorState = EffectorState.None;
 
@@ -120,7 +122,7 @@ public class Effector extends SubsystemBase  {
     }
     public void MoveAlgeaArmAuton()
     {
-        System.out.println("Moving Algea arm Auton version.");
+        //System.out.println("Moving Algea arm Auton version.");
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
         m_algeaArm.setControl(positionRequest.withPosition(-1.76));//Constants.Effector.algeaArmScorePosition));
         m_EffectorMotor.set(-50);
@@ -132,7 +134,7 @@ public class Effector extends SubsystemBase  {
 
     public void MoveAlgeaArm()
     {
-        System.out.println("Moving Algea arm.");
+        //System.out.println("Moving Algea arm.");
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
         m_algeaArm.setControl(positionRequest.withPosition(-1.76));//Constants.Effector.algeaArmScorePosition));
         m_EffectorMotor.set(-50);
@@ -143,7 +145,7 @@ public class Effector extends SubsystemBase  {
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
         m_algeaArm.setControl(positionRequest.withPosition(0));
         m_EffectorMotor.set(0);
-        System.out.println("Stopping Algea arm.");
+        //System.out.println("Stopping Algea arm.");
     }
 
     public void RunEffector(double speed) {
@@ -257,7 +259,7 @@ public class Effector extends SubsystemBase  {
         //emergency measure
         else if(m_EffectorTimer.isRunning() && m_EffectorTimer.hasElapsed(Constants.Effector.intakeTimerMax))  //emergency shutdown if timer expires
         {
-            System.out.println("Emergency Stop.");
+            //System.out.println("Emergency Stop.");
             Stop();
         }   
 

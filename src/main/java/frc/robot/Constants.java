@@ -51,8 +51,8 @@ import edu.wpi.first.math.util.Units;
         public static double CAMERA_PITCH_RADIANS = Units.degreesToRadians(45);
 
         public static final String[] CamNames = {
-            "FrontRightCamera", "FrontLeftCamera" //"LeftSideCam", "RearAngle" /*See if you can change */, 
-            //"RightSideCam", "RearNormal" /*See if you can change*/
+            "FrontRightCamera", "FrontLeftCamera" //,"LeftSideCam", //"RearAngle" /*See if you can change */, 
+            //"RightSideCam"//, "RearNormal" /*See if you can change*/
         };
 
        /* // example Cam mounted facing forward, half a meter forward of center, half a meter up from center*/
@@ -60,11 +60,15 @@ import edu.wpi.first.math.util.Units;
             //FrontRightCamera
             new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
+            //FrontLeftCamera
             new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(8.75), Units.inchesToMeters(8.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
-            /*new Transform3d(new Translation3d(Units.inchesToMeters(3), Units.inchesToMeters(7), Units.inchesToMeters(35)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(270))),
-            new Transform3d(new Translation3d(Units.inchesToMeters(-6), Units.inchesToMeters(3), Units.inchesToMeters(22)),
+            //LeftSideCam
+          //  new Transform3d(new Translation3d(Units.inchesToMeters(3), Units.inchesToMeters(7), Units.inchesToMeters(35)),
+            //    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(270))),
+            
+            
+            /* new Transform3d(new Translation3d(Units.inchesToMeters(-6), Units.inchesToMeters(3), Units.inchesToMeters(22)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(180))),
             new Transform3d(new Translation3d(Units.inchesToMeters(8), Units.inchesToMeters(-12.5), Units.inchesToMeters(9.5)),
                 new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(90))),
@@ -193,6 +197,23 @@ import edu.wpi.first.math.util.Units;
         public static final int L_OUT = 5;
         public static final int CLIMBER_BUTTON_UP = 6;
         public static final int CLIMBER_BUTTON_DN = 7;
+     }
+
+     public static final class DistanceConstants{
+        //Change later when installed
+        public static final int leftAlignmentRangeId = 30;
+        public static final int righttAlignmentRangeId = 31;
+
+        public static final int TargetArray0 = 32;
+        public static final int TargetArray1 = 33;
+        public static final int TargetArray2 = 34;
+        public static final int TargetArray3 = 35;
+        public static final int TargetArray4 = 36;
+
+        //Change later when installed
+        public static final int alignmentDetectionRange = 0;
+        public static final int poleDetectionRange = 0;
+        
      }
  }
  

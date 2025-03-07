@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -55,6 +56,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.AlgaeArm;
 
 public class RobotContainer {
+        int detectedAprilTag = -1;
         public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
         public final AlgaeArm m_Algae = new AlgaeArm();
         //public final Climber m_Climber = new Climber();
@@ -69,6 +71,7 @@ public class RobotContainer {
                                                                                           // second
                                                                                           // max angular velocity
 
+                                                                                                     
         /* Setting up bindings for necessary control of the swerve drive platform */
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
                         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -130,7 +133,7 @@ public class RobotContainer {
 
         public void RobotInit()
         {
-                m_Elevator.RunCurrentZeroing();
+                //m_Elevator.RunCurrentZeroing();
         }
 
         public enum Alignment {
@@ -139,6 +142,38 @@ public class RobotContainer {
                 CENTER
         }
 
+        private void alignToTarget(boolean left)
+         {
+
+                if (detectedAprilTag == -1) {
+                        if (left) 
+                                leftAlign();
+                        else
+                                rightAlign();
+                        return;
+                }
+                else 
+                {
+                  if (detectedAprilTag == 6 || detectedAprilTag == 7 || detectedAprilTag == 8 ||
+                    detectedAprilTag == 18 || detectedAprilTag == 17 || detectedAprilTag == 19) 
+                    {
+                        if (left) 
+                                leftAlign();
+                        else
+                                rightAlign();
+                        return;
+                    }
+                    else{
+                        if (left) 
+                                rightAlign();
+                        else
+                                leftAlign();
+                        return;
+                    }
+                    
+                }
+                
+        }
         private void leftAlign() {
                 Pose2d currentPose = drivetrain.getState().Pose;
                 Pose2d destinationPos = m_ReefTargets.leftTarget;
@@ -334,7 +369,7 @@ public class RobotContainer {
                 // Bindings to control Elevator Level, wait until it aligns, then runs
                 // sequential command gorup to score
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL4)
-                                .onTrue(new InstantCommand(() -> leftAlign())
+                                .onTrue(new InstantCommand(() -> alignToTarget(true))
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.LevelFour()))
@@ -350,7 +385,7 @@ public class RobotContainer {
                                                 
                                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL4)
-                                .onTrue(new InstantCommand(() -> rightAlign())
+                                .onTrue(new InstantCommand(() -> alignToTarget(false))
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.LevelFour()))
@@ -366,7 +401,7 @@ public class RobotContainer {
                                                 
                                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL3)
-                                .onTrue(new InstantCommand(() -> leftAlign())
+                                .onTrue(new InstantCommand(() -> alignToTarget(true))
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.LevelThree()))
@@ -382,7 +417,7 @@ public class RobotContainer {
                                                  
                                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL3)
-                                .onTrue(new InstantCommand(() -> rightAlign())
+                                .onTrue(new InstantCommand(() -> alignToTarget(false))
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.LevelThree()))
@@ -398,7 +433,7 @@ public class RobotContainer {
                                                 
                                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL2)
-                                .onTrue(new InstantCommand(() -> leftAlign())
+                                .onTrue(new InstantCommand(() -> alignToTarget(true))
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
@@ -414,7 +449,7 @@ public class RobotContainer {
                                                 
                                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL2)
-                                .onTrue(new InstantCommand(() -> rightAlign())
+                                .onTrue(new InstantCommand(() -> alignToTarget(false))
                                                 .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
@@ -430,7 +465,18 @@ public class RobotContainer {
                                                 
                                                 );
 
-                
+                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
+                                                .onTrue(new InstantCommand(() -> m_Elevator.LevelOne())
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                                                .andThen(new WaitCommand(0.15))
+                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitCommand(0.6))
+                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                );
+
                 // New trigger to call UpLevel once when the vertical joystick value is over 25%
                 new Trigger(() -> CoralOperator.getY() >= 0.75)
                                 .onTrue(m_Elevator.runOnce(() -> m_Elevator.UpLevel()));
@@ -447,11 +493,12 @@ public class RobotContainer {
                 new Trigger(() -> CoralOperator.getX() < -0.75)
                                 .onTrue(m_Elevator.runOnce(() -> m_Elevator.IncrementDecrease()));
 
-                //new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
-                //                .onTrue(new InstantCommand(() -> ElevatorAutoScore(Alignment.CENTER, 1)));
+                
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.RESET_BUTTON)
-                                .onTrue(m_Elevator.RunCurrentZeroing()); // Todo make a proper reverse.
+                                .onTrue(new ParallelCommandGroup(
+                                                                m_Elevator.RunCurrentZeroing(),
+                                                                new InstantCommand(() -> m_Effector.Stop())));
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.MANUAL_BUTTON)
                                 .onTrue(new InstantCommand(() -> m_Effector.ScoreCoral()));

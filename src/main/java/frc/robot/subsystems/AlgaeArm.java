@@ -107,7 +107,7 @@ public class AlgaeArm extends SubsystemBase {
     m_DistanceValue = m_DistanceSensor.getDistance().refresh().getValueAsDouble()*1000;
         
 //currentPivotPosition
-    m_ArmpidController.setReference(.01, ControlType.kPosition);
+    //m_ArmpidController.setReference(.01, ControlType.kPosition);
     SmartDashboard.putNumber("AlgaePivot/Distance",  m_DistanceValue);
     //SmartDashboard.putNumber("AlgaePivot Position",   m_encoder.getPosition());
 

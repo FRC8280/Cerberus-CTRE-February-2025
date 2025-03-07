@@ -7,11 +7,12 @@ package frc.robot;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import au.grapplerobotics.CanBridge;
-/*import edu.wpi.first.net.PortForwarder;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.net.PortForwarder;
+/*import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;*/
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.net.PortForwarder;
 //import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -24,7 +25,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
+  public boolean debugSpew = false;
   public static int aprilTagId;
 
   private final RobotContainer m_robotContainer;
@@ -44,6 +45,7 @@ public class Robot extends TimedRobot {
     double LowestDistance = 9999.0;
     double distance = 0;
 
+    m_robotContainer.detectedAprilTag = -1;
     for (int i = 0; i < 2; i++) {
       if (camera1Result.hasTargets() || camera2Result.hasTargets()) {
         PhotonPipelineResult result = camera1Result.hasTargets() ? camera1Result : camera2Result;
@@ -57,10 +59,14 @@ public class Robot extends TimedRobot {
 
             if (distance < LowestDistance) {
               m_robotContainer.m_ReefTargets = m_robotContainer.vision[0].CalculateAutoReefTarget(aprilTagId);
-              SmartDashboard.putNumber("Detected April Tag", aprilTagId);
               
-              if(m_robotContainer.m_ReefTargets.leftTarget!=null)
+              if(debugSpew)
+                SmartDashboard.putNumber("Detected April Tag", aprilTagId);
+              
+              if(m_robotContainer.m_ReefTargets.leftTarget!=null){
                 LowestDistance = distance;
+                m_robotContainer.detectedAprilTag = aprilTagId;
+              }
             }
           }
         }
@@ -72,6 +78,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    PortForwarder.add(5800, "photonvision-1.local", 5800);
+    PortForwarder.add(5800, "photonvision-2.local", 5800);
+    PortForwarder.add(5800, "photonvision-3.local", 5800);
 
   }
 
@@ -101,33 +110,15 @@ public class Robot extends TimedRobot {
     processAprilTags();
     m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
 
-    
+    if(debugSpew){
      SmartDashboard.putNumber("Current Drive X",
      m_robotContainer.drivetrain.getState().Pose.getX());
      SmartDashboard.putNumber("Current Drive Y",
      m_robotContainer.drivetrain.getState().Pose.getY());
      SmartDashboard.putNumber("Current Yaw",
      m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
-     /* 
-     * if(m_robotContainer.m_ReefTargets.leftTarget!=null){
-     * SmartDashboard.putNumber("Target Left X",
-     * m_robotContainer.m_ReefTargets.leftTarget.getX());
-     * SmartDashboard.putNumber("Target Left Y",
-     * m_robotContainer.m_ReefTargets.leftTarget.getY());
-     * SmartDashboard.putNumber("Target Left Yaw",
-     * m_robotContainer.m_ReefTargets.leftTarget.getRotation().getDegrees());
-     * }
-     * 
-     * if(m_robotContainer.m_ReefTargets.rightTarget!=null){
-     * SmartDashboard.putNumber("Target Right X",
-     * m_robotContainer.m_ReefTargets.rightTarget.getX());
-     * SmartDashboard.putNumber("Target Right Y",
-     * m_robotContainer.m_ReefTargets.rightTarget.getY());
-     * SmartDashboard.putNumber("Target Right Yaw",
-     * m_robotContainer.m_ReefTargets.rightTarget.getRotation().getDegrees());
-     * }
-     */
-    // Todo add smart dashbaord for vision targets .
+    }
+     
   }
 
   @Override
@@ -169,7 +160,7 @@ public class Robot extends TimedRobot {
     }
 
     // Clear the CommandScheduler of all commands
-    CommandScheduler.getInstance().cancelAll();
+    //CommandScheduler.getInstance().cancelAll();
     m_robotContainer.RobotInit();
   }
 
