@@ -213,6 +213,9 @@ import edu.wpi.first.math.util.Units;
         //Change later when installed
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
+
+        public static final double reefScoringDistance = 0.1;//4 inches to start
+        public static final double reefAlignedDistance = 0.1;
         
      }
  }

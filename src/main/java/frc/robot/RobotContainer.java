@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.List;
+import java.util.Queue;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.fasterxml.jackson.databind.util.Named;
@@ -70,7 +71,9 @@ public class RobotContainer {
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
-
+        private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
+                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
                                                                                                      
         /* Setting up bindings for necessary control of the swerve drive platform */
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -285,7 +288,6 @@ public class RobotContainer {
                 return (automaticPath != null) && (automaticPath.isScheduled());
         }
 
-
         private void configureBindings() {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
@@ -298,24 +300,12 @@ public class RobotContainer {
                 
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
-                                drivetrain.applyRequest(
-                                                () -> drive.withVelocityX(-driverController.getLeftY() * MaxSpeed
-                                                                * m_SlowSpeedMod) // Drive
-                                                                                  // forward
-                                                                                  // with
-                                                                // negative Y
-                                                                // (forward)
-                                                                .withVelocityY(-driverController.getLeftX() * MaxSpeed
-                                                                                * m_SlowSpeedMod) // Drive left
-                                                                                                  // with
-                                                                                                  // negative X
-                                                                                                  // (left)
-                                                                .withRotationalRate(-driverController.getRightX()
-                                                                                * MaxAngularRate * m_SlowSpeedMod) // Drive
-                                                                                                                   // counterclockwise
-                                                                                                                   // with
-                                // negative X (left)
-                                ));
+                        drivetrain.applyRequest(
+                                        () -> drive.withVelocityX(-driverController.getLeftY() * MaxSpeed * m_SlowSpeedMod) // Drive forward with negative Y (forward)
+                                        .withVelocityY(-driverController.getLeftX() * MaxSpeed * m_SlowSpeedMod) // Drive left with negative X (left)
+                                        .withRotationalRate(-driverController.getRightX() * MaxAngularRate * m_SlowSpeedMod)) // Drivecounterclockwise with negative X (left)
+                                        ); 
+                        
                 // reset the field-centric heading on left bumper press
                 driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 

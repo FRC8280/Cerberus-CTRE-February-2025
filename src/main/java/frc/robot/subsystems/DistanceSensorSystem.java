@@ -12,10 +12,10 @@ import frc.robot.Constants.DistanceConstants;
 
 
 public class DistanceSensorSystem extends SubsystemBase {
-    private final CANrange[] m_alignRanges;
+    public final CANrange[] m_alignRanges;
     double[] alignValues;
    
-    private final CANrange[] m_TargetArray;
+    public final CANrange[] m_TargetArray;
     double[] m_TargetArrayValues;
 
     
