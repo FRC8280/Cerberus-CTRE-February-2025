@@ -38,11 +38,11 @@ public class AlignRobotTarget extends Command {
     @Override
     public void execute() {
         // Read the distance values from the forward-facing CANRange sensors
-        double targetDistance0 = m_distanceSystem.m_TargetArray[0].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance1 = m_distanceSystem.m_TargetArray[1].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance2 = m_distanceSystem.m_TargetArray[2].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance3 = m_distanceSystem.m_TargetArray[3].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance4 = m_distanceSystem.m_TargetArray[4].getDistance().refresh().getValueAsDouble() * 1000;
+        double targetDistance0 = m_distanceSystem.m_TargetArray[0].getDistance().refresh().getValueAsDouble() ;
+        double targetDistance1 = m_distanceSystem.m_TargetArray[1].getDistance().refresh().getValueAsDouble() ;
+        double targetDistance2 = m_distanceSystem.m_TargetArray[2].getDistance().refresh().getValueAsDouble() ;
+        double targetDistance3 = m_distanceSystem.m_TargetArray[3].getDistance().refresh().getValueAsDouble() ;
+        double targetDistance4 = m_distanceSystem.m_TargetArray[4].getDistance().refresh().getValueAsDouble() ;
         // Calculate the average distance
         double averageDistance = (targetDistance0 + targetDistance1 + targetDistance2
          + targetDistance3 + targetDistance4) / 5.0;
@@ -65,11 +65,11 @@ public class AlignRobotTarget extends Command {
     @Override
     public boolean isFinished() {
         // Check if both distance sensors read zero
-        double targetDistance0 = m_distanceSystem.m_TargetArray[0].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance1 = m_distanceSystem.m_TargetArray[1].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance2 = m_distanceSystem.m_TargetArray[2].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance3 = m_distanceSystem.m_TargetArray[3].getDistance().refresh().getValueAsDouble() * 1000;
-        double targetDistance4 = m_distanceSystem.m_TargetArray[4].getDistance().refresh().getValueAsDouble() * 1000;
+        double targetDistance0 = m_distanceSystem.m_TargetArray[0].getDistance().refresh().getValueAsDouble();
+        double targetDistance1 = m_distanceSystem.m_TargetArray[1].getDistance().refresh().getValueAsDouble();
+        double targetDistance2 = m_distanceSystem.m_TargetArray[2].getDistance().refresh().getValueAsDouble();
+        double targetDistance3 = m_distanceSystem.m_TargetArray[3].getDistance().refresh().getValueAsDouble();
+        double targetDistance4 = m_distanceSystem.m_TargetArray[4].getDistance().refresh().getValueAsDouble();
 
         if(isInterrupted())
             return true;

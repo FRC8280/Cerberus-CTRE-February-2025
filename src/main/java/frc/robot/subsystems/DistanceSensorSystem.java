@@ -6,19 +6,74 @@ import com.ctre.phoenix6.hardware.CANrange;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.Constants;
 import frc.robot.Constants.DistanceConstants;
 
 
 
 public class DistanceSensorSystem extends SubsystemBase {
+
+    public enum ReefPoleAlignment {
+        FAR_LEFT,
+        LEFT,
+        CENTER,
+        RIGHT,
+        FAR_RIGHT,
+        NOT_FOUND
+    }
+
     public final CANrange[] m_alignRanges;
     double[] alignValues;
    
     public final CANrange[] m_TargetArray;
     double[] m_TargetArrayValues;
 
+    public ReefPoleAlignment LocateReefPole()
+    {
+        if(m_TargetArrayValues[0] <= Constants.DistanceConstants.reefScoringDistance)
+            return ReefPoleAlignment.FAR_LEFT;
+        else if(m_TargetArrayValues[1] <= Constants.DistanceConstants.reefScoringDistance)
+            return ReefPoleAlignment.LEFT;
+        else if(m_TargetArrayValues[2] <= Constants.DistanceConstants.reefScoringDistance)
+            return ReefPoleAlignment.CENTER;
+        else if(m_TargetArrayValues[3] <= Constants.DistanceConstants.reefScoringDistance)
+            return ReefPoleAlignment.RIGHT;
+        else if(m_TargetArrayValues[4] <= Constants.DistanceConstants.reefScoringDistance)
+            return ReefPoleAlignment.FAR_RIGHT;
+        
+        return ReefPoleAlignment.NOT_FOUND;
+    }
     
+    public boolean NudgeLeft()
+    {
+        return true;
+    }
+    public boolean NudgeRight()
+    {
+        return false;
+    }
+
+    public double LongestDistance()
+    {
+        if(alignValues[0] >= alignValues[1])
+        return alignValues[0];
+    else
+        return alignValues[1];
+    }
+    public double ShortestDistance()
+    {
+        if(alignValues[0] <= alignValues[1])
+            return alignValues[0];
+        else
+            return alignValues[1];
+    }
+    public boolean CloseToReef()
+    {
+         if( (alignValues[0] < Constants.DistanceConstants.reefAlignedDistance) && (alignValues[1] < Constants.DistanceConstants.reefAlignedDistance))
+            return false;
+        else 
+            return true;
+    }
 
     public DistanceSensorSystem() {
         m_alignRanges = new CANrange[]{
@@ -42,13 +97,13 @@ public class DistanceSensorSystem extends SubsystemBase {
 
     public void updateAlignValues() {
         for (int i = 0; i < m_alignRanges.length; i++) {
-            alignValues[i] = m_alignRanges[i].getDistance().refresh().getValueAsDouble() * 1000;
+            alignValues[i] = m_alignRanges[i].getDistance().refresh().getValueAsDouble();
         }
     }
 
     public void updateTargetArrayValues() {
         for (int i = 0; i < m_TargetArray.length; i++) {
-            m_TargetArrayValues[i] = m_TargetArray[i].getDistance().refresh().getValueAsDouble() * 1000;
+            m_TargetArrayValues[i] = m_TargetArray[i].getDistance().refresh().getValueAsDouble();
         }
     }
 
@@ -64,7 +119,7 @@ public class DistanceSensorSystem extends SubsystemBase {
         }
 
         for (int i =0; i < m_TargetArrayValues.length; i++) {
-            SmartDashboard.putNumber("Pole Value " + i, m_TargetArrayValues[i]);
+            SmartDashboard.putNumber("Array Value " + i, m_TargetArrayValues[i]);
         }
     }
     

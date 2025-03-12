@@ -7,16 +7,10 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.List;
-import java.util.Queue;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import frc.robot.Constants.AlgaeClimberOperatorConstants;
-import frc.robot.commands.AlgeaArmCommand;
-import frc.robot.commands.ClimberDownCommand;
-import frc.robot.commands.ClimberUpCommand;
 import frc.robot.commands.IntakeReverse;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -25,16 +19,14 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
-
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -48,23 +40,26 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.CANdleSystem;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.DistanceSensorSystem;
+import frc.robot.subsystems.DistanceSensorSystem.ReefPoleAlignment;
 import frc.robot.subsystems.Effector;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.AlgaeArm;
-
 public class RobotContainer {
         int detectedAprilTag = -1;
         public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
-        public final AlgaeArm m_Algae = new AlgaeArm();
+        //public final AlgaeArm m_Algae = new AlgaeArm();
         //public final Climber m_Climber = new Climber();
         public final Elevator m_Elevator = new Elevator();
         public final Effector m_Effector = new Effector();
+        private final CANdleSystem m_candleSubsystem = new CANdleSystem();
         public ReefTargets m_ReefTargets = new ReefTargets();
+        public DistanceSensorSystem m_DistanceSensorSystem = new DistanceSensorSystem();
         public double m_SlowSpeedMod = 1;
+        public boolean m_DevelopmentDontMove = true;
 
         private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                       // speed
@@ -72,7 +67,6 @@ public class RobotContainer {
                                                                                           // second
                                                                                           // max angular velocity
         private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
-                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
                         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
                                                                                                      
         /* Setting up bindings for necessary control of the swerve drive platform */
@@ -104,7 +98,6 @@ public class RobotContainer {
         public RobotContainer() {
 
                 // Register Named Commands
-                NamedCommands.registerCommand("Score Coral", new InstantCommand(()->m_Effector.ScoreCoral()));
                 NamedCommands.registerCommand("Intake Complete", new WaitUntilCommand (() -> m_Effector.IntakeComplete()));
                 NamedCommands.registerCommand("Done Scoring", new WaitUntilCommand(() -> !m_Effector.Scoring()));
                 NamedCommands.registerCommand("Intake", new InstantCommand(() -> m_Effector.autonIntake()));
@@ -132,6 +125,7 @@ public class RobotContainer {
                 SmartDashboard.putData("Auto Mode", autoChooser);
 
                 configureBindings();
+                //m_candleSubsystem.m_candle.setLEDs(255, 51, 51, 0, 0, 4);
         }
 
         public void RobotInit()
@@ -147,6 +141,8 @@ public class RobotContainer {
 
         private void alignToTarget(boolean left)
          {
+                if(m_DevelopmentDontMove)
+                        return;
 
                 if (detectedAprilTag == -1) {
                         if (left) 
@@ -177,6 +173,110 @@ public class RobotContainer {
                 }
                 
         }
+
+        private Pose2d calculateLateralPose(Pose2d originalPose, double distance) {
+                // Get the rotation of the original pose
+                Rotation2d rotation = originalPose.getRotation();
+        
+                // Calculate the translation to move laterally by the specified distance
+                Translation2d lateralTranslation = new Translation2d(0, distance).rotateBy(rotation);
+        
+                // Create the new pose by adding the translation to the original pose
+                Pose2d newPose =  originalPose.plus(new Transform2d(lateralTranslation, rotation));
+        
+                return newPose;
+            }
+
+        SwerveRequest.RobotCentric retval = new SwerveRequest.RobotCentric();
+        private SwerveRequest driveToPinRequest(){
+
+                ReefPoleAlignment currentAlignment = m_DistanceSensorSystem.LocateReefPole();
+
+                //if(m_DistanceSensorSystem.)
+                if(m_DistanceSensorSystem.NudgeLeft())
+                        retval.VelocityY = -0.25;
+                else if (m_DistanceSensorSystem.NudgeRight())
+                        retval.VelocityY = 0.25;
+                else
+                        retval.VelocityY = 0.0;
+                return retval;
+        }
+
+        private void alignShot()
+        {
+                
+                //drivetrain.setControl(forwardStraight.withVelocityX(0.25).withVelocityY(0.25));
+
+                Pose2d currentPose = drivetrain.getState().Pose;        
+                Pose2d destinationPos = calculateLateralPose(currentPose,.1);//new Pose2d(newX,newY,heading);
+
+                if (destinationPos == null)
+                        return;
+                // The rotation component in these poses represents the direction of travel
+                Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
+                
+                //List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPos, destinationPos);
+                List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+                        startPos,destinationPos);
+                
+                PathPlannerPath path = new PathPlannerPath(
+                                waypoints,
+                                new PathConstraints(
+                                                Constants.AutoAlignment.maxVelocity,
+                                                Constants.AutoAlignment.maxAcceleration,
+                                                Constants.AutoAlignment.MaxAngularRate,
+                                                Constants.AutoAlignment.MaxAngularAcceleration),
+                                null, // Ideal starting state can be null for on-the-fly paths
+                                new GoalEndState(0.0, destinationPos.getRotation())// currentPose.getRotation())
+                );
+
+                // Prevent this path from being flipped on the red alliance, since the given
+                // positions are already correct
+                path.preventFlipping = true;
+                automaticPath = AutoBuilder.followPath(path);
+                automaticPath.schedule();
+        }
+
+        private void alignReefEdge()
+        {
+                double distance= -(m_DistanceSensorSystem.LongestDistance()- Constants.DistanceConstants.reefAlignedDistance);
+                Pose2d currentPose = drivetrain.getState().Pose;
+
+                //try to calculate
+                
+                double x = currentPose.getX();
+                double y = currentPose.getY();
+                Rotation2d heading = currentPose.getRotation();
+                double newX = x - distance *Math.cos(heading.getRadians());
+                double newY = y - distance*Math.sin(heading.getRadians());
+
+                Pose2d destinationPos = new Pose2d(newX,newY,heading);
+
+                if (destinationPos == null)
+                        return;
+                // The rotation component in these poses represents the direction of travel
+                Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
+
+                List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPos, destinationPos);
+                PathPlannerPath path = new PathPlannerPath(
+                                waypoints,
+                                new PathConstraints(
+                                                Constants.AutoAlignment.maxVelocity,
+                                                Constants.AutoAlignment.maxAcceleration,
+                                                Constants.AutoAlignment.MaxAngularRate,
+                                                Constants.AutoAlignment.MaxAngularAcceleration),
+                                null, // Ideal starting state can be null for on-the-fly paths
+                                new GoalEndState(0.0, destinationPos.getRotation())// currentPose.getRotation())
+                );
+
+                // Prevent this path from being flipped on the red alliance, since the given
+                // positions are already correct
+                path.preventFlipping = true;
+                automaticPath = AutoBuilder.followPath(path);
+                automaticPath.schedule();         
+        }
+
+        
         private void leftAlign() {
                 Pose2d currentPose = drivetrain.getState().Pose;
                 Pose2d destinationPos = m_ReefTargets.leftTarget;
@@ -285,6 +385,10 @@ public class RobotContainer {
         }
 
         private boolean autoPathActive() {
+
+                if(m_DevelopmentDontMove)
+                        return false;
+
                 return (automaticPath != null) && (automaticPath.isScheduled());
         }
 
@@ -297,7 +401,7 @@ public class RobotContainer {
                 new Trigger(() -> driverController.getLeftTriggerAxis() > 0.25)
                                 .whileTrue(new InstantCommand(() -> m_SlowSpeedMod = 0.5))
                                 .onFalse(new InstantCommand(() -> m_SlowSpeedMod = 1));
-                
+                                
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
                         drivetrain.applyRequest(
@@ -305,7 +409,9 @@ public class RobotContainer {
                                         .withVelocityY(-driverController.getLeftX() * MaxSpeed * m_SlowSpeedMod) // Drive left with negative X (left)
                                         .withRotationalRate(-driverController.getRightX() * MaxAngularRate * m_SlowSpeedMod)) // Drivecounterclockwise with negative X (left)
                                         ); 
-                        
+
+                
+
                 // reset the field-centric heading on left bumper press
                 driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
@@ -323,6 +429,22 @@ public class RobotContainer {
                                         .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                         .andThen(new InstantCommand(() -> m_Effector.Stop()))
                                         );
+                        Trigger coralDetected = new Trigger( () -> m_Effector.IntakeComplete());
+                         //coralDetected.onTrue(new InstantCommand(()->m_candleSubsystem.set()));
+
+                driverController.y().onTrue(
+                        new InstantCommand(()->alignReefEdge()));  
+                 
+                driverController.b().onTrue(
+                        //new InstantCommand(()->alignShot()));
+
+                        drivetrain.applyRequest(()->driveToPinRequest()).withTimeout(0.5));
+                        /*drivetrain.applyRequest(()->forwardStraight.withVelocityX(0.25).withVelocityY(0))
+                        .andThen(new WaitCommand(0.5))
+                        .andThen(drivetrain.applyRequest(
+                                                () -> forwardStraight.withVelocityX(0.0).withVelocityY(0)))
+                        );                     */
+        
 
                 driverController.pov(0)
                                 .whileTrue(drivetrain.applyRequest(
@@ -369,7 +491,7 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
 
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 
@@ -385,7 +507,7 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
 
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 
@@ -401,7 +523,7 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                                 
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                  
@@ -417,7 +539,7 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
 
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 
@@ -433,7 +555,7 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                                 
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 
@@ -449,7 +571,7 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                                 
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 
@@ -462,7 +584,7 @@ public class RobotContainer {
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                                 .andThen(new WaitCommand(0.15))
                                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 );
@@ -520,17 +642,19 @@ public class RobotContainer {
 
                 // Turn on coral intake with left button press
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON)
+                                .onTrue(new InstantCommand(() -> m_Effector.IntakeCoral()));
+                /*new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON)
                                 .onTrue(new InstantCommand(() -> m_Elevator.Stow())
                                                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                                                 .andThen(new WaitCommand(0.1))
                                                 .andThen(new InstantCommand(() -> m_Elevator.RunCurrentZeroing()))
-                                                .andThen(new InstantCommand(() -> m_Effector.IntakeCoral())));
+                                                .andThen(new InstantCommand(() -> m_Effector.IntakeCoral())));*/
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.REVERSE_INTAKE)
                                         .whileTrue(new IntakeReverse(m_Effector));
 
-                new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.L_IN)
-                                        .whileTrue(new AlgeaArmCommand(m_Algae));
+                //new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.L_IN)
+                                  //      .whileTrue(new AlgeaArmCommand(m_Algae));
 
                 /*JoystickButton coralIntakeButton = new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_INTAKE_BUTTON);
                 

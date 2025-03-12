@@ -36,6 +36,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
  import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.XboxController;
  
  public class Constants {
      public static class AutoAlignment{
@@ -214,9 +215,24 @@ import edu.wpi.first.math.util.Units;
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
 
-        public static final double reefScoringDistance = 0.1;//4 inches to start
-        public static final double reefAlignedDistance = 0.1;
-        
+        public static final double reefScoringDistance = .200;//4 inches to start
+        public static final double reefAlignedDistance = .200;
+        public static final double maxTimer = 2.0;
+        public static final double maxSpeed = 0.25;
+     }
+     public static final class CANdleConstants{
+         public static final int CANdleID = 21;
+    public static final int JoystickId = 0;
+    public static final int IncrementAnimButton = XboxController.Button.kRightBumper.value;
+    public static final int DecrementAnimButton = XboxController.Button.kLeftBumper.value;
+    public static final int BlockButton = XboxController.Button.kStart.value;
+    public static final int MaxBrightnessAngle = 90;
+    public static final int MidBrightnessAngle = 180;
+    public static final int ZeroBrightnessAngle = 270;
+    public static final int VbatButton = XboxController.Button.kA.value;
+    public static final int V5Button = XboxController.Button.kB.value;
+    public static final int CurrentButton = XboxController.Button.kX.value;
+    public static final int TemperatureButton = XboxController.Button.kY.value;
      }
  }
  
