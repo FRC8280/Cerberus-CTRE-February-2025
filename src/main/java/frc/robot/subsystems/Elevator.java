@@ -182,6 +182,12 @@ public class Elevator extends SubsystemBase {
     targetElevatorPosition = 2.279;
   }
 
+  public void SetLevel(double level)
+  {
+    setPosition(level);
+    targetElevatorPosition = level;
+  }
+  
   public void LevelOne()
   {
     setPosition(Constants.Elevator.levelOne);

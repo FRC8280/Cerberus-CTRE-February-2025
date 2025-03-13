@@ -40,8 +40,8 @@ import edu.wpi.first.wpilibj.XboxController;
  
  public class Constants {
      public static class AutoAlignment{
-        public static double maxVelocity = 2.25;//2.5;
-        public static double maxAcceleration = 2.25;//2.5;
+        public static double maxVelocity = 3;//2.25;
+        public static double maxAcceleration = 3;//2.25;
         public static double MaxAngularRate = Units.degreesToRadians(200);//360;
         public static double MaxAngularAcceleration = Units.degreesToRadians(300) ;//540; 
      }
@@ -198,6 +198,7 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final int L_OUT = 5;
         public static final int CLIMBER_BUTTON_UP = 6;
         public static final int CLIMBER_BUTTON_DN = 7;
+        public static final int ABORT_SCORE = 8;
      }
 
      public static final class DistanceConstants{
@@ -215,24 +216,18 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
 
-        public static final double reefScoringDistance = .200;//4 inches to start
-        public static final double reefAlignedDistance = .200;
+        public static final double reefScoringDistance = 0.3;
+        public static final double reefAlignedDistance = .21;
         public static final double maxTimer = 2.0;
         public static final double maxSpeed = 0.25;
      }
+
      public static final class CANdleConstants{
-         public static final int CANdleID = 21;
-    public static final int JoystickId = 0;
-    public static final int IncrementAnimButton = XboxController.Button.kRightBumper.value;
-    public static final int DecrementAnimButton = XboxController.Button.kLeftBumper.value;
-    public static final int BlockButton = XboxController.Button.kStart.value;
-    public static final int MaxBrightnessAngle = 90;
-    public static final int MidBrightnessAngle = 180;
-    public static final int ZeroBrightnessAngle = 270;
-    public static final int VbatButton = XboxController.Button.kA.value;
-    public static final int V5Button = XboxController.Button.kB.value;
-    public static final int CurrentButton = XboxController.Button.kX.value;
-    public static final int TemperatureButton = XboxController.Button.kY.value;
+        public static final int CANdleID = 21;
+        public static final int MaxBrightnessAngle = 90;
+        public static final int MidBrightnessAngle = 180;
+        public static final int ZeroBrightnessAngle = 270;
+
      }
  }
  

@@ -59,7 +59,9 @@ public class RobotContainer {
         public ReefTargets m_ReefTargets = new ReefTargets();
         public DistanceSensorSystem m_DistanceSensorSystem = new DistanceSensorSystem();
         public double m_SlowSpeedMod = 1;
-        public boolean m_DevelopmentDontMove = true;
+        public boolean m_DevelopmentDontMove = false;
+        public boolean m_RunScoring = false;
+        public double m_ElevatorDestination = Constants.Elevator.levelTwo;
 
         private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                       // speed
@@ -128,6 +130,26 @@ public class RobotContainer {
                 //m_candleSubsystem.m_candle.setLEDs(255, 51, 51, 0, 0, 4);
         }
 
+        public boolean GetScoreTrigger()
+        {
+            return m_RunScoring;
+        }
+
+        public void SetScoreTrigger(boolean value)
+        {
+            m_RunScoring = value;
+        }
+
+        public void SetElevatorDestination(double destination)
+        {
+            m_ElevatorDestination = destination;
+        }
+
+        public double GetElevatorDestination()
+        {
+            return m_ElevatorDestination;
+        }
+
         public void RobotInit()
         {
                 //m_Elevator.RunCurrentZeroing();
@@ -143,7 +165,12 @@ public class RobotContainer {
          {
                 if(m_DevelopmentDontMove)
                         return;
-
+                if (left) 
+                        leftAlign();
+                else
+                        rightAlign();
+                return;
+                        /*
                 if (detectedAprilTag == -1) {
                         if (left) 
                                 leftAlign();
@@ -170,7 +197,7 @@ public class RobotContainer {
                         return;
                     }
                     
-                }
+                }*/
                 
         }
 
@@ -187,96 +214,54 @@ public class RobotContainer {
                 return newPose;
             }
 
-        SwerveRequest.RobotCentric retval = new SwerveRequest.RobotCentric();
-        private SwerveRequest driveToPinRequest(){
-
-                ReefPoleAlignment currentAlignment = m_DistanceSensorSystem.LocateReefPole();
-
-                //if(m_DistanceSensorSystem.)
-                if(m_DistanceSensorSystem.NudgeLeft())
-                        retval.VelocityY = -0.25;
-                else if (m_DistanceSensorSystem.NudgeRight())
-                        retval.VelocityY = 0.25;
-                else
-                        retval.VelocityY = 0.0;
-                return retval;
+        public boolean DriverInterrupt() {
+            // Abort if any joystick is moved past 50%
+            return CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE) || 
+                    Math.abs(driverController.getLeftX()) > 0.4 ||
+                    Math.abs(driverController.getLeftY()) > 0.4 ||
+                    Math.abs(driverController.getRightX()) > 0.4;
         }
 
-        private void alignShot()
-        {
-                
-                //drivetrain.setControl(forwardStraight.withVelocityX(0.25).withVelocityY(0.25));
+        SwerveRequest.RobotCentric stopRobotMovementRequest = new SwerveRequest.RobotCentric();
+        private SwerveRequest StopRobotNow(){
 
-                Pose2d currentPose = drivetrain.getState().Pose;        
-                Pose2d destinationPos = calculateLateralPose(currentPose,.1);//new Pose2d(newX,newY,heading);
+            stopRobotMovementRequest.VelocityY = 0;
+            return stopRobotMovementRequest;
+        } 
+        SwerveRequest.RobotCentric alignShotRobotRequest = new SwerveRequest.RobotCentric();
+        private SwerveRequest AlignShotRequest(){
 
-                if (destinationPos == null)
-                        return;
-                // The rotation component in these poses represents the direction of travel
-                Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
-                
-                //List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPos, destinationPos);
-                List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                        startPos,destinationPos);
-                
-                PathPlannerPath path = new PathPlannerPath(
-                                waypoints,
-                                new PathConstraints(
-                                                Constants.AutoAlignment.maxVelocity,
-                                                Constants.AutoAlignment.maxAcceleration,
-                                                Constants.AutoAlignment.MaxAngularRate,
-                                                Constants.AutoAlignment.MaxAngularAcceleration),
-                                null, // Ideal starting state can be null for on-the-fly paths
-                                new GoalEndState(0.0, destinationPos.getRotation())// currentPose.getRotation())
-                );
+            ReefPoleAlignment currentAlignment = m_DistanceSensorSystem.LocateReefPole();
 
-                // Prevent this path from being flipped on the red alliance, since the given
-                // positions are already correct
-                path.preventFlipping = true;
-                automaticPath = AutoBuilder.followPath(path);
-                automaticPath.schedule();
+            if(currentAlignment == ReefPoleAlignment.FAR_LEFT) 
+                alignShotRobotRequest.VelocityY = -0.25;
+            else if (currentAlignment == ReefPoleAlignment.LEFT) 
+                alignShotRobotRequest.VelocityY = -0.25;
+            else if (currentAlignment == ReefPoleAlignment.RIGHT) 
+                alignShotRobotRequest.VelocityY = +0.25;
+            else if (currentAlignment == ReefPoleAlignment.FAR_RIGHT) 
+                alignShotRobotRequest.VelocityY = +0.25;
+            else if (currentAlignment == ReefPoleAlignment.CENTER) 
+                alignShotRobotRequest.VelocityY = 0;
+            else
+                alignShotRobotRequest.VelocityY = 0;
+
+            return alignShotRobotRequest;
         }
 
-        private void alignReefEdge()
-        {
-                double distance= -(m_DistanceSensorSystem.LongestDistance()- Constants.DistanceConstants.reefAlignedDistance);
-                Pose2d currentPose = drivetrain.getState().Pose;
+        SwerveRequest.RobotCentric alignReefEdgeRequest = new SwerveRequest.RobotCentric();
+        private SwerveRequest AlignReefRequest(){
 
-                //try to calculate
-                
-                double x = currentPose.getX();
-                double y = currentPose.getY();
-                Rotation2d heading = currentPose.getRotation();
-                double newX = x - distance *Math.cos(heading.getRadians());
-                double newY = y - distance*Math.sin(heading.getRadians());
-
-                Pose2d destinationPos = new Pose2d(newX,newY,heading);
-
-                if (destinationPos == null)
-                        return;
-                // The rotation component in these poses represents the direction of travel
-                Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
-
-                List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPos, destinationPos);
-                PathPlannerPath path = new PathPlannerPath(
-                                waypoints,
-                                new PathConstraints(
-                                                Constants.AutoAlignment.maxVelocity,
-                                                Constants.AutoAlignment.maxAcceleration,
-                                                Constants.AutoAlignment.MaxAngularRate,
-                                                Constants.AutoAlignment.MaxAngularAcceleration),
-                                null, // Ideal starting state can be null for on-the-fly paths
-                                new GoalEndState(0.0, destinationPos.getRotation())// currentPose.getRotation())
-                );
-
-                // Prevent this path from being flipped on the red alliance, since the given
-                // positions are already correct
-                path.preventFlipping = true;
-                automaticPath = AutoBuilder.followPath(path);
-                automaticPath.schedule();         
-        }
-
+            double distance = m_DistanceSensorSystem.LongestDistance();
+            
+            if(distance > Constants.DistanceConstants.reefAlignedDistance)
+                alignReefEdgeRequest.VelocityX = 0.35;
+            else
+                alignReefEdgeRequest.VelocityX = 0.0;
         
+            return alignReefEdgeRequest;
+        }
+    
         private void leftAlign() {
                 Pose2d currentPose = drivetrain.getState().Pose;
                 Pose2d destinationPos = m_ReefTargets.leftTarget;
@@ -301,7 +286,7 @@ public class RobotContainer {
                 // Prevent this path from being flipped on the red alliance, since the given
                 // positions are already correct
                 path.preventFlipping = true;
-                automaticPath = AutoBuilder.followPath(path);
+                automaticPath = AutoBuilder.followPath(path).withTimeout(2);;
                 automaticPath.schedule();
                 // AutoBuilder.followPath(path).schedule();
         }
@@ -330,7 +315,7 @@ public class RobotContainer {
                 // Prevent this path from being flipped on the red alliance, since the given
                 // positions are already correct
                 path.preventFlipping = true;
-                automaticPath = AutoBuilder.followPath(path);
+                automaticPath = AutoBuilder.followPath(path).withTimeout(2);
                 automaticPath.schedule();
         }
 
@@ -411,7 +396,6 @@ public class RobotContainer {
                                         ); 
 
                 
-
                 // reset the field-centric heading on left bumper press
                 driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
@@ -420,31 +404,52 @@ public class RobotContainer {
                                 .whileTrue(drivetrain.applyRequest(() -> brake));
 
                 // Binding to call CancelAutomaticMovement() if any analog stick is over 50%
-                new Trigger(() -> Math.abs(driverController.getLeftX()) > 0.4 ||
-                                Math.abs(driverController.getLeftY()) > 0.4 ||
-                                Math.abs(driverController.getRightX()) > 0.4 ||
-                                Math.abs(driverController.getRightY()) > 0.4)
+                new Trigger(() -> (Math.abs(driverController.getLeftX()) > 0.4) ||
+                                (Math.abs(driverController.getLeftY()) > 0.4) ||
+                                (Math.abs(driverController.getRightX()) > 0.4) ||
+                                (Math.abs(driverController.getRightY()) > 0.4) ||
+                                CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE)) 
                                 .onTrue(new InstantCommand(() -> this.CancelAutomaticMovement())
                                         .andThen(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()))
                                         .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                         .andThen(new InstantCommand(() -> m_Effector.Stop()))
                                         );
-                        Trigger coralDetected = new Trigger( () -> m_Effector.IntakeComplete());
-                         //coralDetected.onTrue(new InstantCommand(()->m_candleSubsystem.set()));
 
                 driverController.y().onTrue(
-                        new InstantCommand(()->alignReefEdge()));  
+                        drivetrain.applyRequest(()->AlignReefRequest())
+                        .withTimeout(2)
+                        .until (()->m_DistanceSensorSystem.CloseEnoughToReef())
+                        .until(()->DriverInterrupt())
+                        //.andThen(new InstantCommand(() -> System.out.println("Approach Reef completed")))
+                        //.beforeStarting(new InstantCommand(() -> System.out.println("Starting Approach Reef")))
+                        );
                  
                 driverController.b().onTrue(
-                        //new InstantCommand(()->alignShot()));
-
-                        drivetrain.applyRequest(()->driveToPinRequest()).withTimeout(0.5));
-                        /*drivetrain.applyRequest(()->forwardStraight.withVelocityX(0.25).withVelocityY(0))
-                        .andThen(new WaitCommand(0.5))
-                        .andThen(drivetrain.applyRequest(
-                                                () -> forwardStraight.withVelocityX(0.0).withVelocityY(0)))
-                        );                     */
-        
+                    new WaitCommand(0.5)
+                    //Alignment correction
+                    .andThen(drivetrain.applyRequest(()->AlignReefRequest())
+                        .withTimeout(2)
+                        .until (()->m_DistanceSensorSystem.CloseEnoughToReef())
+                        .until(()->DriverInterrupt()))                    
+                    .andThen(drivetrain.applyRequest(()->AlignShotRequest())
+                        .withTimeout(2)
+                        .until (()->m_DistanceSensorSystem.ReefScoreAligned())
+                        .until(()->DriverInterrupt()))
+                    .andThen(drivetrain.applyRequest(()->StopRobotNow()).withTimeout(0.1))
+                    
+                    //Taken from scoring code
+                    .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
+                                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                                        .andThen(new WaitCommand(0.15))
+                                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                                        
+                                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
+                                        .andThen(new WaitCommand(0.6))
+                                        .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                                                
+                            );
 
                 driverController.pov(0)
                                 .whileTrue(drivetrain.applyRequest(
@@ -482,100 +487,47 @@ public class RobotContainer {
                 // sequential command gorup to score
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL4)
                                 .onTrue(new InstantCommand(() -> alignToTarget(true))
-                                                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                                .andThen(new WaitCommand(0.1))
-                                                .andThen(new InstantCommand(() -> m_Elevator.LevelFour()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                                .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                                                .andThen(new WaitCommand(0.6))
-                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                                                
-                                                );
+                                    .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                                    .andThen(new WaitCommand(0.1))
+                                    .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelFour)))
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
+                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL4)
                                 .onTrue(new InstantCommand(() -> alignToTarget(false))
-                                                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                                .andThen(new WaitCommand(0.1))
-                                                .andThen(new InstantCommand(() -> m_Elevator.LevelFour()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                                .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                                                .andThen(new WaitCommand(0.6))
-                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                                                
-                                                );
+                                    .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                                    .andThen(new WaitCommand(0.1))
+                                    .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelFour)))
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
+                                );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL3)
                                 .onTrue(new InstantCommand(() -> alignToTarget(true))
-                                                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                                .andThen(new WaitCommand(0.1))
-                                                .andThen(new InstantCommand(() -> m_Elevator.LevelThree()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                                .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                                                
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                                                .andThen(new WaitCommand(0.6))
-                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                                                 
-                                                );
+                                    .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                                    .andThen(new WaitCommand(0.1))
+                                    .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree)))
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
+                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL3)
                                 .onTrue(new InstantCommand(() -> alignToTarget(false))
-                                                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                                .andThen(new WaitCommand(0.1))
-                                                .andThen(new InstantCommand(() -> m_Elevator.LevelThree()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                                .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                                                .andThen(new WaitCommand(0.6))
-                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                                                
-                                                );
+                                    .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                                    .andThen(new WaitCommand(0.1))
+                                    .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree)))
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
+                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL2)
                                 .onTrue(new InstantCommand(() -> alignToTarget(true))
-                                                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                                .andThen(new WaitCommand(0.1))
-                                                .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                                .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                                                
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                                                .andThen(new WaitCommand(0.6))
-                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                                                
-                                                );
+                                    .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                                    .andThen(new WaitCommand(0.1))
+                                    .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo)))
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
+                                );
+
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL2)
                                 .onTrue(new InstantCommand(() -> alignToTarget(false))
-                                                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                                .andThen(new WaitCommand(0.1))
-                                                .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-                                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                                .andThen(new WaitCommand(0.15))
-                                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                                                
-                                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                                                .andThen(new WaitCommand(0.6))
-                                                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                                                
-                                                );
+                                    .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                                    .andThen(new WaitCommand(0.1))
+                                    .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo)))
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
+                                );
 
                  new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
                                                 .onTrue(new InstantCommand(() -> m_Elevator.LevelOne())
@@ -588,6 +540,36 @@ public class RobotContainer {
                                                 .andThen(new WaitCommand(0.6))
                                                 .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 );
+
+                //Complete Scoring Action. 
+                new Trigger(() -> GetScoreTrigger()).onTrue(
+                    //Align - Get close to reef
+                    drivetrain.applyRequest(()->AlignReefRequest())
+                    .withTimeout(1)
+                    .until (()->m_DistanceSensorSystem.CloseEnoughToReef())
+                    .until(()->DriverInterrupt())
+
+                    //Align to target
+                    .andThen(drivetrain.applyRequest(()->AlignShotRequest())
+                    .withTimeout(2)
+                    .until (()->m_DistanceSensorSystem.ReefScoreAligned())
+                    .until(()->DriverInterrupt()))
+                    .andThen(drivetrain.applyRequest(()->StopRobotNow()).withTimeout(0.1))
+
+                    //Score
+                    .andThen(new InstantCommand(() -> m_Elevator.SetLevel(GetElevatorDestination())))
+                    .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                    .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                    .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                    .andThen(new WaitCommand(0.15))
+                    .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                    //Rest
+                    .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
+                    .andThen(new WaitCommand(0.6))
+                    .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                    .andThen(new InstantCommand(()->SetScoreTrigger(false)))
+                );
+                
 
                 // New trigger to call UpLevel once when the vertical joystick value is over 25%
                 new Trigger(() -> CoralOperator.getY() >= 0.75)

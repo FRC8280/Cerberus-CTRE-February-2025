@@ -40,6 +40,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -52,6 +53,8 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 //import org.photonvision.targeting.PhotonPipelineResult;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -64,6 +67,83 @@ public class Vision {
     // Simulation
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
+
+    // Lookup table for angles
+    private  Map<Integer, Double> angleLookupTable;
+
+    private void populateAngleLookupTable() {
+
+        angleLookupTable = new HashMap<Integer,Double>();
+        // Populate the lookup table with values for 17-22 and 6-11
+        angleLookupTable.put(17,60.0);
+        angleLookupTable.put(18,0.0);
+        angleLookupTable.put(19,-60.0);
+        angleLookupTable.put(20,-120.0);
+        angleLookupTable.put(21,180.0);
+        angleLookupTable.put(22,120.0);
+        angleLookupTable.put(6, 120.0);
+        angleLookupTable.put(7, 180.0);
+        angleLookupTable.put(8,-120.0 );
+        angleLookupTable.put(9, -60.0);
+        angleLookupTable.put(10, 0.0);
+        angleLookupTable.put(11, 60.0 );
+    }
+
+    public double normalizeAngle(double angle) {
+        // Normalize the angle to be within the range [0, 360)
+        angle = angle % 360;
+        if (angle < 0) {
+            angle += 360;
+        }
+        return angle;
+    }
+
+    public double AngleDifference(double robotAngle, int tag)
+    {
+        double normalizeAngle = normalizeAngle(robotAngle);
+        double normalizeTagAngle = normalizeAngle(getAngleForIndex(tag));
+
+        return Math.abs(normalizeAngle - normalizeTagAngle);
+  
+    }
+    public int CompareAngles(double robotAngle, double angle1, double angle2)
+    {
+        // Normalize the angles
+        robotAngle = normalizeAngle(robotAngle);
+        angle1 = normalizeAngle(angle1);
+        angle2 = normalizeAngle(angle2);
+
+        // Calculate the absolute differences
+        double diff1 = Math.abs(robotAngle - angle1);
+        double diff2 = Math.abs(robotAngle - angle2);
+
+        // Compare the differences
+        if (diff1 < diff2) {
+            return -1;
+        } else if (diff2 < diff1) {
+            return 1;
+        } else {
+            return 0; // They match
+        }
+    }
+
+    public double PercentageAngle(double robotAngle,int tag)
+    {
+        double normalizeAngle = normalizeAngle(robotAngle);
+        double normalizeTagAngle = normalizeAngle(getAngleForIndex(tag));
+
+        //Don't divide by 0
+        if(normalizeAngle == 0)
+            normalizeAngle = 0.1;
+        if(normalizeTagAngle == 0.0)
+            normalizeTagAngle = 0.1;
+        
+        return normalizeAngle/normalizeTagAngle;
+    }
+
+    public double getAngleForIndex(int index) {
+        return angleLookupTable.getOrDefault(index, 0.0); // Return 0.0 if index is not found
+    }
 
     public static double angleBetweenPoses(Pose2d pose1, Pose2d pose2) {
         // Calculate the direction vectors
@@ -132,12 +212,7 @@ public class Vision {
     }
 
     public ReefTargets CalculateAutoReefTarget(int aprilTag) {
-        // aprilTag = Robot.aprilTagId;
-
-        int trimX = 0;
-        int trimY = 0;
-        double trimTheta = 0.0;
-
+        
         Optional<Alliance> ally = DriverStation.getAlliance();
         ReefTargets returnTargets = new ReefTargets();
         if (ally.get() == Alliance.Red) {
@@ -230,15 +305,12 @@ public class Vision {
             }
         }   
 
-        //Adjustment code for trimming fields. 
-       /* returnTargets.leftTarget = addXYToPose(returnTargets.leftTarget, trimX, trimY, trimTheta);
-        returnTargets.rightTarget = addXYToPose(returnTargets.rightTarget, trimX, trimY, trimTheta);
-        returnTargets.centerTarget = addXYToPose(returnTargets.centerTarget, trimX, trimY, trimTheta);
- */
         return returnTargets;
     }
 
     public Vision(int index) {
+
+        populateAngleLookupTable();
         camera = new PhotonCamera(Constants.Vision.CamNames[index]);
 
         photonEstimator = new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,

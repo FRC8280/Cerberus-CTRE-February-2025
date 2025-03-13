@@ -28,29 +28,40 @@ public class DistanceSensorSystem extends SubsystemBase {
     public final CANrange[] m_TargetArray;
     double[] m_TargetArrayValues;
 
+    public boolean CloseEnoughToReef()
+    {
+        if( (alignValues[0] <= Constants.DistanceConstants.reefAlignedDistance) && (alignValues[1] <= Constants.DistanceConstants.reefAlignedDistance))
+            return true;
+        else
+            return false;
+    }
+
+    public boolean ReefScoreAligned()
+    {
+        if(m_TargetArrayValues[2] <= Constants.DistanceConstants.reefScoringDistance)
+            return true;
+        else   
+            return false;
+    }
+    
     public ReefPoleAlignment LocateReefPole()
     {
-        if(m_TargetArrayValues[0] <= Constants.DistanceConstants.reefScoringDistance)
+        if(m_TargetArrayValues[0] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
             return ReefPoleAlignment.FAR_LEFT;
-        else if(m_TargetArrayValues[1] <= Constants.DistanceConstants.reefScoringDistance)
+        else if(m_TargetArrayValues[1] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
             return ReefPoleAlignment.LEFT;
         else if(m_TargetArrayValues[2] <= Constants.DistanceConstants.reefScoringDistance)
             return ReefPoleAlignment.CENTER;
-        else if(m_TargetArrayValues[3] <= Constants.DistanceConstants.reefScoringDistance)
+        else if(m_TargetArrayValues[3] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
             return ReefPoleAlignment.RIGHT;
-        else if(m_TargetArrayValues[4] <= Constants.DistanceConstants.reefScoringDistance)
+        else if(m_TargetArrayValues[4] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
             return ReefPoleAlignment.FAR_RIGHT;
         
+            //Note even close so take a guess
+        if( (m_TargetArrayValues[0] > 0.6)&& (m_TargetArrayValues[1] > 0.6) && (m_TargetArrayValues[1] > 0.6) &&
+        (m_TargetArrayValues[1] > 0.6) && (m_TargetArrayValues[1] > 0.6))
+            return ReefPoleAlignment.FAR_RIGHT;
         return ReefPoleAlignment.NOT_FOUND;
-    }
-    
-    public boolean NudgeLeft()
-    {
-        return true;
-    }
-    public boolean NudgeRight()
-    {
-        return false;
     }
 
     public double LongestDistance()

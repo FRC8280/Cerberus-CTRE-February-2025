@@ -42,8 +42,12 @@ public class Robot extends TimedRobot {
     PhotonPipelineResult camera1Result = m_robotContainer.vision[0].camera.getLatestResult();
     PhotonPipelineResult camera2Result = m_robotContainer.vision[1].camera.getLatestResult();
 
-    double LowestDistance = 9999.0;
-    double distance = 0;
+    //double LowestDistance = 9999.0;
+    //double distance = 0;
+
+    //Look at the deltas for the angles. 
+    double lowestAngleDifference = 9999.0;
+    double angleDifference = 0;
 
     m_robotContainer.detectedAprilTag = -1;
     for (int i = 0; i < 2; i++) {
@@ -53,18 +57,22 @@ public class Robot extends TimedRobot {
           int aprilTagId = target.getFiducialId();
           if (m_robotContainer.vision[0].CheckValidAprilTag(aprilTagId)) {
 
-               distance = m_robotContainer.vision[0].calculateDistanceBetweenPoseAndTransform(
-                m_robotContainer.drivetrain.getState().Pose,target.getBestCameraToTarget());
+              angleDifference = m_robotContainer.vision[0].AngleDifference(m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees(),aprilTagId);
+               
+              /*distance = m_robotContainer.vision[0].calculateDistanceBetweenPoseAndTransform(
+                m_robotContainer.drivetrain.getState().Pose,target.getBestCameraToTarget());*/
                 //System.out.println("AprilTag ID: " + aprilTagId +" At Distance: " + distance);
 
-            if (distance < LowestDistance) {
+              if(angleDifference < lowestAngleDifference){
+              //if (distance < LowestDistance) {
               m_robotContainer.m_ReefTargets = m_robotContainer.vision[0].CalculateAutoReefTarget(aprilTagId);
               
               if(debugSpew)
                 SmartDashboard.putNumber("Detected April Tag", aprilTagId);
               
               if(m_robotContainer.m_ReefTargets.leftTarget!=null){
-                LowestDistance = distance;
+                lowestAngleDifference = angleDifference;
+                //LowestDistance = distance;
                 m_robotContainer.detectedAprilTag = aprilTagId;
               }
             }

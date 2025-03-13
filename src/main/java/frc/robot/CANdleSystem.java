@@ -44,7 +44,7 @@ public class CANdleSystem extends SubsystemBase {
         m_candle.configAllSettings(configAll, 100);
         //m_currentAnimation = AnimationTypes.Fire;
         //m_candle.setLEDs(255, 0, 00);
-        changeAnimation(AnimationTypes.ColorFlow);
+        changeAnimation(AnimationTypes.Fire);
         m_candle.animate(m_toAnimate);
     }
 
