@@ -119,6 +119,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Back Up", new InstantCommand(() -> this.backUp(0.5)));
 
                 NamedCommands.registerCommand("STOPNOW", new InstantCommand(() -> m_Effector.StopNewArm()));
+
+
                 // Initialize each element of the vision array
                 for (int i = 0; i < vision.length; i++) {
                         vision[i] = new Vision(i);
@@ -234,13 +236,13 @@ public class RobotContainer {
             ReefPoleAlignment currentAlignment = m_DistanceSensorSystem.LocateReefPole();
 
             if(currentAlignment == ReefPoleAlignment.FAR_LEFT) 
-                alignShotRobotRequest.VelocityY = -0.25;
+                alignShotRobotRequest.VelocityY = -Constants.AutoAlignment.AutoAlignmentSpeed;
             else if (currentAlignment == ReefPoleAlignment.LEFT) 
-                alignShotRobotRequest.VelocityY = -0.25;
+                alignShotRobotRequest.VelocityY = -Constants.AutoAlignment.AutoAlignmentSpeed;
             else if (currentAlignment == ReefPoleAlignment.RIGHT) 
-                alignShotRobotRequest.VelocityY = +0.25;
+                alignShotRobotRequest.VelocityY = +Constants.AutoAlignment.AutoAlignmentSpeed;
             else if (currentAlignment == ReefPoleAlignment.FAR_RIGHT) 
-                alignShotRobotRequest.VelocityY = +0.25;
+                alignShotRobotRequest.VelocityY = +Constants.AutoAlignment.AutoAlignmentSpeed;
             else if (currentAlignment == ReefPoleAlignment.CENTER) 
                 alignShotRobotRequest.VelocityY = 0;
             else
@@ -255,7 +257,7 @@ public class RobotContainer {
             double distance = m_DistanceSensorSystem.LongestDistance();
             
             if(distance > Constants.DistanceConstants.reefAlignedDistance)
-                alignReefEdgeRequest.VelocityX = 0.35;
+                alignReefEdgeRequest.VelocityX = Constants.AutoAlignment.AutoReefAlignmentSpeed;
             else
                 alignReefEdgeRequest.VelocityX = 0.0;
         

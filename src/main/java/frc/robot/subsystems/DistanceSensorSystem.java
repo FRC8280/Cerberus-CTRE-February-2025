@@ -46,20 +46,20 @@ public class DistanceSensorSystem extends SubsystemBase {
     
     public ReefPoleAlignment LocateReefPole()
     {
-        if(m_TargetArrayValues[0] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
+        if(m_TargetArrayValues[0] <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.FAR_LEFT;
-        else if(m_TargetArrayValues[1] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
+        else if(m_TargetArrayValues[1] <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.LEFT;
         else if(m_TargetArrayValues[2] <= Constants.DistanceConstants.reefScoringDistance)
             return ReefPoleAlignment.CENTER;
-        else if(m_TargetArrayValues[3] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
+        else if(m_TargetArrayValues[3] <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.RIGHT;
-        else if(m_TargetArrayValues[4] <= 0.55) //Constants.DistanceConstants.reefScoringDistance)
+        else if(m_TargetArrayValues[4] <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.FAR_RIGHT;
         
             //Note even close so take a guess
-        if( (m_TargetArrayValues[0] > 0.6)&& (m_TargetArrayValues[1] > 0.6) && (m_TargetArrayValues[1] > 0.6) &&
-        (m_TargetArrayValues[1] > 0.6) && (m_TargetArrayValues[1] > 0.6))
+        if( (m_TargetArrayValues[0] > Constants.DistanceConstants.reefGuessThreshhold)&& (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold) && (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold) &&
+        (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold) && (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold))
             return ReefPoleAlignment.FAR_RIGHT;
         return ReefPoleAlignment.NOT_FOUND;
     }

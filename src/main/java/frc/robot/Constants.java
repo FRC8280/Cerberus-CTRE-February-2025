@@ -44,7 +44,10 @@ import edu.wpi.first.wpilibj.XboxController;
         public static double maxAcceleration = 3;//2.25;
         public static double MaxAngularRate = Units.degreesToRadians(200);//360;
         public static double MaxAngularAcceleration = Units.degreesToRadians(300) ;//540; 
-     }
+     
+        public static double AutoAlignmentSpeed = 0.25;
+        public static double AutoReefAlignmentSpeed = 0.35;
+    }
      public static class Vision {
 
         public static double CAMERA_HEIGHT_METERS = Units.inchesToMeters(11.5);
@@ -217,6 +220,8 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final int poleDetectionRange = 0;
 
         public static final double reefScoringDistance = 0.3;
+        public static final double reefDetectionThreshold = 0.55;
+        public static final double reefGuessThreshhold = 0.6;
         public static final double reefAlignedDistance = .21;
         public static final double maxTimer = 2.0;
         public static final double maxSpeed = 0.25;
