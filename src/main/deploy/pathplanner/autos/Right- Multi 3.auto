@@ -25,25 +25,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Reached Set State"
+            "name": "Set Score Trigger"
           }
         },
         {
           "type": "wait",
           "data": {
             "waitTime": 0.3
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score Coral"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.25
           }
         },
         {
@@ -85,7 +73,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Reached Set State"
+            "name": "Set Score Trigger"
           }
         },
         {
@@ -145,7 +133,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Reached Set State"
+            "name": "Set Score Trigger"
           }
         },
         {

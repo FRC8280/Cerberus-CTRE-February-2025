@@ -196,12 +196,10 @@ import edu.wpi.first.wpilibj.XboxController;
      public static final class AlgaeClimberOperatorConstants{
         public static final int CLEAR_HIGH = 1;
         public static final int CLEAR_LOW = 2;
-        public static final int ALGAE_EJECT = 3;
-        public static final int L_IN = 4;
-        public static final int L_OUT = 5;
         public static final int CLIMBER_BUTTON_UP = 6;
         public static final int CLIMBER_BUTTON_DN = 7;
         public static final int ABORT_SCORE = 8;
+        public static final int MANUAL_SWITCH = 9;
      }
 
      public static final class DistanceConstants{

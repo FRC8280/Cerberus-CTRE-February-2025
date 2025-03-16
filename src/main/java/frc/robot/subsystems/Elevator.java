@@ -10,7 +10,6 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.*;
 import com.ctre.phoenix6.hardware.TalonFX;
-import au.grapplerobotics.LaserCan;
 import frc.robot.Constants;
 //import frc.robot.subsystems.RobotMap.mapElevator;
 
@@ -187,7 +186,7 @@ public class Elevator extends SubsystemBase {
     setPosition(level);
     targetElevatorPosition = level;
   }
-  
+
   public void LevelOne()
   {
     setPosition(Constants.Elevator.levelOne);
@@ -280,12 +279,12 @@ public void checkAndFix(){
   public void periodic() {
     
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
+    /*SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator/Rear/Pos",  m_RearMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator Target",targetElevatorPosition);
     //SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putBoolean("Elevator Jacked Up", atStowed() && !ElevatorAtZero());
-    
+    */
   }
 }
   

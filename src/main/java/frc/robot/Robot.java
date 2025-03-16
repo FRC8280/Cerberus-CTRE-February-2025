@@ -6,13 +6,15 @@ package frc.robot;
 
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import au.grapplerobotics.CanBridge;
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.net.PortForwarder;
 /*import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;*/
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Threads;
 //import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -33,7 +35,6 @@ public class Robot extends TimedRobot {
   private final Field2d m_field = new Field2d();
 
   public Robot() {
-    CanBridge.runTCP();
     m_robotContainer = new RobotContainer();
     SmartDashboard.putData("Field", m_field);
   }
@@ -42,8 +43,8 @@ public class Robot extends TimedRobot {
     PhotonPipelineResult camera1Result = m_robotContainer.vision[0].camera.getLatestResult();
     PhotonPipelineResult camera2Result = m_robotContainer.vision[1].camera.getLatestResult();
 
-    //double LowestDistance = 9999.0;
-    //double distance = 0;
+    double LowestDistance = 9999.0;
+    double distance = 0;
 
     //Look at the deltas for the angles. 
     double lowestAngleDifference = 9999.0;
@@ -59,20 +60,20 @@ public class Robot extends TimedRobot {
 
               angleDifference = m_robotContainer.vision[0].AngleDifference(m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees(),aprilTagId);
                
-              /*distance = m_robotContainer.vision[0].calculateDistanceBetweenPoseAndTransform(
-                m_robotContainer.drivetrain.getState().Pose,target.getBestCameraToTarget());*/
+              distance = m_robotContainer.vision[0].calculateDistanceBetweenPoseAndTransform(
+                m_robotContainer.drivetrain.getState().Pose,target.getBestCameraToTarget());
                 //System.out.println("AprilTag ID: " + aprilTagId +" At Distance: " + distance);
 
-              if(angleDifference < lowestAngleDifference){
-              //if (distance < LowestDistance) {
+              //if(angleDifference < lowestAngleDifference){
+              if (distance < LowestDistance) {
               m_robotContainer.m_ReefTargets = m_robotContainer.vision[0].CalculateAutoReefTarget(aprilTagId);
               
               if(debugSpew)
                 SmartDashboard.putNumber("Detected April Tag", aprilTagId);
               
               if(m_robotContainer.m_ReefTargets.leftTarget!=null){
-                lowestAngleDifference = angleDifference;
-                //LowestDistance = distance;
+                //lowestAngleDifference = angleDifference;
+                LowestDistance = distance;
                 m_robotContainer.detectedAprilTag = aprilTagId;
               }
             }
@@ -86,10 +87,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    PortForwarder.add(5800, "photonvision-1.local", 5800);
+    //PortForwarder.add(5800, "photonvision-1.local", 5800);
     PortForwarder.add(5800, "photonvision-2.local", 5800);
-    PortForwarder.add(5800, "photonvision-3.local", 5800);
-
+    //PortForwarder.add(5800, "photonvision-3.local", 5800);
+    SignalLogger.enableAutoLogging(false);
+    m_robotContainer.threadCommand();
   }
 
   @Override
@@ -102,7 +104,8 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     // Correct pose estimate with vision measurements
-    for (int i = 0; i < m_robotContainer.vision.length; i++) {
+   
+   for (int i = 0; i < m_robotContainer.vision.length; i++) {
       var visionEst = m_robotContainer.vision[i].getEstimatedGlobalPose();
       int index = i;
       visionEst.ifPresent(
@@ -113,10 +116,10 @@ public class Robot extends TimedRobot {
             m_robotContainer.drivetrain.addVisionMeasurement(
                 est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
           });
-    }
+    }  
 
     processAprilTags();
-    m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
+    //m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
 
     if(debugSpew){
      SmartDashboard.putNumber("Current Drive X",

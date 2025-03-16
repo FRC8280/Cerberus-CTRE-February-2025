@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.954523026315789,
-        "y": 2.8126644736842104
+        "x": 3.95,
+        "y": 2.793
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.427229207995761,
-        "y": 3.118445295162335
+        "x": 4.422706181679972,
+        "y": 3.0987808214781247
       },
       "isLocked": false,
       "linkedName": "Right Second Score"
