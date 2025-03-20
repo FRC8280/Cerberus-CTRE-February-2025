@@ -27,6 +27,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,6 +54,9 @@ import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
 
 public class RobotContainer {
+        private Timer m_cancelAutomovementTimer = new Timer();
+        private boolean m_scoreCommandAborted = false;
+
         int detectedAprilTag = -1;
         public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
         //public final AlgaeArm m_Algae = new AlgaeArm();
@@ -66,6 +70,8 @@ public class RobotContainer {
         public boolean m_AutoAlignOff = false;
         public boolean m_RunScoring = false;
         public double m_ElevatorDestination = Constants.Elevator.levelTwo;
+
+        private boolean scoreTriggerActive = false;
 
         public boolean SequenceFinished = false;
 
@@ -103,6 +109,7 @@ public class RobotContainer {
         private final SendableChooser<Command> autoChooser;
         public Command automaticPath = null;
 
+
         public static Command threadCommand() {
             return Commands.sequence(
                 Commands.waitSeconds(20),
@@ -118,10 +125,17 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new InstantCommand(() -> m_Effector.autonIntake()));
                      
                 NamedCommands.registerCommand("Stow Elevator", new InstantCommand(()->m_Elevator.Stow())); 
+                NamedCommands.registerCommand("Set Stage 1", new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelOne))); 
+                NamedCommands.registerCommand("Set Stage 2", new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo))); 
+                NamedCommands.registerCommand("Set Stage 3", new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree))); 
+                NamedCommands.registerCommand("Set Stage 4", new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelFour)));
+                NamedCommands.registerCommand("Set Score Trigger", new InstantCommand(()->SetScoreTrigger(true)));
+                NamedCommands.registerCommand("Sequence Complete", new WaitUntilCommand(() -> scoreTriggerActive));
+
                 NamedCommands.registerCommand("Level 1", new InstantCommand(()->m_Elevator.LevelOne())); 
-                NamedCommands.registerCommand("Level 2", new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo))); 
-                NamedCommands.registerCommand("Level 3", new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree))); 
-                NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelFour)));
+                NamedCommands.registerCommand("Level 2", new InstantCommand(()->m_Elevator.LevelTwo())); 
+                NamedCommands.registerCommand("Level 3", new InstantCommand(()->m_Elevator.LevelThree())); 
+                NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(() -> m_Elevator.LevelFour()));
                 NamedCommands.registerCommand("Set Score Trigger", new InstantCommand(()->SetScoreTrigger(true)));
 
                 NamedCommands.registerCommand("Reached Set State", new WaitUntilCommand(() -> m_Elevator.reachedSetState()));
@@ -147,9 +161,19 @@ public class RobotContainer {
                 //m_candleSubsystem.m_candle.setLEDs(255, 51, 51, 0, 0, 4);
         }
 
+        public void NewScoreAttempt()
+        {
+            m_scoreCommandAborted = false;
+        }
+
+        public boolean CommandAborted()
+        {
+            return m_scoreCommandAborted;
+        }
+
         public boolean GetScoreTrigger()
         {
-            return m_RunScoring;
+            return m_RunScoring && !CommandAborted();
         }
 
         public void SetScoreTrigger(boolean value)
@@ -234,11 +258,23 @@ public class RobotContainer {
 
 
             public boolean DriverInterrupt() {
-                // Abort if any joystick is moved past 50%
-                return CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE) || 
+                
+                if(m_cancelAutomovementTimer.isRunning() && !m_cancelAutomovementTimer.hasElapsed(2))
+                    return false;
+                else if(m_cancelAutomovementTimer.isRunning() && m_cancelAutomovementTimer.hasElapsed(2))
+                    m_cancelAutomovementTimer.stop();
+
+                boolean abort = CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE) || 
                         Math.abs(driverController.getLeftX()) > 0.4 ||
                         Math.abs(driverController.getLeftY()) > 0.4 ||
                         Math.abs(driverController.getRightX()) > 0.4;
+                
+                if(abort) {
+                    m_cancelAutomovementTimer.reset();
+                    m_cancelAutomovementTimer.start();
+                }
+
+                return abort;
             }
 
 
@@ -399,7 +435,9 @@ public class RobotContainer {
 
         private Command createCommandSequence() {
             return new SequentialCommandGroup(
-                new WaitCommand(0.3),
+                new WaitCommand(0.15),
+                new InstantCommand(() -> SetScoreTrigger(false)),
+
                 drivetrain.applyRequest(() -> AlignReefRequest())
                     .withTimeout(1)
                     .until(() -> m_DistanceSensorSystem.CloseEnoughToReef())
@@ -427,8 +465,8 @@ public class RobotContainer {
                 new InstantCommand(() -> m_Elevator.Stow()),
                 new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5),
                 new WaitCommand(0.6),
-                m_Elevator.RunCurrentZeroing(), // Todo make a proper reverse.
-                new InstantCommand(() -> SetScoreTrigger(false))
+                m_Elevator.RunCurrentZeroing() // Todo make a proper reverse.
+                
             );
         }
 
@@ -466,6 +504,7 @@ public class RobotContainer {
                                 (Math.abs(driverController.getRightY()) > 0.4) ||
                                 CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE)) 
                                 .onTrue(new InstantCommand(() -> this.CancelAutomaticMovement())
+                                        .andThen(new InstantCommand(()->SetScoreTrigger(false)))
                                         .andThen(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()))
                                         .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                         .andThen(new InstantCommand(() -> m_Effector.Stop()))
@@ -540,46 +579,44 @@ public class RobotContainer {
                 // Bindings to control Elevator Level, wait until it aligns, then runs
                 // sequential command gorup to score
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL4)
-                                .onTrue(new InstantCommand(() -> alignToTarget(true))
+                                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                                    .andThen(new InstantCommand(() -> alignToTarget(true)))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelFour)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL4)
-                                .onTrue(new InstantCommand(() -> alignToTarget(false))
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                .andThen(new InstantCommand(() -> alignToTarget(false)))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelFour)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL3)
-                                .onTrue(new InstantCommand(() -> alignToTarget(true))
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                .andThen(new InstantCommand(() -> alignToTarget(true)))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                  );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL3)
-                                .onTrue(new InstantCommand(() -> alignToTarget(false))
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                .andThen(new InstantCommand(() -> alignToTarget(false)))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                  );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL2)
-                                .onTrue(new InstantCommand(() -> alignToTarget(true))
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                .andThen(new InstantCommand(() -> alignToTarget(true)))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    //.andThen(new WaitCommand(2))  //move this delay to trigger code. 
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo)))
-                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))
-                                    /* .andThen(new InstantCommand(() -> System.out.println("LL2 pushed triggerin pathplanner")))
-                                    .beforeStarting(new InstantCommand(() -> System.out.println("PathPlanning")))
-                                    */
-                                    .andThen(new InstantCommand(() -> System.out.println("LL2 pushed triggerin pathplanner")))
-                                    .beforeStarting(new InstantCommand(() -> System.out.println("PathPlanning")))
-                                    //.andThen(createCommandSequence())
-                                    
+                                    .andThen(new InstantCommand(()->SetScoreTrigger(true)))        
                                     );
 
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL2)
-                                .onTrue(new InstantCommand(() -> alignToTarget(false))
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                .andThen(new InstantCommand(() -> alignToTarget(false)))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
@@ -587,6 +624,7 @@ public class RobotContainer {
 
                  new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_L1)
                                                 .onTrue(new InstantCommand(() -> m_Elevator.LevelOne())
+                                                .andThen(new InstantCommand(() -> NewScoreAttempt()))
                                                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
                                                 .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
                                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
@@ -599,9 +637,11 @@ public class RobotContainer {
 
                 //Complete Scoring Action trigger
                 new Trigger(() -> GetScoreTrigger()).onTrue(
+                    new InstantCommand(() -> scoreTriggerActive = false)
                     
                     //Add the magic wait here
-                    new WaitCommand(0.15)
+                    .andThen(new WaitCommand(0.15)
+                    .andThen(new InstantCommand(()->SetScoreTrigger(false)))
 
                     //Align - Get close to reef (Tre look here)
                     .andThen(drivetrain.applyRequest(()->AlignReefRequest())
@@ -636,8 +676,9 @@ public class RobotContainer {
                     .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                     .andThen(new WaitCommand(0.6))
                     .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                    .andThen(new InstantCommand(()->SetScoreTrigger(false)))
-                );
+                    .andThen(new InstantCommand(() -> scoreTriggerActive = true)) // Set the flag to false
+                    
+                ));
                 
 
                 // New trigger to call UpLevel once when the vertical joystick value is over 25%

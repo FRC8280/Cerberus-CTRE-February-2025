@@ -217,8 +217,8 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
 
-        public static final double reefScoringDistance = 0.32;//0.4;
-        public static final double reefDetectionThreshold = 0.8;//0.75;
+        public static final double reefScoringDistance = 0.4;//0.32; //0.24 No lean //0.4; Lean
+        public static final double reefDetectionThreshold = 0.88; //0.8;//0.75;
         public static final double reefGuessThreshhold = 0.6;
         public static final double reefAlignedDistance = .21;
         public static final double maxTimer = 2.0;
