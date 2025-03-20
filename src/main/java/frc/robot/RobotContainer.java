@@ -27,7 +27,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Threads;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,11 +49,14 @@ import frc.robot.subsystems.DistanceSensorSystem.ReefPoleAlignment;
 import frc.robot.subsystems.Effector;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
+import frc.robot.commands.ClimberDownCommand;
+import frc.robot.commands.ClimberUpCommand;
+
 public class RobotContainer {
         int detectedAprilTag = -1;
         public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
         //public final AlgaeArm m_Algae = new AlgaeArm();
-        //public final Climber m_Climber = new Climber();
+        public final Climber m_Climber = new Climber();
         public final Elevator m_Elevator = new Elevator();
         public final Effector m_Effector = new Effector();
         private final CANdleSystem m_candleSubsystem = new CANdleSystem();
@@ -64,6 +66,8 @@ public class RobotContainer {
         public boolean m_AutoAlignOff = false;
         public boolean m_RunScoring = false;
         public double m_ElevatorDestination = Constants.Elevator.levelTwo;
+
+        public boolean SequenceFinished = false;
 
         private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                       // speed
@@ -228,13 +232,15 @@ public class RobotContainer {
                 return newPose;
             }
 
-        public boolean DriverInterrupt() {
-            // Abort if any joystick is moved past 50%
-            return CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE) || 
-                    Math.abs(driverController.getLeftX()) > 0.4 ||
-                    Math.abs(driverController.getLeftY()) > 0.4 ||
-                    Math.abs(driverController.getRightX()) > 0.4;
-        }
+
+            public boolean DriverInterrupt() {
+                // Abort if any joystick is moved past 50%
+                return CoralOperator.getRawButtonPressed(Constants.AlgaeClimberOperatorConstants.ABORT_SCORE) || 
+                        Math.abs(driverController.getLeftX()) > 0.4 ||
+                        Math.abs(driverController.getLeftY()) > 0.4 ||
+                        Math.abs(driverController.getRightX()) > 0.4;
+            }
+
 
         SwerveRequest.RobotCentric stopRobotMovementRequest = new SwerveRequest.RobotCentric();
         private SwerveRequest StopRobotNow(){
@@ -393,12 +399,13 @@ public class RobotContainer {
 
         private Command createCommandSequence() {
             return new SequentialCommandGroup(
-                /*drivetrain.applyRequest(() -> AlignReefRequest())
+                new WaitCommand(0.3),
+                drivetrain.applyRequest(() -> AlignReefRequest())
                     .withTimeout(1)
                     .until(() -> m_DistanceSensorSystem.CloseEnoughToReef())
                     .until(() -> DriverInterrupt())
                     .andThen(new InstantCommand(() -> System.out.println("Completed Approaching Reef")))
-                    .beforeStarting(new InstantCommand(() -> System.out.println("Beginning Approaching Reef"))),*/
+                    .beforeStarting(new InstantCommand(() -> System.out.println("Beginning Approaching Reef"))),
     
                 drivetrain.applyRequest(() -> AlignShotRequest())
                     .withTimeout(2)
@@ -443,7 +450,8 @@ public class RobotContainer {
                                         .withRotationalRate(-driverController.getRightX() * MaxAngularRate * m_SlowSpeedMod)) // Drivecounterclockwise with negative X (left)
                                         ); 
 
-                
+
+                    
                 // reset the field-centric heading on left bumper press
                 driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
@@ -524,45 +532,41 @@ public class RobotContainer {
 
     
                 // Winch Code
-               /*  new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)
+               new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_DN)
                                 .whileTrue(new ClimberDownCommand(m_Climber));
                 new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLIMBER_BUTTON_UP)
-                                .whileTrue(new ClimberUpCommand(m_Climber));*/
+                                .whileTrue(new ClimberUpCommand(m_Climber));
 
                 // Bindings to control Elevator Level, wait until it aligns, then runs
                 // sequential command gorup to score
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL4)
                                 .onTrue(new InstantCommand(() -> alignToTarget(true))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    .andThen(new WaitCommand(0.1))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelFour)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL4)
                                 .onTrue(new InstantCommand(() -> alignToTarget(false))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    .andThen(new WaitCommand(0.1))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelFour)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                 );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL3)
                                 .onTrue(new InstantCommand(() -> alignToTarget(true))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    .andThen(new WaitCommand(0.1))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                  );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL3)
                                 .onTrue(new InstantCommand(() -> alignToTarget(false))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    .andThen(new WaitCommand(0.1))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                  );
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_LL2)
                                 .onTrue(new InstantCommand(() -> alignToTarget(true))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    .andThen(new WaitCommand(0.5))
+                                    //.andThen(new WaitCommand(2))  //move this delay to trigger code. 
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                     /* .andThen(new InstantCommand(() -> System.out.println("LL2 pushed triggerin pathplanner")))
@@ -577,7 +581,6 @@ public class RobotContainer {
                 new JoystickButton(CoralOperator, Constants.CoralOperatorConstants.CORAL_RL2)
                                 .onTrue(new InstantCommand(() -> alignToTarget(false))
                                     .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                                    .andThen(new WaitCommand(0.1))
                                     .andThen(new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelTwo)))
                                     .andThen(new InstantCommand(()->SetScoreTrigger(true)))
                                 );
@@ -597,13 +600,16 @@ public class RobotContainer {
                 //Complete Scoring Action trigger
                 new Trigger(() -> GetScoreTrigger()).onTrue(
                     
+                    //Add the magic wait here
+                    new WaitCommand(0.15)
+
                     //Align - Get close to reef (Tre look here)
-                    drivetrain.applyRequest(()->AlignReefRequest())
+                    .andThen(drivetrain.applyRequest(()->AlignReefRequest())
                         .withTimeout(1)
                         .until (()->m_DistanceSensorSystem.CloseEnoughToReef())
                         .until(()->DriverInterrupt())
                         .andThen(new InstantCommand(() -> System.out.println("Completed Approaching Reef")))
-                        .beforeStarting(new InstantCommand(() -> System.out.println("Beginning Approaching Reef")))
+                        .beforeStarting(new InstantCommand(() -> System.out.println("Beginning Approaching Reef"))))
 
                     //Align to target (Tre look here)
                     .andThen(drivetrain.applyRequest(()->AlignShotRequest())
@@ -612,6 +618,7 @@ public class RobotContainer {
                         .until(()->DriverInterrupt()))
                         .andThen(new InstantCommand(() -> System.out.println("Completed Aligning on the reef")))
                         .beforeStarting(new InstantCommand(() -> System.out.println("Beginning Aligning on Reef")))
+
                     .andThen(drivetrain.applyRequest(()->StopRobotNow()) //Make sure the drive shuts off
                         .withTimeout(0.1))
                         .andThen(new InstantCommand(() -> System.out.println("Completed Stop Drive")))

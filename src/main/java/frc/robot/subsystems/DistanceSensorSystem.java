@@ -26,7 +26,7 @@ public class DistanceSensorSystem extends SubsystemBase {
     //double[] alignValues;
    
     public final CANrange[] m_TargetArray;
-    //double[] m_TargetArrayValues;
+   // double[] m_TargetArrayValues;
 
     public boolean CloseEnoughToReef()
     {
@@ -104,7 +104,7 @@ public class DistanceSensorSystem extends SubsystemBase {
             new CANrange(DistanceConstants.TargetArray4)
         };
 
-       // m_TargetArrayValues = new double[m_TargetArray.length];
+       //m_TargetArrayValues = new double[m_TargetArray.length];
 
     }
 
@@ -113,7 +113,7 @@ public class DistanceSensorSystem extends SubsystemBase {
             alignValues[i] = m_alignRanges[i].getDistance().refresh().getValueAsDouble();
         }
     }
-
+    
     public void updateTargetArrayValues() {
         for (int i = 0; i < m_TargetArray.length; i++) {
             m_TargetArrayValues[i] = m_TargetArray[i].getDistance().refresh().getValueAsDouble();
@@ -124,7 +124,7 @@ public class DistanceSensorSystem extends SubsystemBase {
     @Override
     public void periodic() {
        // updateAlignValues();
-       // updateTargetArrayValues();
+       //updateTargetArrayValues();
 
        /* for (int i = 0; i < alignValues.length; i++) {
             SmartDashboard.putNumber("Align Value " + i, alignValues[i]);

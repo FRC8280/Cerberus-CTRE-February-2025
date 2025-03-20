@@ -1,0 +1,133 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Blue Side Approach"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Level 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Set Score Trigger"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Sequence Complete"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Coral Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.35
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Score 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Level 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Set Score Trigger"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.15
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Coral Station 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.35
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Score 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Level 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Set Score Trigger"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.15
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
