@@ -70,6 +70,13 @@ public class Elevator extends SubsystemBase {
   //manual pivot commands to test launcher
   //Function to set up position control of motors
   public void setPosition(double setpoint) {
+
+   /* if(setpoint > Constants.Elevator.levelFour)
+        setpoint = Constants.Elevator.levelFour;
+    
+    if(setpoint < Constants.Elevator.levelOne)
+        setpoint = Constants.Elevator.levelOne;*/
+        
     final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
     m_RearMotor.setControl(positionRequest.withPosition(setpoint));
 
@@ -279,7 +286,7 @@ public void checkAndFix(){
   public void periodic() {
     
     // This method will be called once per scheduler run
-    /*SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());*/
+    SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator/Rear/Pos",  m_RearMotor.getPosition().getValueAsDouble());
     /*SmartDashboard.putNumber("Elevator Target",targetElevatorPosition);
     //SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());

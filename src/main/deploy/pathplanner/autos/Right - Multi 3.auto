@@ -31,7 +31,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.3
+            "waitTime": 0.25
           }
         },
         {
@@ -53,9 +53,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Right First Reload"
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset Elevator Zero"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Right First Reload"
+                }
+              }
+            ]
           }
         },
         {
@@ -67,7 +86,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.35
+            "waitTime": 0.25
           }
         },
         {
@@ -113,9 +132,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Right Second Reload"
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset Elevator Zero"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Right Second Reload"
+                }
+              }
+            ]
           }
         },
         {
@@ -127,7 +165,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.35
+            "waitTime": 0.25
           }
         },
         {
@@ -163,7 +201,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.35
+            "waitTime": 0.3
           }
         },
         {
@@ -173,15 +211,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.25
+            "name": "Reached Set State"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Right Approach 4"
+            "name": "Reset Elevator Zero"
           }
         }
       ]

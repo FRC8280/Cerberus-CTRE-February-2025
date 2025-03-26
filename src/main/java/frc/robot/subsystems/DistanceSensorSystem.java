@@ -126,9 +126,10 @@ public class DistanceSensorSystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-       updateAlignValues();
-       updateTargetArrayValues();
+       //updateAlignValues();
+       //updateTargetArrayValues();
 
+      /*
        for (int i = 0; i < alignValues.length; i++) {
             SmartDashboard.putNumber("Align Value " + i, alignValues[i]);
         }
@@ -139,7 +140,7 @@ public class DistanceSensorSystem extends SubsystemBase {
 
         for (int i =0; i < m_TargetArrayValues.length; i++) {
             SmartDashboard.putNumber("StdDev Value " + i, m_TargetArrayValuesStd[i]);
-        } 
+        }*/ 
         
     }
     

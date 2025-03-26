@@ -21,6 +21,7 @@ public class Effector extends SubsystemBase  {
     public enum EffectorState {
         None,
         Intaking,
+        ManualIntake,
         Scoring,
         Ejecting
       }
@@ -181,8 +182,14 @@ public class Effector extends SubsystemBase  {
 
     public void IntakeCoral()
     {
-        m_EffectorState = EffectorState.Intaking;
+        m_EffectorState = EffectorState.ManualIntake;
         RunEffector(Constants.Effector.kSpeed);
+    }
+
+    public void IntakeCoralSlower()
+    {
+        m_EffectorState = EffectorState.ManualIntake;
+        RunEffector(Constants.Effector.kSlowerSpeed);
     }
 
     public Boolean IntakeComplete()
@@ -260,7 +267,11 @@ public class Effector extends SubsystemBase  {
         m_FrontDistanceValue = m_FrontSensor.getDistance().refresh().getValueAsDouble()*1000;
         m_RearDistanceValue = m_RearSensor.getDistance().refresh().getValueAsDouble()*1000;
 
-        if(m_EffectorState == EffectorState.Intaking && DetectCoralFront())
+        if((m_EffectorState == EffectorState.ManualIntake) && (DetectCoralFront()))
+            Stop();
+        else if((m_EffectorState == EffectorState.ManualIntake) && DetectCoralRear() )
+            IntakeCoralSlower();
+        else if(m_EffectorState == EffectorState.Intaking && DetectCoralFront())
             Stop();
         else if(m_EffectorState == EffectorState.Intaking && IntakeComplete())
             Stop();

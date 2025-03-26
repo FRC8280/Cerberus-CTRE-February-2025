@@ -97,7 +97,7 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final double levelOne = 2.03564453125; //idk find the values later
         public static final double levelTwo = 6.96728515625;
         public static final double levelThree = 14.49;//14.0595703125;
-        public static final double levelFour = 25.45;
+        public static final double levelFour = 25.39;//25.45;
         public static final double kStowed = 0;
 
         public static final int kCurrentLimit = 60;
@@ -112,7 +112,9 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final double kCurrentLimit = 60;
         public static final double kVoltageComp = 12;
         public static final double kSpeed = 40;
+        public static final double kSlowerSpeed = 20;
         public static final double kAdjustIntakeSpeed = -25;
+        
         
         public static final int kFrontLaserCanId = 39;
         public static final int kRearLaserCanId = 40;

@@ -63,6 +63,12 @@
           "data": {
             "pathName": "Adjust for Ball"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reset Elevator Zero"
+          }
         }
       ]
     }

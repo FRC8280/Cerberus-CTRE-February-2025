@@ -53,9 +53,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Approach Coral Station"
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset Elevator Zero"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Approach Coral Station"
+                }
+              }
+            ]
           }
         },
         {
@@ -67,7 +86,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.35
+            "waitTime": 0.25
           }
         },
         {
@@ -113,9 +132,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Approach Coral Station 2"
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset Elevator Zero"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Approach Coral Station 2"
+                }
+              }
+            ]
           }
         },
         {
@@ -127,7 +165,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.35
+            "waitTime": 0.25
           }
         },
         {
@@ -173,15 +211,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.25
+            "name": "Reached Set State"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Left Approach 4"
+            "name": "Reset Elevator Zero"
           }
         }
       ]

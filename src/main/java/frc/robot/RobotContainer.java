@@ -560,8 +560,7 @@ public class RobotContainer {
                                         .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
                                                 
                             );
-
-/*              driverController.pov(0)
+              driverController.pov(0)
                                 .whileTrue(drivetrain.applyRequest(
                                                 () -> forwardStraight.withVelocityX(0.5).withVelocityY(0)));
                 driverController.pov(180)
@@ -577,7 +576,7 @@ public class RobotContainer {
                 driverController.start().and(driverController.y())
                                 .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 driverController.start().and(driverController.x())
-                                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));*/
+                                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
     
                 // Winch Code
@@ -652,7 +651,7 @@ public class RobotContainer {
                     //Add the magic wait here
                     .andThen(new WaitCommand(0.15)
                     //.andThen(new InstantCommand(()->SetScoreTrigger(false)))
-
+  
                     //Align - Get close to reef (Tre look here)
                     .andThen(drivetrain.applyRequest(()->AlignReefRequest())
                         .withTimeout(1)
