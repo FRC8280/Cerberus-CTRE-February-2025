@@ -116,7 +116,7 @@ import edu.wpi.first.wpilibj.XboxController;
         
         public static final int kFrontLaserCanId = 39;
         public static final int kRearLaserCanId = 40;
-        public static final int kCoralDetectionRange = 100;//70;
+        public static final int kCoralDetectionRange = 120;//100;//70;
         public static final int intakeTimerMax = 3;
         public static final double intakeSpeed = 2;//50;//300; //0.5;
         public static final int ejectSpeed = -10;
@@ -217,9 +217,9 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
 
-        public static final double reefScoringDistance = 0.4;//0.32; //0.24 No lean //0.4; Lean
-        public static final double reefDetectionThreshold = 0.88; //0.8;//0.75;
-        public static final double reefGuessThreshhold = 0.6;
+        public static final double reefScoringDistance = 0.23; //0.4; //0.22;//0.32; //0.24 No lean //0.4; Lean
+        public static final double reefDetectionThreshold = 0.8; //0.8;//0.75;
+        //public static final double reefGuessThreshhold = 0.6;
         public static final double reefAlignedDistance = .21;
         public static final double maxTimer = 2.0;
         public static final double maxSpeed = 0.25;

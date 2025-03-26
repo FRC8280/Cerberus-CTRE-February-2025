@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue Side Approach"
+            "pathName": "Right First Score"
           }
         },
         {
@@ -55,7 +55,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Coral Station"
+            "pathName": "Right First Reload"
           }
         },
         {
@@ -73,7 +73,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Score 2"
+            "pathName": "Right Second score"
           }
         },
         {
@@ -115,7 +115,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Coral Station 2"
+            "pathName": "Right Second Reload"
           }
         },
         {
@@ -133,7 +133,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Score 3"
+            "pathName": "Right Third Score"
           }
         },
         {
@@ -181,7 +181,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Approach 4"
+            "pathName": "Right Approach 4"
           }
         }
       ]

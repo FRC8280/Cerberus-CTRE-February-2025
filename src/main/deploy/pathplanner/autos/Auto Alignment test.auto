@@ -11,39 +11,57 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Level 2"
+            "waitTime": 0.5
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Reached Set State"
+            "name": "Set Stage 4"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.25
+            "waitTime": 0.5
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Score Coral"
+            "name": "Set Score Trigger"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.25
+            "waitTime": 0.5
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Stow Elevator"
+            "name": "Sequence Complete"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Test Alignment"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 6.0
           }
         }
       ]

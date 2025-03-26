@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.567869648863823,
-        "y": 2.8808562272706184
+        "x": 5.935,
+        "y": 4.1175
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.040575830543794,
-        "y": 3.186637048748743
+        "x": 6.177030006960941,
+        "y": 4.461228780781275
       },
       "isLocked": false,
-      "linkedName": "Right Second Score"
+      "linkedName": "Rear Coral Branch"
     },
     {
       "anchor": {
-        "x": 1.43325,
-        "y": 0.5539999999999998
+        "x": 6.7860000000000005,
+        "y": 5.029249999999999
       },
       "prevControl": {
-        "x": 1.1631010033269684,
-        "y": 0.3811317231374861
+        "x": 6.970193411527104,
+        "y": 5.198284869627561
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Right First Reload"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 53.97262661489649
+    "rotation": 179.07595464722726
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 59.88141121788503
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

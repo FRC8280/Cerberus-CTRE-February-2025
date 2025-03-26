@@ -23,10 +23,11 @@ public class DistanceSensorSystem extends SubsystemBase {
     }
 
     public final CANrange[] m_alignRanges;
-    //double[] alignValues;
+    double[] alignValues;
    
     public final CANrange[] m_TargetArray;
-   // double[] m_TargetArrayValues;
+   double[] m_TargetArrayValues;
+   double[] m_TargetArrayValuesStd;
 
     public boolean CloseEnoughToReef()
     {
@@ -94,7 +95,7 @@ public class DistanceSensorSystem extends SubsystemBase {
         new CANrange(DistanceConstants.righttAlignmentRangeId)
         };
 
-       // alignValues = new double[m_alignRanges.length];
+       alignValues = new double[m_alignRanges.length];
 
         m_TargetArray = new CANrange[] {
             new CANrange(DistanceConstants.TargetArray0),
@@ -104,11 +105,12 @@ public class DistanceSensorSystem extends SubsystemBase {
             new CANrange(DistanceConstants.TargetArray4)
         };
 
-       //m_TargetArrayValues = new double[m_TargetArray.length];
+       m_TargetArrayValues = new double[m_TargetArray.length];
+       m_TargetArrayValuesStd = new double[m_TargetArray.length];
 
     }
 
-    /*public void updateAlignValues() {
+    public void updateAlignValues() {
         for (int i = 0; i < m_alignRanges.length; i++) {
             alignValues[i] = m_alignRanges[i].getDistance().refresh().getValueAsDouble();
         }
@@ -117,22 +119,28 @@ public class DistanceSensorSystem extends SubsystemBase {
     public void updateTargetArrayValues() {
         for (int i = 0; i < m_TargetArray.length; i++) {
             m_TargetArrayValues[i] = m_TargetArray[i].getDistance().refresh().getValueAsDouble();
+            m_TargetArrayValuesStd[i] = m_TargetArray[i].getDistanceStdDev(true).getValueAsDouble();
         }
-    }*/
+    }
 
 
     @Override
     public void periodic() {
-       // updateAlignValues();
-       //updateTargetArrayValues();
+       updateAlignValues();
+       updateTargetArrayValues();
 
-       /* for (int i = 0; i < alignValues.length; i++) {
+       for (int i = 0; i < alignValues.length; i++) {
             SmartDashboard.putNumber("Align Value " + i, alignValues[i]);
         }
 
         for (int i =0; i < m_TargetArrayValues.length; i++) {
             SmartDashboard.putNumber("Array Value " + i, m_TargetArrayValues[i]);
-        } */
+        } 
+
+        for (int i =0; i < m_TargetArrayValues.length; i++) {
+            SmartDashboard.putNumber("StdDev Value " + i, m_TargetArrayValuesStd[i]);
+        } 
+        
     }
     
 }

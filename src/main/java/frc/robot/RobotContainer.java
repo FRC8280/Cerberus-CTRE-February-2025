@@ -63,7 +63,7 @@ public class RobotContainer {
         public final Climber m_Climber = new Climber();
         public final Elevator m_Elevator = new Elevator();
         public final Effector m_Effector = new Effector();
-        private final CANdleSystem m_candleSubsystem = new CANdleSystem();
+        //private final CANdleSystem m_candleSubsystem = new CANdleSystem();
         public ReefTargets m_ReefTargets = new ReefTargets();
         public DistanceSensorSystem m_DistanceSensorSystem = new DistanceSensorSystem();
         public double m_SlowSpeedMod = 1;
@@ -71,7 +71,7 @@ public class RobotContainer {
         public boolean m_RunScoring = false;
         public double m_ElevatorDestination = Constants.Elevator.levelTwo;
 
-        private boolean scoreTriggerActive = false;
+        //private boolean scoreTriggerActive = false;
 
         public boolean SequenceFinished = false;
 
@@ -130,13 +130,13 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Set Stage 3", new InstantCommand(()->SetElevatorDestination(Constants.Elevator.levelThree))); 
                 NamedCommands.registerCommand("Set Stage 4", new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelFour)));
                 NamedCommands.registerCommand("Set Score Trigger", new InstantCommand(()->SetScoreTrigger(true)));
-                NamedCommands.registerCommand("Sequence Complete", new WaitUntilCommand(() -> scoreTriggerActive));
+                NamedCommands.registerCommand("Sequence Complete", new WaitUntilCommand(() -> GetScoreTriggerFlag()));
 
                 NamedCommands.registerCommand("Level 1", new InstantCommand(()->m_Elevator.LevelOne())); 
                 NamedCommands.registerCommand("Level 2", new InstantCommand(()->m_Elevator.LevelTwo())); 
                 NamedCommands.registerCommand("Level 3", new InstantCommand(()->m_Elevator.LevelThree())); 
                 NamedCommands.registerCommand("Elevator Level 4", new InstantCommand(() -> m_Elevator.LevelFour()));
-                NamedCommands.registerCommand("Set Score Trigger", new InstantCommand(()->SetScoreTrigger(true)));
+                //NamedCommands.registerCommand("Set Score Trigger", new InstantCommand(()->SetScoreTrigger(true)));
 
                 NamedCommands.registerCommand("Reached Set State", new WaitUntilCommand(() -> m_Elevator.reachedSetState()));
                 NamedCommands.registerCommand("Reset Elevator Zero", new InstantCommand(() ->m_Elevator.RunCurrentZeroing()));
@@ -149,6 +149,10 @@ public class RobotContainer {
 
                 NamedCommands.registerCommand("STOPNOW", new InstantCommand(() -> m_Effector.StopNewArm()));
 
+                
+                NamedCommands.registerCommand("Algea CheckPoint", new WaitCommand(0.15));
+                NamedCommands.registerCommand("Score Coral", new InstantCommand(() -> m_Effector.ScoreCoral()));
+                
 
                 // Initialize each element of the vision array
                 for (int i = 0; i < vision.length; i++) {
@@ -175,6 +179,12 @@ public class RobotContainer {
         {
             return m_RunScoring && !CommandAborted();
         }
+
+        public boolean GetScoreTriggerFlag()
+        {
+            return m_RunScoring;
+        }
+
 
         public void SetScoreTrigger(boolean value)
         {
@@ -433,7 +443,7 @@ public class RobotContainer {
                 return (automaticPath != null) && (automaticPath.isScheduled());
         }
 
-        private Command createCommandSequence() {
+        /*private Command createCommandSequence() {
             return new SequentialCommandGroup(
                 new WaitCommand(0.15),
                 new InstantCommand(() -> SetScoreTrigger(false)),
@@ -468,7 +478,7 @@ public class RobotContainer {
                 m_Elevator.RunCurrentZeroing() // Todo make a proper reverse.
                 
             );
-        }
+        }*/
 
         private void configureBindings() {
                 // Note that X is defined as forward according to WPILib convention,
@@ -637,11 +647,11 @@ public class RobotContainer {
 
                 //Complete Scoring Action trigger
                 new Trigger(() -> GetScoreTrigger()).onTrue(
-                    new InstantCommand(() -> scoreTriggerActive = false)
+                    new InstantCommand(() -> SetScoreTrigger(false))
                     
                     //Add the magic wait here
                     .andThen(new WaitCommand(0.15)
-                    .andThen(new InstantCommand(()->SetScoreTrigger(false)))
+                    //.andThen(new InstantCommand(()->SetScoreTrigger(false)))
 
                     //Align - Get close to reef (Tre look here)
                     .andThen(drivetrain.applyRequest(()->AlignReefRequest())
@@ -676,7 +686,7 @@ public class RobotContainer {
                     .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                     .andThen(new WaitCommand(0.6))
                     .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-                    .andThen(new InstantCommand(() -> scoreTriggerActive = true)) // Set the flag to false
+                    //.andThen(new InstantCommand(() -> scoreTriggerActive = true)) // Set the flag to false
                     
                 ));
                 
@@ -713,6 +723,8 @@ public class RobotContainer {
                                 .andThen(new WaitCommand(0.5))
                                 .andThen(new InstantCommand(()->m_Effector.Stop()))
                                 .andThen(new InstantCommand(() -> this.backUp(0.5)))
+                                .andThen(new WaitUntilCommand(() -> m_Effector.reachedSetState()))
+                                .andThen(new InstantCommand(() -> this.backUp(0.25)))
                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                                 ));
                 new JoystickButton(AlgeaAndClimberOperator, Constants.AlgaeClimberOperatorConstants.CLEAR_LOW)
@@ -724,6 +736,7 @@ public class RobotContainer {
                                 .andThen(new WaitCommand(0.5))
                                 .andThen(new InstantCommand(()->m_Effector.Stop()))
                                 .andThen(new InstantCommand(() -> this.backUp(0.5)))
+                                .andThen(new WaitUntilCommand(() -> m_Effector.reachedSetState()))
                                 .andThen(new InstantCommand(() -> m_Elevator.Stow())))
                                 ));
 

@@ -120,6 +120,16 @@ public class Effector extends SubsystemBase  {
         m_algeaArm.setControl(positionRequest.withPosition(0));
         m_EffectorMotor.set(0);
     }
+
+    public boolean aboveThreshold(double value, double constant) {
+        return value >= Math.abs(0.95 * constant);
+    }
+    
+    public boolean reachedSetState() {
+        double currentPosition = m_algeaArm.getPosition().getValueAsDouble();
+        return aboveThreshold(currentPosition, 0);
+      }
+
     public void MoveAlgeaArmAuton()
     {
         //System.out.println("Moving Algea arm Auton version.");
@@ -193,7 +203,7 @@ public class Effector extends SubsystemBase  {
     public void ScoreCoral()
     {
         m_EffectorState = EffectorState.Scoring;
-        RunEffector(Constants.Effector.kSpeed+10);
+        RunEffector(Constants.Effector.kSpeed+10);//20
     }
 
     public void EjectCoral()

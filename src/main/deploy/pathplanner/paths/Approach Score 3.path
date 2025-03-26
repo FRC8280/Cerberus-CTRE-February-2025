@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5464139344262293,
-        "y": 7.375563524590164
+        "x": 1.5795,
+        "y": 7.4765
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3564268118738925,
-        "y": 6.641290177493724
+        "x": 2.389512877447663,
+        "y": 6.74222665290356
       },
       "isLocked": false,
       "linkedName": "Coral Station"
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Left Final Score"
     }
   ],
   "rotationTargets": [],
