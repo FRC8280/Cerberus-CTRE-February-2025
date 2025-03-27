@@ -39,7 +39,15 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
  
  public class Constants {
+
+    public enum Alignment {
+        BRANCH,
+        LEVEL1,
+        ALGEA
+    }
+
      public static class AutoAlignment{
+        public static int noReef = -1;
         public static double maxVelocity = 3;//2.25;
         public static double maxAcceleration = 3;//2.25;
         public static double MaxAngularRate = Units.degreesToRadians(200);//360;
@@ -98,6 +106,7 @@ import edu.wpi.first.wpilibj.XboxController;
         public static final double levelTwo = 6.96728515625;
         public static final double levelThree = 14.49;//14.0595703125;
         public static final double levelFour = 25.39;//25.45;
+        public static final double noDestination = -999;
         public static final double kStowed = 0;
 
         public static final int kCurrentLimit = 60;
@@ -181,27 +190,39 @@ import edu.wpi.first.wpilibj.XboxController;
          public static final double kIntakeBarDistanceMM = 60;
      }
 
-     public static final class CoralOperatorConstants{
-        public static final int CORAL_LL4 = 1;
-        public static final int CORAL_RL4 = 2;
-        public static final int CORAL_LL3 = 3;
-        public static final int CORAL_RL3 = 4;
-        public static final int CORAL_LL2 = 5;
-        public static final int CORAL_RL2 = 6;
-        public static final int CORAL_L1 = 7;
-        public static final int MANUAL_BUTTON = 8;
-        public static final int RESET_BUTTON = 9;
-        public static final int CORAL_INTAKE_BUTTON = 10;
-        public static final int REVERSE_INTAKE = 11;
+     public static final class ManualOperatorConstants{
+        public static final int MANUAL_SWITCH = 1;
+        public static final int MANUAL_SCORE = 2;
+        public static final int CLIMBER_FOOT = 3;
+        public static final int CLIMBER_UP = 4;
+        public static final int CLIMBER_DN = 5;
+        public static final int ABORT = 12;
      }
 
-     public static final class AlgaeClimberOperatorConstants{
-        public static final int CLEAR_HIGH = 1;
-        public static final int CLEAR_LOW = 2;
-        public static final int CLIMBER_BUTTON_UP = 6;
-        public static final int CLIMBER_BUTTON_DN = 7;
-        public static final int ABORT_SCORE = 8;
-        public static final int MANUAL_SWITCH = 9;
+     public static final class ReefOperatorConstants{
+        public static final int TWELVE_LEFT = 1;
+        public static final int TWELVE_RIGHT = 2;
+        public static final int TEN_LEFT = 3;
+        public static final int TEN_RIGHT = 4;
+        public static final int EIGHT_LEFT = 5;
+        public static final int EIGHT_RIGHT = 6;
+        public static final int SIX_LEFT = 7;
+        public static final int SIX_RIGHT = 8;
+        public static final int FOUR_LEFT = 9;
+        public static final int FOUR_RIGHT = 10;
+        public static final int TWO_LEFT = 11;
+        public static final int TWO_RIGHT = 12;
+     }
+
+     public static final class ElevatorOperatorConstants{
+        public static final int L4 = 1;
+        public static final int RESET = 2;
+        public static final int L3 = 3;
+        public static final int INTAKE = 4;
+        public static final int L2 = 5;
+        public static final int REV = 6;
+        public static final int L1 = 7;
+        public static final int ALGAE = 9;
      }
 
      public static final class DistanceConstants{

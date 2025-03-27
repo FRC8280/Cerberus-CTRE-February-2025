@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
     double camera2distance = 999999;
 
     //Get camera 1 Data. 
-    if(camera1Result.hasTargets())
+    /*if(camera1Result.hasTargets())
     {
         for (PhotonTrackedTarget target : camera1Result.getTargets())
         {
