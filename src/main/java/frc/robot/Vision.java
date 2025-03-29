@@ -34,15 +34,12 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -54,7 +51,6 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 //import org.photonvision.targeting.PhotonPipelineResult;
 import java.util.HashMap;
-import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -211,7 +207,6 @@ public class Vision {
 
     public Pose2d GetDestinationFromReefBranch(int selectedReefBranch, Constants.Alignment alignment) {
 
-        
         if (alignment == Constants.Alignment.BRANCH) 
             return GetDestinationFromReefStandard(selectedReefBranch);
         else if (alignment == Constants.Alignment.LEVEL1)

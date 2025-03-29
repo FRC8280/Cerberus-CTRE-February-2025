@@ -1,7 +1,6 @@
 package frc.robot;
-import edu.wpi.first.wpilibj.XboxController;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.CANdleConstants;
 
 import com.ctre.phoenix.led.*;

@@ -23,8 +23,6 @@ import com.pathplanner.lib.path.Waypoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -36,17 +34,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.CANdleSystem;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DistanceSensorSystem;
@@ -56,7 +51,6 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
-import frc.robot.Vision;
 
 public class RobotContainer {
 
@@ -96,8 +90,8 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                       // second
                                                                                       // max angular velocity
-    private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    /*private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive*/
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -413,8 +407,7 @@ public class RobotContainer {
          * currentPose.getRotation());
          */
         // Pose2d destinationPos = new Pose2d(14.8, 3.4,Rotation2d.fromDegrees(174.06));
-        if (destinationPos == null)
-            return;
+        
         // The rotation component in these poses represents the direction of travel
         Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
 
@@ -825,9 +818,7 @@ public class RobotContainer {
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetAlgeaScoreFlag(true))));
 
-        // Todo - new trigger for the algea score
-        // use GetAlgeaHeight() to determine the height of the algea of selected reef.
-        // Note slightly different commands for each. Maybe have two triggers.
+        // New trigger for the algea score
         new Trigger(() -> GetAlgeaScoreTrigger() && IsAlgeaHigh()).onTrue(
                 new InstantCommand(() -> SetAlgeaScoreFlag(false))
                         // Add the magic wait here
@@ -867,19 +858,6 @@ public class RobotContainer {
                 .whileTrue(new IntakeReverse(m_Effector));
 
         // drivetrain.registerTelemetry(logger::telemeterize);
-    }
-
-    private SequentialCommandGroup AlgeaLowSequence() {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> m_Elevator.AlgaeCheckpoint()),
-                new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
-                new InstantCommand(() -> m_Effector.MoveAlgeaArm()),
-                new InstantCommand(() -> m_Elevator.AlgeaLow()),
-                new WaitUntilCommand(() -> m_Elevator.reachedSetState()),
-                new WaitCommand(0.5),
-                new InstantCommand(() -> m_Effector.Stop()),
-                new InstantCommand(() -> this.backUp(0.5)),
-                new InstantCommand(() -> m_Elevator.Stow()));
     }
 
     public void Periodic() {
