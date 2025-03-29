@@ -44,21 +44,42 @@ public class DistanceSensorSystem extends SubsystemBase {
             return false;
     }
     
+    public int getIndexOfLowestValue() {
+        double lowestValue = Double.MAX_VALUE; // Initialize with the maximum possible value
+        int lowestIndex = -1; // Initialize with an invalid index
+    
+        for (int i = 0; i < m_TargetArray.length; i++) {
+            double currentValue = m_TargetArray[i].getDistance().refresh().getValueAsDouble();
+            if (currentValue < lowestValue) {
+                lowestValue = currentValue;
+                lowestIndex = i;
+            }
+        }
+    
+        return lowestIndex; // Return the index of the lowest value
+    }
+
     public ReefPoleAlignment LocateReefPole()
     {
-        /*
-        if(m_TargetArrayValues[0] <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.FAR_LEFT;
-        else if(m_TargetArrayValues[1] <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.LEFT;
-        else if(m_TargetArrayValues[2] <= Constants.DistanceConstants.reefScoringDistance)
-            return ReefPoleAlignment.CENTER;
-        else if(m_TargetArrayValues[3] <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.RIGHT;
-        else if(m_TargetArrayValues[4] <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.FAR_RIGHT;
-        */
-        if( m_TargetArray[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
+
+        int lowIndex = getIndexOfLowestValue();
+        switch (lowIndex)
+        {
+            case 0:
+                return ReefPoleAlignment.FAR_LEFT;
+            case 1:
+                return ReefPoleAlignment.LEFT;
+            case 2:
+                return ReefPoleAlignment.CENTER;
+            case 3:
+                return ReefPoleAlignment.RIGHT;
+            case 4:
+                return ReefPoleAlignment.FAR_RIGHT;
+            default:
+                return ReefPoleAlignment.NOT_FOUND;
+        }
+
+        /*if( m_TargetArray[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.FAR_LEFT;
         else if( m_TargetArray[1].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.LEFT;
@@ -69,11 +90,7 @@ public class DistanceSensorSystem extends SubsystemBase {
         else if( m_TargetArray[4].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.FAR_RIGHT;
         
-        //Note even close so take a guess
-        /*if( (m_TargetArrayValues[0] > Constants.DistanceConstants.reefGuessThreshhold)&& (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold) && (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold) &&
-        (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold) && (m_TargetArrayValues[1] > Constants.DistanceConstants.reefGuessThreshhold))
-            return ReefPoleAlignment.FAR_RIGHT;*/
-        return ReefPoleAlignment.FAR_RIGHT;
+        return ReefPoleAlignment.FAR_RIGHT;*/
     }
 
     public double LongestDistance()
