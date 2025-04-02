@@ -7,9 +7,13 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
 
+import edu.wpi.first.wpilibj.Servo;
+
 public class Climber extends SubsystemBase {
 
     private final TalonFX m_ClimbMotor;
+
+    private final Servo m_Servo;
 
     /**
      * This subsytem that controls the climber.
@@ -18,6 +22,8 @@ public class Climber extends SubsystemBase {
 
         // Set up the climb motor as a brushless motor
         m_ClimbMotor = new TalonFX(ClimberConstants.CLIMBER_MOTOR_ID);
+        
+        m_Servo = new Servo(9);
 
         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
         currentLimits.SupplyCurrentLimitEnable = true;
@@ -41,6 +47,10 @@ public class Climber extends SubsystemBase {
      */
     public void runClimber(double speed){
         m_ClimbMotor.set(speed);
+    }
+
+    public void releaseFoot(){
+        m_Servo.setAngle(90);
     }
 
 }

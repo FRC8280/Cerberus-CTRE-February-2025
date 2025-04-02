@@ -212,6 +212,28 @@ public class Effector extends SubsystemBase  {
         RunEffector(Constants.Effector.kSpeed+10);//20
     }
 
+    public void ScoreCoralTeleOp(double level)
+    {
+        if(level == Constants.Elevator.levelOne)
+        {
+            m_EffectorState = EffectorState.Scoring;
+            RunEffector(Constants.Effector.kSpeed-8);
+        }
+        else
+        {
+            m_EffectorState = EffectorState.Scoring;
+            RunEffector(Constants.Effector.kSpeed+10);//20
+        }
+        
+    }
+    
+
+    public void ScoreL1()
+    {
+        m_EffectorState = EffectorState.Scoring;
+        RunEffector(1);
+    }
+
     public void EjectCoral()
     {
         m_EffectorState = EffectorState.Ejecting;
@@ -282,6 +304,7 @@ public class Effector extends SubsystemBase  {
             //System.out.println("Emergency Stop.");
             Stop();
         }   
+
 
         SmartDashboard.putNumber("Front Sensor: ", m_FrontDistanceValue);
         SmartDashboard.putNumber("Rear Sensor: ", m_RearDistanceValue);

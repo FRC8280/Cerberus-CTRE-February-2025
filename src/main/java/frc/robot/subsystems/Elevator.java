@@ -18,6 +18,7 @@ public class Elevator extends SubsystemBase {
 
   private TalonFX m_FrontMotor;
   private TalonFX m_RearMotor;
+  public boolean m_RunZeroFunction = false;
 
   //Control for elevator
 
@@ -60,6 +61,11 @@ public class Elevator extends SubsystemBase {
     //elevatorGains.kA = 0.01;
     m_RearMotor.getConfigurator().apply(elevatorGains);
     ResetEncoders();
+  }
+
+  public void SetZeroingFlag(boolean value)
+  {
+    m_RunZeroFunction = value;
   }
 
   public boolean ElevatorAtZero()
@@ -227,6 +233,7 @@ public class Elevator extends SubsystemBase {
     return value >= Math.abs(0.95 * constant);
 }
 
+
 public boolean reachedSetState() {
   double currentPosition = m_RearMotor.getPosition().getValueAsDouble();
   return aboveThreshold(currentPosition, targetElevatorPosition);
@@ -275,15 +282,23 @@ public void checkAndFix(){
     m_RearMotor.setPosition(0);
   }
 
+  
   public Command RunCurrentZeroing() {
     return this.run(() -> this.SetPower(-.10))
+        .andThen(() -> this.SetZeroingFlag(true))
         .until(() -> m_FrontMotor.getStatorCurrent().refresh().getValueAsDouble() > 40.0)
         .andThen(() -> this.SetPower(0))
+        .andThen(() -> this.SetZeroingFlag(false))
         .finallyDo(() -> this.ResetEncoders());
   }
 
   @Override
   public void periodic() {
+
+    //Emergency measure - make sure this works. 
+    //If it's not zeroing and current spikes. Then Reset the target movement level
+    /*if(!m_RunZeroFunction && (m_FrontMotor.getStatorCurrent().refresh().getValueAsDouble() > 40.0))
+        setPosition(m_FrontMotor.getPosition().refresh().getValueAsDouble()*0.95);*/
     
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());

@@ -52,8 +52,8 @@ import edu.wpi.first.math.util.Units;
         public static double MaxAngularRate = Units.degreesToRadians(200);//360;
         public static double MaxAngularAcceleration = Units.degreesToRadians(300) ;//540; 
      
-        public static double AutoAlignmentSpeed = 0.40;//0.25;
-        public static double AutoReefAlignmentSpeed = 0.50;//0.35;
+        public static double AutoAlignmentSpeed = 0.60; //0.40;//0.25;
+        public static double AutoReefAlignmentSpeed = 0.75;//0.50;//0.35;
     }
      public static class Vision {
 
@@ -101,16 +101,17 @@ import edu.wpi.first.math.util.Units;
         public static final int kRearCanId = 12;
         public static final int kBottomLaserCanId = 38;
 
-        public static final double levelOne = 2.03564453125; //idk find the values later
+        public static final double levelOne = 4.5; //4.5;//3.4998; //2.03564453125; //3.4998; //idk find the values later
         public static final double levelTwo = 6.96728515625;
         public static final double levelThree = 14.49;//14.0595703125;
-        public static final double levelFour = 25.39;//25.45;
+        public static final double levelFour = 25.45;//25.39;//25.45;
         public static final double noDestination = -999;
         public static final double kStowed = 0;
 
         public static final int kCurrentLimit = 60;
 
-        public static final double kElevatorDetectionRange = 450;
+        public static final double kElevatorDetectionRange
+         = 450;
         
     }
 
@@ -221,7 +222,7 @@ import edu.wpi.first.math.util.Units;
         public static final int L2 = 5;
         public static final int REV = 6;
         public static final int L1 = 7;
-        public static final int ALGAE = 9;
+        public static final int ALGAE = 8;
      }
 
      public static final class DistanceConstants{
@@ -239,10 +240,10 @@ import edu.wpi.first.math.util.Units;
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
 
-        public static final double reefScoringDistance = 0.23; //0.4; //0.22;//0.32; //0.24 No lean //0.4; Lean
+        public static final double reefScoringDistance = 0.4;//0.63;//0.4;//0.5; //0.4; //0.22;//0.32; //0.24 No lean //0.4; Lean
         public static final double reefDetectionThreshold = 0.8; //0.8;//0.75;
         //public static final double reefGuessThreshhold = 0.6;
-        public static final double reefAlignedDistance = .21;
+        public static final double reefAlignedDistance = .23;
         public static final double maxTimer = 2.0;
         public static final double maxSpeed = 0.25;
      }

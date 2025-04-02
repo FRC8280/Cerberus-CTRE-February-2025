@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.CANrange;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -19,6 +21,9 @@ public class DistanceSensorSystem extends SubsystemBase {
         NOT_FOUND
     }
 
+    public double leftCompare = 1;
+    public double centerCompare = 1;
+    public double rightCompare =1 ;
     public final CANrange[] m_alignRanges;
     double[] alignValues;
    
@@ -59,10 +64,59 @@ public class DistanceSensorSystem extends SubsystemBase {
         return lowestIndex; // Return the index of the lowest value
     }
 
+    public boolean DetectCenteredPoleWIthCoral() {
+
+        // Retrieve the values at indexes 1, 2, and 3
+        double value1 = m_TargetArray[1].getDistance().refresh().getValueAsDouble();;
+        double value2 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
+        //double value3 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
+        
+        if((value1 > 0.4) || (value2 > 0.4))
+            return false;
+
+            centerCompare = value1/value2;
+        // Check if the minimum value is at least 95% of the maximum value
+        return value1 >= 0.90 * value2;
+    }
+
+    public boolean DetectLeftWithCoral() {
+
+        // Retrieve the values at indexes 1, 2, and 3
+        double value1 = m_TargetArray[4].getDistance().refresh().getValueAsDouble();;
+        double value2 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
+        //double value3 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
+        
+        if((value1 > 0.4) || (value2 > 0.4))
+            return false;
+
+        leftCompare = value1/value2;
+        // Check if the minimum value is at least 95% of the maximum value
+        return value1 >= 0.90 * value2;
+    }
+
+    public boolean DetectRightWithCoral() {
+
+        // Retrieve the values at indexes 1, 2, and 3
+        double value1 = m_TargetArray[0].getDistance().refresh().getValueAsDouble();;
+        double value2 = m_TargetArray[1].getDistance().refresh().getValueAsDouble();;
+        //double value3 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
+        
+        if((value1 > 0.4) || (value2 > 0.4))
+            return false;
+
+        rightCompare = value1/value2;
+        // Check if the minimum value is at least 95% of the maximum value
+        return value1 >= 0.90 * value2;
+    }
+
+    
+
     public ReefPoleAlignment LocateReefPole()
     {
-
-        int lowIndex = getIndexOfLowestValue();
+        
+        //Special cases. 
+    
+        /*int lowIndex = getIndexOfLowestValue();
         switch (lowIndex)
         {
             case 0:
@@ -77,9 +131,9 @@ public class DistanceSensorSystem extends SubsystemBase {
                 return ReefPoleAlignment.FAR_RIGHT;
             default:
                 return ReefPoleAlignment.NOT_FOUND;
-        }
+        }*/
 
-        /*if( m_TargetArray[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
+        if( m_TargetArray[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.FAR_LEFT;
         else if( m_TargetArray[1].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.LEFT;
@@ -90,7 +144,7 @@ public class DistanceSensorSystem extends SubsystemBase {
         else if( m_TargetArray[4].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
             return ReefPoleAlignment.FAR_RIGHT;
         
-        return ReefPoleAlignment.FAR_RIGHT;*/
+        return ReefPoleAlignment.FAR_RIGHT;
     }
 
     public double LongestDistance()
@@ -140,18 +194,27 @@ public class DistanceSensorSystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-       //updateAlignValues();
-       //updateTargetArrayValues();
+        //todo comment this back out
+    updateAlignValues();
+       updateTargetArrayValues();
 
-      /*
+      
        for (int i = 0; i < alignValues.length; i++) {
             SmartDashboard.putNumber("Align Value " + i, alignValues[i]);
         }
-
+        
         for (int i =0; i < m_TargetArrayValues.length; i++) {
             SmartDashboard.putNumber("Array Value " + i, m_TargetArrayValues[i]);
         } 
 
+        SmartDashboard.putBoolean("DetectCenteredPole", DetectCenteredPoleWIthCoral());
+        SmartDashboard.putBoolean("DetectLeftCoral", DetectLeftWithCoral());
+        SmartDashboard.putBoolean("DetectRightCoral", DetectRightWithCoral());
+
+        SmartDashboard.putNumber("Left Compate",leftCompare);
+        SmartDashboard.putNumber("Right Compate",rightCompare);
+        SmartDashboard.putNumber("Center Compate",centerCompare);
+        /* 
         for (int i =0; i < m_TargetArrayValues.length; i++) {
             SmartDashboard.putNumber("StdDev Value " + i, m_TargetArrayValuesStd[i]);
         }*/ 

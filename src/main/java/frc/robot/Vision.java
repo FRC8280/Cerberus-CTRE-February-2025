@@ -407,13 +407,17 @@ public class Vision {
                     destination = new Pose2d(5.867954, 4.10801, Rotation2d.fromDegrees(-177.0344));
                     break;
                 case Constants.ReefOperatorConstants.TEN_LEFT: // 20 left
-                    destination = new Pose2d(5.37180, 5.095107, Rotation2d.fromDegrees(-121.58));
+                    //destination = new Pose2d(5.37180, 5.095107, Rotation2d.fromDegrees(-121.58));
+                    destination = new Pose2d(5.484, 5.189, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.TEN_RIGHT: // 20 right
-                    destination = new Pose2d(5.12041, 5.28087, Rotation2d.fromDegrees(-119.38));
+                    //destination = new Pose2d(5.12041, 5.28087, Rotation2d.fromDegrees(-119.38));
+                    destination = new Pose2d(5.205, 5.372, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_LEFT: // 19 left
-                    destination = new Pose2d(3.99474, 5.34948, Rotation2d.fromDegrees(-57.4));
+                   // original destination = new Pose2d(3.99474, 5.34948, Rotation2d.fromDegrees(-57.4));
+                    //Pathplanner update
+                    destination = new Pose2d(3.978,5.400,Rotation2d.fromDegrees((-60)));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right
                     destination = new Pose2d(3.6625, 5.2106, Rotation2d.fromDegrees(-56.982));

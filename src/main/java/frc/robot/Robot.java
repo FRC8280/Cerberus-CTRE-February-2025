@@ -111,7 +111,7 @@ public class Robot extends TimedRobot {
     }
 
     // Clear the CommandScheduler of all commands
-    //CommandScheduler.getInstance().cancelAll();
+    CommandScheduler.getInstance().cancelAll();
     m_robotContainer.RobotInit();
   }
 
