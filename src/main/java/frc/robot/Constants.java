@@ -193,7 +193,7 @@ import edu.wpi.first.math.util.Units;
      public static final class ManualOperatorConstants{
         public static final int MANUAL_SWITCH = 1;
         public static final int MANUAL_SCORE = 2;
-        public static final int CLIMBER_FOOT = 3;
+        public static final int ARM_CLIMBER = 3;
         public static final int CLIMBER_UP = 4;
         public static final int CLIMBER_DN = 5;
         public static final int ABORT = 12;

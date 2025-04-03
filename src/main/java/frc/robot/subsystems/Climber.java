@@ -8,12 +8,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
 
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Climber extends SubsystemBase {
 
     private final TalonFX m_ClimbMotor;
 
-    private final Servo m_Servo;
+    private final Servo m_RampServo;
+    private final Servo m_FootServo;
 
     /**
      * This subsytem that controls the climber.
@@ -23,7 +25,8 @@ public class Climber extends SubsystemBase {
         // Set up the climb motor as a brushless motor
         m_ClimbMotor = new TalonFX(ClimberConstants.CLIMBER_MOTOR_ID);
         
-        m_Servo = new Servo(9);
+        m_RampServo = new Servo(9);
+        m_FootServo = new Servo(8);
 
         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
         currentLimits.SupplyCurrentLimitEnable = true;
@@ -37,6 +40,8 @@ public class Climber extends SubsystemBase {
     @Override
     public void periodic() {
         //todo check for position and prvent from it from moving too far up or down
+        SmartDashboard.putNumber("Ramp Servo Angle", m_RampServo.getAngle());
+        SmartDashboard.putNumber("Foot Servo Angle", m_FootServo.getAngle());
     }
 
     /**
@@ -49,8 +54,14 @@ public class Climber extends SubsystemBase {
         m_ClimbMotor.set(speed);
     }
 
-    public void releaseFoot(){
-        m_Servo.setAngle(90);
+    public void ArmClimber(){
+        m_RampServo.setAngle(180);
+        m_FootServo.setAngle(80);
+    }
+
+    public void ResetClimber(){
+        m_RampServo.setAngle(00);
+        m_FootServo.setAngle(149);
     }
 
 }

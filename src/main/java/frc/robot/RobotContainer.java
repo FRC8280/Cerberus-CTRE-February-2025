@@ -74,6 +74,7 @@ public class RobotContainer {
     public DistanceSensorSystem m_DistanceSensorSystem = new DistanceSensorSystem();
     public double m_SlowSpeedMod = 1;
     public boolean m_AutoAlignOff = false;
+    public boolean m_ArmedClimber = false;
     public boolean m_RunScoring = false;
     public boolean m_AlgeaScoring = false;
     public boolean m_L1Scoring = false;
@@ -177,6 +178,27 @@ public class RobotContainer {
         // m_candleSubsystem.m_candle.setLEDs(255, 51, 51, 0, 0, 4);
     }
 
+    public void EnableManualMode()
+    {
+        m_AutoAlignOff = true;
+        System.out.println("Enabling Manual Mode");
+    }
+    public void DisableManualMode(){
+        m_AutoAlignOff = false;
+        System.out.println("Disable Manual Mode");
+    }
+
+    public void ArmClimber() {
+        m_ArmedClimber = true;
+        m_Climber.ArmClimber();
+    }
+    public void DisarmClimber(){
+        m_ArmedClimber = false;
+    }
+    public boolean ManualModeEngaged() {
+        return m_AutoAlignOff;
+    }
+
     public void NewScoreAttempt() {
         m_scoreCommandAborted = false;
     }
@@ -252,6 +274,7 @@ public class RobotContainer {
 
     public void RobotInit() {
         System.out.println("Initializing ROBOT LOOK AT ME");
+        m_Climber.ResetClimber();
         // m_Elevator.RunCurrentZeroing();
     }
 
@@ -339,7 +362,6 @@ public class RobotContainer {
 
         return vision[0].GetDestinationFromReefBranch(m_selectedReef, alignment);
     }
-
 
     private void SetReefBranch(int branch) {
         m_selectedReef = branch;
@@ -508,15 +530,14 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> m_Effector.Stop())));
 
         new Trigger(() -> ManualOperator.getRawButton(Constants.ManualOperatorConstants.MANUAL_SWITCH))
-                .onTrue(new InstantCommand(() -> m_AutoAlignOff = true))
-                .onFalse(new InstantCommand(() -> m_AutoAlignOff = false));
+                .onTrue(new InstantCommand(() -> EnableManualMode()))
+                .onFalse(new InstantCommand(() -> DisableManualMode()));
 
         driverController.y().onTrue(
                 drivetrain.applyRequest(() -> AlignReefRequest())
                         .withTimeout(2)
                         .until(() -> m_DistanceSensorSystem.CloseEnoughToReef())
-                        .until(() -> DriverInterrupt())
-        );
+                        .until(() -> DriverInterrupt()));
 
         driverController.b().onTrue(
                 new WaitCommand(0.5)
@@ -561,43 +582,54 @@ public class RobotContainer {
                 .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         driverController.start().and(driverController.x())
                 .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-        
-        //Test Servo Code                         
-        /*driverController.rightBumper()
-            .onTrue(new InstantCommand(() -> m_Climber.releaseFoot()));*/
+
+        new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.ARM_CLIMBER)
+                .onTrue(new InstantCommand(() -> ArmClimber()));
 
         // Winch Code
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_DN)
-                .onTrue(new InstantCommand(()->m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
                 .whileTrue(new ClimberDownCommand(m_Climber));
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_UP)
-                .onTrue(new InstantCommand(()->m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
                 .whileTrue(new ClimberUpCommand(m_Climber));
 
         // Code to make buttons set elevator destination
-        new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L1)
+        JoystickButton l1Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L1);
+        new Trigger(() -> l1Button.getAsBoolean() && !ManualModeEngaged())
                 .onTrue(new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelOne)))
                 .onTrue(new InstantCommand(() -> m_L1Scoring = true)
-                .andThen(new InstantCommand(()-> disableAlgeaButtonPressed()))
-                );
+                        .andThen(new InstantCommand(() -> disableAlgeaButtonPressed())));
 
-        new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L2)
+        new Trigger(() -> l1Button.getAsBoolean() && ManualModeEngaged())
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelOne)));
+
+        JoystickButton l2Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L2);
+        new Trigger(() -> l2Button.getAsBoolean() && !ManualModeEngaged())
                 .onTrue(new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelTwo))
-                .andThen(new InstantCommand(()-> disableAlgeaButtonPressed()))
-                .andThen(new InstantCommand(() -> m_L1Scoring = false))
-                );
+                        .andThen(new InstantCommand(() -> disableAlgeaButtonPressed()))
+                        .andThen(new InstantCommand(() -> m_L1Scoring = false)));
 
-        new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L3)
+        new Trigger(() -> l2Button.getAsBoolean() && ManualModeEngaged())
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)));
+
+        JoystickButton l3Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L3);
+        new Trigger(() -> l3Button.getAsBoolean() && !ManualModeEngaged())
                 .onTrue(new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelThree))
-                .andThen(new InstantCommand(()-> disableAlgeaButtonPressed()))
-                .andThen(new InstantCommand(() -> m_L1Scoring = false))
-                );
+                        .andThen(new InstantCommand(() -> disableAlgeaButtonPressed()))
+                        .andThen(new InstantCommand(() -> m_L1Scoring = false)));
 
-        new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L4)
+        new Trigger(() -> l3Button.getAsBoolean() && ManualModeEngaged())
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelThree)));
+
+        JoystickButton l4Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L4);
+        new Trigger(() -> l4Button.getAsBoolean() && !ManualModeEngaged())
                 .onTrue(new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.levelFour))
-                .andThen(new InstantCommand(()-> disableAlgeaButtonPressed()))
-                .andThen(new InstantCommand(() -> m_L1Scoring = false))
-                );
+                        .andThen(new InstantCommand(() -> disableAlgeaButtonPressed()))
+                        .andThen(new InstantCommand(() -> m_L1Scoring = false)));
+
+        new Trigger(() -> l4Button.getAsBoolean() && ManualModeEngaged())
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelFour)));
 
         // Bindings to control Elevator Level, wait until it aligns, then runs
         // sequential command gorup to score
@@ -704,7 +736,7 @@ public class RobotContainer {
         new Trigger(() -> GetScoreTrigger()).onTrue(
                 new InstantCommand(() -> SetScoreTrigger(false))
                         .andThen(new InstantCommand(() -> m_Elevator.ResetEncoders()))
-                        .andThen(new InstantCommand(()->System.out.println("Scoring Trigger Activated.\n")))
+                        .andThen(new InstantCommand(() -> System.out.println("Scoring Trigger Activated.\n")))
 
                         // Add the magic wait here
                         .andThen(new WaitCommand(0.15)
@@ -726,7 +758,8 @@ public class RobotContainer {
                                 // Score
                                 .andThen(new InstantCommand(() -> m_Elevator.SetLevel(GetElevatorDestination())))
                                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                .andThen(new InstantCommand(() -> m_Effector.ScoreCoralTeleOp(GetElevatorDestination())))
+                                .andThen(
+                                        new InstantCommand(() -> m_Effector.ScoreCoralTeleOp(GetElevatorDestination())))
                                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                                 .andThen(new WaitCommand(0.15))
                                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
@@ -736,13 +769,12 @@ public class RobotContainer {
                                 .andThen(new WaitCommand(0.6)) // was 0.6
                                 .andThen(m_Elevator.RunCurrentZeroing())
                                 .andThen(new InstantCommand(() -> resetElevatorDestination()))
-                    
+
                         // Chain command here instead of resetting.
                         // .andThen(new InstantCommand(() -> scoreTriggerActive = true)) // Set the flag
                         // to false
 
                         ));
-
 
         new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.RESET)
                 .onTrue(new ParallelCommandGroup(
@@ -755,7 +787,7 @@ public class RobotContainer {
         JoystickButton algeaButton = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.ALGAE);
         new Trigger(() -> algeaButton.getAsBoolean())
                 .onTrue(new InstantCommand(() -> this.recordAlgeaButtonPressed())
-                .andThen(new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.noDestination))));
+                        .andThen(new InstantCommand(() -> SetElevatorDestination(Constants.Elevator.noDestination))));
 
         // Algea score trigger
         new Trigger(
@@ -842,8 +874,6 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> this.backUp(0.5)))
                         .andThen(new WaitUntilCommand(() -> m_Effector.reachedSetState()))
                         .andThen(new InstantCommand(() -> m_Elevator.Stow())));
-
-
 
         // Turn on coral intake with left button press
         new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.INTAKE)
