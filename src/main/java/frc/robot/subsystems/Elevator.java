@@ -154,6 +154,16 @@ public class Elevator extends SubsystemBase {
       return;
   }
 
+  public boolean CheckBadElevatorPosition()
+  {
+    //Is this expensive?
+    if (m_FrontMotor.getPosition().getValueAsDouble() < -2.0 || m_RearMotor.getPosition().getValueAsDouble() < -2.0) 
+    {    
+        System.out.println("BAD ELEVATOR POSITION DETECTED");
+        return true;
+    }
+    return false;
+  }
 
   public void SetLevel(int level){
 

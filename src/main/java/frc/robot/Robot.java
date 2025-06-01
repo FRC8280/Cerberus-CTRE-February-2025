@@ -4,18 +4,21 @@
 
 package frc.robot;
 
+import org.photonvision.PhotonUtils;
 import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-//import org.photonvision.PhotonUtils;
+
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  public boolean debugSpew = false;
+  public boolean debugSpew = true;
   public static int aprilTagId;
 
   private final RobotContainer m_robotContainer;
@@ -30,8 +33,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     PortForwarder.add(5800, "photonvision-1.local", 5800);
-    PortForwarder.add(5800, "photonvision-2.local", 5800);
-    PortForwarder.add(5800, "photonvision-3.local", 5800);
+    //PortForwarder.add(5800, "photonvision-2.local", 5800);
+    //PortForwarder.add(5800, "photonvision-3.local", 5800);
     SignalLogger.enableAutoLogging(false);
     m_robotContainer.threadCommand();
   }
@@ -46,9 +49,15 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     // Correct pose estimate with vision measurements
-   
-   for (int i = 0; i < m_robotContainer.vision.length; i++) {
+    for (int i = 0; i < m_robotContainer.vision.length; i++) {
+      //Get coordinate information and process. 
+      m_robotContainer.vision[i].photonEstimator.addHeadingData(
+        Timer.getFPGATimestamp(),
+        m_robotContainer.drivetrain.getState().Pose.getRotation());
+
       var visionEst = m_robotContainer.vision[i].getEstimatedGlobalPose();
+      
+      
       int index = i;
       visionEst.ifPresent(
           est -> {
@@ -59,17 +68,18 @@ public class Robot extends TimedRobot {
                 est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
           });
     }  
+
     
+
     if(debugSpew){
         m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);
         SmartDashboard.putNumber("Current Drive X",
-     m_robotContainer.drivetrain.getState().Pose.getX());
-     SmartDashboard.putNumber("Current Drive Y",
-     m_robotContainer.drivetrain.getState().Pose.getY());
-     SmartDashboard.putNumber("Current Yaw",
-     m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
+        m_robotContainer.drivetrain.getState().Pose.getX());
+        SmartDashboard.putNumber("Current Drive Y",
+        m_robotContainer.drivetrain.getState().Pose.getY());
+        SmartDashboard.putNumber("Current Yaw",
+        m_robotContainer.drivetrain.getState().Pose.getRotation().getDegrees());
     }
-     
   }
 
   @Override

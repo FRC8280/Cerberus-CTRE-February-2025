@@ -42,49 +42,49 @@ import edu.wpi.first.math.util.Units;
     public enum Alignment {
         BRANCH,
         LEVEL1,
-        ALGEA
+        ALGEA,
+        OFF_REEF
     }
 
      public static class AutoAlignment{
         public static int noReef = -1;
+        public static int noAprilTag = -1;
         public static double maxVelocity = 3;//2.25;
         public static double maxAcceleration = 3;//2.25;
         public static double MaxAngularRate = Units.degreesToRadians(200);//360;
         public static double MaxAngularAcceleration = Units.degreesToRadians(300) ;//540; 
      
-        public static double AutoAlignmentSpeed = 0.60; //0.40;//0.25;
-        public static double AutoReefAlignmentSpeed = 0.75;//0.50;//0.35;
+        public static double AutoAlignmentSpeed = 0.5;
+        //0.6;//0.60; //0.40;//0.25;
+        public static double AutoReefAlignmentSpeed = 0.55;//0.50;//0.35;
     }
      public static class Vision {
+
+        public static double secondaryPrecision = 0.99;
+        public static double reefPoleOffset = 6.38; //6.38 inches from the apriltag to the pole.
+        public static double scoringPrecision = 0.5;
+        public static double leftCameraDistanceShooter = 14;//14 inches from the left camera to the shooter. 
+        public static double leftCameraAngle = 45.0;//45 degree andle 
+
+        public static double rightCameraDistanceShooter = -7.5; //7.5 inches
+        public static double rightCameraAngle = -15; //15 degrees 
 
         public static double CAMERA_HEIGHT_METERS = Units.inchesToMeters(11.5);
         public static double TARGET_HEIGHT_METERS = Units.inchesToMeters(51.875);
         public static double CAMERA_PITCH_RADIANS = Units.degreesToRadians(45);
 
         public static final String[] CamNames = {
-            "FrontRightCamera", "FrontLeftCamera" //,"LeftSideCam", //"RearAngle" /*See if you can change */, 
-            //"RightSideCam"//, "RearNormal" /*See if you can change*/
+            "FrontRightCamera", "FrontLeftCamera" 
         };
 
        /* // example Cam mounted facing forward, half a meter forward of center, half a meter up from center*/
         public static final Transform3d[] cameraTransforms = {
             //FrontRightCamera
-            new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(-8.75), Units.inchesToMeters(8.5)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
+            new Transform3d(new Translation3d(Units.inchesToMeters(9.75), Units.inchesToMeters(-11.0), Units.inchesToMeters(8.5)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-15.0), Units.degreesToRadians(15.0))),
             //FrontLeftCamera
-            new Transform3d(new Translation3d(Units.inchesToMeters(12.5+6), Units.inchesToMeters(8.75), Units.inchesToMeters(8.5)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))),
-            //LeftSideCam
-          //  new Transform3d(new Translation3d(Units.inchesToMeters(3), Units.inchesToMeters(7), Units.inchesToMeters(35)),
-            //    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(270))),
-            
-            
-            /* new Transform3d(new Translation3d(Units.inchesToMeters(-6), Units.inchesToMeters(3), Units.inchesToMeters(22)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(180))),
-            new Transform3d(new Translation3d(Units.inchesToMeters(8), Units.inchesToMeters(-12.5), Units.inchesToMeters(9.5)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(90))),
-            new Transform3d(new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-30), Units.degreesToRadians(180))),*/
+            new Transform3d(new Translation3d(Units.inchesToMeters(12.5), Units.inchesToMeters(10), Units.inchesToMeters(8.5)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(-15.0), Units.degreesToRadians(-45.0))),
         };
          // The layout of the AprilTags on the field
          public static final AprilTagFieldLayout kTagLayout =
@@ -240,10 +240,10 @@ import edu.wpi.first.math.util.Units;
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;
 
-        public static final double reefScoringDistance = 0.4;//0.63;//0.4;//0.5; //0.4; //0.22;//0.32; //0.24 No lean //0.4; Lean
-        public static final double reefDetectionThreshold = 0.8; //0.8;//0.75;
+        public static final double reefScoringDistance = 0.25;//0.4;//0.63;//0.4;//0.5; //0.4; //0.22;//0.32; //0.24 No lean //0.4; Lean
+        public static final double reefDetectionThreshold = 0.5;//0.7;//0.8; //0.8;//0.75;
         //public static final double reefGuessThreshhold = 0.6;
-        public static final double reefAlignedDistance = .23;
+        public static final double reefAlignedDistance = .29;
         public static final double maxTimer = 2.0;
         public static final double maxSpeed = 0.25;
      }
