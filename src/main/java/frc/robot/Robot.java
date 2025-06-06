@@ -46,18 +46,24 @@ public class Robot extends TimedRobot {
      * m_robotContainer.Periodic();
      */
 
+     //Check to see if we are in single target mode
+    boolean singleTargetVision = false;
+    //if(m_robotContainer!=null)
+     //   singleTargetVision = m_robotContainer.GetSingleTargetMode();
+
     CommandScheduler.getInstance().run();
 
     // Correct pose estimate with vision measurements
     for (int i = 0; i < m_robotContainer.vision.length; i++) {
+      
       //Get coordinate information and process. 
-      m_robotContainer.vision[i].photonEstimator.addHeadingData(
-        Timer.getFPGATimestamp(),
-        m_robotContainer.drivetrain.getState().Pose.getRotation());
 
-      var visionEst = m_robotContainer.vision[i].getEstimatedGlobalPose();
-      
-      
+      //Update the heading information for the single target pose. 
+      /*m_robotContainer.vision[i].photonEstimatorSingleTarget.addHeadingData(
+        Timer.getFPGATimestamp(),
+        m_robotContainer.drivetrain.getState().Pose.getRotation());*/
+
+      var visionEst = m_robotContainer.vision[i].getEstimatedGlobalPose(singleTargetVision);
       int index = i;
       visionEst.ifPresent(
           est -> {
@@ -68,8 +74,6 @@ public class Robot extends TimedRobot {
                 est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
           });
     }  
-
-    
 
     if(debugSpew){
         m_field.setRobotPose(m_robotContainer.drivetrain.getState().Pose);

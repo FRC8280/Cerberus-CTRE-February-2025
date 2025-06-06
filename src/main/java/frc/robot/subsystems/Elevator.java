@@ -46,7 +46,6 @@ public class Elevator extends SubsystemBase {
     ReartalonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     m_RearMotor.getConfigurator().apply(ReartalonFXConfigs);
 
-    
     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
     currentLimits.SupplyCurrentLimitEnable = true;
     currentLimits.SupplyCurrentLimit = 40;
@@ -63,6 +62,10 @@ public class Elevator extends SubsystemBase {
     ResetEncoders();
   }
 
+  public boolean ZeroCompleted()
+  {
+    return !m_RunZeroFunction;
+  }
   public void SetZeroingFlag(boolean value)
   {
     m_RunZeroFunction = value;
@@ -156,12 +159,23 @@ public class Elevator extends SubsystemBase {
 
   public boolean CheckBadElevatorPosition()
   {
-    //Is this expensive?
-    if (m_FrontMotor.getPosition().getValueAsDouble() < -2.0 || m_RearMotor.getPosition().getValueAsDouble() < -2.0) 
+  
+    if (m_FrontMotor.getPosition().getValueAsDouble() < -3 || m_RearMotor.getPosition().getValueAsDouble() < -3) 
     {    
-        System.out.println("BAD ELEVATOR POSITION DETECTED");
+        //Test
+        System.out.println("BAD ELEVATOR POSITION DETECTED Front Motor %: " + m_FrontMotor.getPosition().getValueAsDouble() + " Rear Motor %: " + m_RearMotor.getPosition().getValueAsDouble());
+        
         return true;
     }
+
+      //Is this expensive?
+      if (m_FrontMotor.getPosition().getValueAsDouble() < -2.0 || m_RearMotor.getPosition().getValueAsDouble() < -2.0)
+      {
+            System.out.println("It's between 0 and -3, resetting");
+            ResetEncoders();
+      } 
+    
+      
     return false;
   }
 
@@ -291,15 +305,15 @@ public void checkAndFix(){
     m_FrontMotor.setPosition(0);
     m_RearMotor.setPosition(0);
   }
-
   
   public Command RunCurrentZeroing() {
     return this.run(() -> this.SetPower(-.10))
         .andThen(() -> this.SetZeroingFlag(true))
         .until(() -> m_FrontMotor.getStatorCurrent().refresh().getValueAsDouble() > 40.0)
+        .andThen(() -> this.ResetEncoders())
         .andThen(() -> this.SetPower(0))
-        .andThen(() -> this.SetZeroingFlag(false))
-        .finallyDo(() -> this.ResetEncoders());
+        .finallyDo(() -> this.SetZeroingFlag(false));
+        //.finallyDo(() -> this.ResetEncoders());
   }
 
   @Override

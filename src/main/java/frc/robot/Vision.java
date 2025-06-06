@@ -58,6 +58,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 public class Vision {
     public final PhotonCamera camera;
     public final PhotonPoseEstimator photonEstimator;
+    //public final PhotonPoseEstimator photonEstimatorSingleTarget;
     private Matrix<N3, N1> curStdDevs;
 
     // Simulation
@@ -581,10 +582,10 @@ public class Vision {
                     destination = new Pose2d(3.6625, 5.2106, Rotation2d.fromDegrees(-60));
                     break;
                 case Constants.ReefOperatorConstants.SIX_LEFT: // 18 left
-                    destination = new Pose2d(3.2, 4.32, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(3.1, 4.32, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.SIX_RIGHT: // 18 right
-                    destination = new Pose2d(3.24, 3.93, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(3.1, 3.97, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.FOUR_LEFT: // 17 left
                     destination = new Pose2d(3.524, 2.952, Rotation2d.fromDegrees(60/* 53.6 */));
@@ -611,6 +612,10 @@ public class Vision {
 
         populateAngleLookupTable();
         camera = new PhotonCamera(Constants.Vision.CamNames[index]);
+
+        //photonEstimatorSingleTarget = new PhotonPoseEstimator(kTagLayout, PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
+        //        cameraTransforms[index]);
+        //photonEstimatorSingleTarget.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         photonEstimator = new PhotonPoseEstimator(kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR   /* PNP_DISTANCE_TRIG_SOLVE MULTI_TAG_PNP_ON_COPROCESSOR*/,
                 cameraTransforms[index]);
@@ -657,11 +662,18 @@ public class Vision {
      *         timestamp, and targets
      *         used for estimation.
      */
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+    public Optional<EstimatedRobotPose> getEstimatedGlobalPose(boolean singleTarget) {
+
+        PhotonPoseEstimator photonEstimatorToUse;
+       // if(singleTarget)
+        //    photonEstimatorToUse = photonEstimatorSingleTarget;
+        //else
+            photonEstimatorToUse = photonEstimator;
+        
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         for (var change : camera.getAllUnreadResults()) {
-            visionEst = photonEstimator.update(change);
-            updateEstimationStdDevs(visionEst, change.getTargets());
+            visionEst = photonEstimatorToUse.update(change);
+            updateEstimationStdDevs(singleTarget,visionEst, change.getTargets());
 
             if (Robot.isSimulation()) {
                 visionEst.ifPresentOrElse(
@@ -685,8 +697,15 @@ public class Vision {
      * @param estimatedPose The estimated pose to guess standard deviations for.
      * @param targets       All targets in this camera frame
      */
-    private void updateEstimationStdDevs(
+    private void updateEstimationStdDevs(boolean singleTarget,
             Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
+
+        PhotonPoseEstimator photonEstimatorToUse;
+        //if(singleTarget)
+        //    photonEstimatorToUse = photonEstimatorSingleTarget;
+       // else
+            photonEstimatorToUse = photonEstimator;
+
         if (estimatedPose.isEmpty()) {
             // No pose input. Default to single-tag std devs
             curStdDevs = kSingleTagStdDevs;
@@ -700,7 +719,7 @@ public class Vision {
             // Precalculation - see how many tags we found, and calculate an
             // average-distance metric
             for (var tgt : targets) {
-                var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+                var tagPose = photonEstimatorToUse.getFieldTags().getTagPose(tgt.getFiducialId());
                 if (tagPose.isEmpty())
                     continue;
                 numTags++;

@@ -34,7 +34,7 @@ public class DistanceSensorSystem extends SubsystemBase {
     public boolean CloseEnoughToReef()
     {
        // if( (alignValues[0] <= Constants.DistanceConstants.reefAlignedDistance) && (alignValues[1] <= Constants.DistanceConstants.reefAlignedDistance))
-       if( (m_alignRanges[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefAlignedDistance) && (m_alignRanges[1].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefAlignedDistance))
+       if( (m_alignRanges[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefAlignedDistance) || (m_alignRanges[1].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefAlignedDistance))
             return true;
         else
             return false;

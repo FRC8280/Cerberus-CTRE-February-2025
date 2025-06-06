@@ -4,17 +4,15 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.List;
 import java.util.Optional;
 
-import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import frc.robot.commands.IntakeReverse;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.GoalEndState;
@@ -43,15 +41,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.DistanceSensorSystem;
-import frc.robot.subsystems.DistanceSensorSystem.ReefPoleAlignment;
-import frc.robot.subsystems.Effector;
-import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Elevator;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
+import frc.robot.commands.IntakeReverse;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.DistanceSensorSystem;
+import frc.robot.subsystems.Effector;
+import frc.robot.subsystems.Elevator;
 
 public class RobotContainer {
 
@@ -60,20 +58,14 @@ public class RobotContainer {
         Hi
     };
 
-    private Timer m_cancelAutomovementTimer = new Timer();
+    // private Timer m_cancelAutomovementTimer = new Timer();
+    private Timer m_autoAlignTimer = new Timer();
+    private boolean m_alignmentInactive = true;
     private boolean m_scoreCommandAborted = false;
     private boolean m_algeaScoreCommandAborted = false;
 
     public final Vision[] vision = new Vision[Constants.Vision.CamNames.length];
-    private double m_VisionAprilTagX = 0;
-    private double m_VisionAprilTagY = 0;
-    private double m_VisionDetectedAprilTag = 0;
-
-    public void SetVisionAprilTagXY(double x, double y, int tagId) {
-        m_VisionAprilTagX = x;
-        m_VisionAprilTagY = y;
-        m_VisionDetectedAprilTag = tagId;
-    }
+    public boolean m_SingleTargetMode = false; // Default to single target mode
 
     // public final AlgaeArm m_Algae = new AlgaeArm();
     public final Climber m_Climber = new Climber();
@@ -92,6 +84,18 @@ public class RobotContainer {
     public double m_ElevatorDestination = Constants.Elevator.noDestination;
     public int m_selectedReef = Constants.AutoAlignment.noReef;
     public boolean m_AlgeaButtonPressed = false;
+
+    public boolean AutoAlignmentInActive() {
+        return m_alignmentInactive;
+    }
+
+    public boolean GetSingleTargetMode() {
+        return m_SingleTargetMode;
+    }
+
+    public void SetSingleTargetMode(boolean value) {
+        m_SingleTargetMode = value;
+    }
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                   // speed
@@ -298,20 +302,28 @@ public class RobotContainer {
 
     public boolean DriverInterrupt() {
 
-        if (m_cancelAutomovementTimer.isRunning() && !m_cancelAutomovementTimer.hasElapsed(2))
-            return false;
-        else if (m_cancelAutomovementTimer.isRunning() && m_cancelAutomovementTimer.hasElapsed(2))
-            m_cancelAutomovementTimer.stop();
+        /*
+         * dead code?
+         * if (m_cancelAutomovementTimer.isRunning() &&
+         * !m_cancelAutomovementTimer.hasElapsed(2))
+         * return false;
+         * else if (m_cancelAutomovementTimer.isRunning() &&
+         * m_cancelAutomovementTimer.hasElapsed(2))
+         * m_cancelAutomovementTimer.stop();
+         */
 
         boolean abort = ManualOperator.getRawButtonPressed(Constants.ManualOperatorConstants.ABORT) ||
                 Math.abs(driverController.getLeftX()) > 0.4 ||
                 Math.abs(driverController.getLeftY()) > 0.4 ||
                 Math.abs(driverController.getRightX()) > 0.4;
 
-        if (abort) {
-            m_cancelAutomovementTimer.reset();
-            m_cancelAutomovementTimer.start();
-        }
+        /*
+         * if (abort) {
+         * m_cancelAutomovementTimer.reset();
+         * m_cancelAutomovementTimer.start();
+         * //SetSingleTargetMode(false);
+         * }
+         */
 
         return abort;
     }
@@ -321,69 +333,51 @@ public class RobotContainer {
     private SwerveRequest StopRobotNow() {
 
         stopRobotMovementRequest.VelocityY = 0;
+        stopRobotMovementRequest.VelocityX = 0;
+        stopRobotMovementRequest.RotationalRate = 0;
         return stopRobotMovementRequest;
     }
 
     SwerveRequest.RobotCentric alignShotRobotRequest = new SwerveRequest.RobotCentric();
 
-    private SwerveRequest AlignShotRequest() {
-
-        ReefPoleAlignment currentAlignment = m_DistanceSensorSystem.LocateReefPole();
-
-        if (currentAlignment == ReefPoleAlignment.FAR_LEFT)
-            alignShotRobotRequest.VelocityY = -Constants.AutoAlignment.AutoAlignmentSpeed;
-        else if (currentAlignment == ReefPoleAlignment.LEFT)
-            alignShotRobotRequest.VelocityY = -Constants.AutoAlignment.AutoAlignmentSpeed;
-        else if (currentAlignment == ReefPoleAlignment.RIGHT)
-            alignShotRobotRequest.VelocityY = +Constants.AutoAlignment.AutoAlignmentSpeed;
-        else if (currentAlignment == ReefPoleAlignment.FAR_RIGHT)
-            alignShotRobotRequest.VelocityY = +Constants.AutoAlignment.AutoAlignmentSpeed;
-        else if (currentAlignment == ReefPoleAlignment.CENTER)
-            alignShotRobotRequest.VelocityY = 0;
-        else
-            alignShotRobotRequest.VelocityY = 0;
-
-        return alignShotRobotRequest;
-    }
-
     boolean m_NegativeMovement = false;
     SwerveRequest.RobotCentric alignShotRobotRequestEx = new SwerveRequest.RobotCentric();
 
     private SwerveRequest AlignShotRequestX() {
+        m_alignmentInactive = false;
 
         double currentX = drivetrain.getState().Pose.getX();
-        
+
         Pose2d destinationPos = RetrieveDestination(Constants.Alignment.BRANCH);
-        double destinationX = destinationPos.getX();        
+        double destinationX = destinationPos.getX();
         double deltaX = destinationX - currentX;
 
-        //Set both motors for 0
+        // Set both motors for 0
         alignShotRobotRequestEx.VelocityY = 0;
         alignShotRobotRequestEx.VelocityX = 0;
 
-        if(Math.abs(currentX) >= 0.99 * Math.abs(destinationX))
+        if (Math.abs(currentX) >= 0.99 * Math.abs(destinationX))
             deltaX = 0;
 
-        if(deltaX < 0)
-        {
+        if (deltaX < 0) {
             m_NegativeMovement = true;
             alignShotRobotRequestEx.VelocityX = -0.35;
-        }
-        else if (deltaX > 0)
-        {
+        } else if (deltaX > 0) {
             m_NegativeMovement = false;
             alignShotRobotRequestEx.VelocityX = +0.35;
-        }
-        else
-        {
+        } else {
             m_NegativeMovement = true;
             alignShotRobotRequestEx.VelocityX = 0;
         }
 
+        m_autoAlignTimer.reset();
+        m_autoAlignTimer.start();
         return alignShotRobotRequestEx;
     }
 
     private SwerveRequest AlignShotRequestY() {
+
+        m_alignmentInactive = false;
 
         double currentY = drivetrain.getState().Pose.getY();
         Pose2d destinationPos = RetrieveDestination(Constants.Alignment.BRANCH);
@@ -392,84 +386,139 @@ public class RobotContainer {
         alignShotRobotRequestEx.VelocityX = 0;
 
         double deltaY = destinationY - currentY;
-        //if(Math.abs(currentY) >= 0.99 * Math.abs(destinationY))
-         //   deltaY = 0;
+        // if(Math.abs(currentY) >= 0.99 * Math.abs(destinationY))
+        // deltaY = 0;
 
-        if(deltaY < 0)
-        {
+        if (deltaY < 0) {
             m_NegativeMovement = true;
             alignShotRobotRequestEx.VelocityY = -0.35;
-        }
-        else if (deltaY > 0)
-        {   
+        } else if (deltaY > 0) {
             m_NegativeMovement = false;
             alignShotRobotRequestEx.VelocityY = 0.35;
-        }
-        else
-        {
+        } else {
             m_NegativeMovement = true;
             alignShotRobotRequestEx.VelocityY = 0;
         }
 
+        m_autoAlignTimer.reset();
+        m_autoAlignTimer.start();
         return alignShotRobotRequestEx;
     }
 
-    private boolean CheckNegativeMovementAlignment(double current, double destination){
+    private boolean CheckNegativeMovementAlignment(double current, double destination) {
 
-        //double delta = destination - current;
-        
+        // double delta = destination - current;
+
         // Check to see if they are 99%
         if (Math.abs(destination) >= Constants.Vision.secondaryPrecision * Math.abs(current))
             return true;
 
         return false;
     }
-    public boolean CheckPositiveMovementAlignment(double current, double destination){
 
-        //double delta = destination - current;
-        
+    public boolean CheckPositiveMovementAlignment(double current, double destination) {
+
+        // double delta = destination - current;
+
         // Check to see if they are 99%
         if (Math.abs(current) >= Constants.Vision.secondaryPrecision * Math.abs(destination))
             return true;
 
         return false;
     }
-    
 
     public boolean CameraAlignmentCompleteX() {
 
+        if (DriverInterrupt()) {
+            m_alignmentInactive = true;
+            return true;
+        }
+        if (m_autoAlignTimer.hasElapsed(2)) {
+            m_alignmentInactive = true;
+            return true;
+        }
+
         double currentX = drivetrain.getState().Pose.getX();
-        
+
         Pose2d destinationPos = RetrieveDestination(Constants.Alignment.BRANCH);
         double destinationX = destinationPos.getX();
-        
-        //double deltaX = destinationX - currentX;
-        
-        if(m_NegativeMovement)
-            return CheckNegativeMovementAlignment(currentX, destinationX);
-        else 
-            return CheckPositiveMovementAlignment(currentX, destinationX);
+
+        boolean test;
+
+        if (m_NegativeMovement)
+            test = CheckNegativeMovementAlignment(currentX, destinationX);
+        else
+            test = CheckPositiveMovementAlignment(currentX, destinationX);
+
+        if (test) {
+            System.out.println("90% reached - Camera Alignment Complete X");
+            m_alignmentInactive = true;
+        }
+
+        return test;
     }
 
     public boolean CameraAlignmentCompleteY() {
 
+        if (DriverInterrupt()) {
+            m_alignmentInactive = true;
+            System.out.println("Driver Interrupt");
+            return true;
+        }
+
+        if (m_autoAlignTimer.hasElapsed(2)) {
+            m_alignmentInactive = true;
+            System.out.println("Auto Align Timer has elapsed");
+            return true;
+        }
+
         double currentY = drivetrain.getState().Pose.getY();
-        
+
         Pose2d destinationPos = RetrieveDestination(Constants.Alignment.BRANCH);
         double destinationY = destinationPos.getY();
-        
-        //double deltaY = destinationY - currentY;
-        
-        if(m_NegativeMovement)
-            return CheckNegativeMovementAlignment(currentY, destinationY);
-        else 
-            return CheckPositiveMovementAlignment(currentY, destinationY);
 
+        // double deltaY = destinationY - currentY;
+
+        boolean test;
+        System.out.println("Current Y: " + currentY + " Destination Y: " + destinationY);
+        if (m_NegativeMovement)
+            test = CheckNegativeMovementAlignment(currentY, destinationY);
+        else
+            test = CheckPositiveMovementAlignment(currentY, destinationY);
+
+        if (test) {
+            System.out.println("The values of test is: " + test);
+            System.out.println("90% reached - Camera Alignment Complete Y");
+            m_alignmentInactive = true;
+        }
+
+        return test;
+    }
+
+    public void ResetAutoAlignTimer() {
+        m_autoAlignTimer.reset();
+        m_autoAlignTimer.start();
+    }
+
+    public boolean ReefClosingComplete() {
+        // Check to see if the robot is close enough to the reef edge
+        if (m_DistanceSensorSystem.CloseEnoughToReef()) {
+            m_alignmentInactive = true;
+            return true;
+        }
+        // Check to see if the robot has been moving for 2 seconds
+        if (m_autoAlignTimer.hasElapsed(0.6)) {
+            m_alignmentInactive = true;
+            return true;
+        }
+        return false;
     }
 
     SwerveRequest.RobotCentric alignReefEdgeRequest = new SwerveRequest.RobotCentric();
 
     private SwerveRequest ApproachReefRequest() {
+
+        m_alignmentInactive = false;
 
         double distance = m_DistanceSensorSystem.LongestDistance();
 
@@ -680,6 +729,7 @@ public class RobotContainer {
                 (Math.abs(driverController.getRightY()) > 0.4) ||
                 ManualOperator.getRawButtonPressed(Constants.ManualOperatorConstants.ABORT))
                 .onTrue(new InstantCommand(() -> this.CancelAutomaticMovement())
+                        // .andThen(new InstantCommand(() -> SetSingleTargetMode(false)))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(false)))
                         .andThen(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()))
                         .andThen(new InstantCommand(() -> m_Elevator.Stow()))
@@ -712,44 +762,39 @@ public class RobotContainer {
          */
 
         driverController.y().onTrue(
-                /*
-                 * drivetrain.applyRequest(() -> AlignShotRequestEx())
-                 * .withTimeout(4)
-                 * .until(() -> CameraAlignmentComplete())
-                 * .until(() -> DriverInterrupt()));
-                 */
-                /*
-                 * drivetrain.applyRequest(() -> ApproachReefRequest())
-                 * .withTimeout(2)
-                 * .until(() -> m_DistanceSensorSystem.CloseEnoughToReef())
-                 * .until(() -> DriverInterrupt()));
-                 */
-                // Align to target (Tre look here)
-               new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT))
+
+                new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT))
+                        // Realign
+                        // .andThen(drivetrain.applyRequest(() -> AlignShotRequestX()).until(() ->
+                        // CameraAlignmentCompleteY()))
                         .andThen(drivetrain.applyRequest(() -> AlignShotRequestY())
-                                .withTimeout(4)
-                                .until(() -> CameraAlignmentCompleteY())
-                                .until(() -> DriverInterrupt())) 
+                                .until(() -> CameraAlignmentCompleteY()))
+                        // .andThen(drivetrain.applyRequest(() -> AlignShotRequestX()).until(() ->
+                        // CameraAlignmentCompleteX()))
+                        .andThen(drivetrain.applyRequest(() -> AlignShotRequestX())
+                                .until(() -> CameraAlignmentCompleteX()))
 
-                .andThen(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT))
-                                .andThen(drivetrain.applyRequest(() -> AlignShotRequestX())
-                                        .withTimeout(4)
-                                        .until(() -> CameraAlignmentCompleteX())
-                                        .until(() -> DriverInterrupt()))//);
+                        // Close in on the reef
+                        .andThen(new InstantCommand(() -> ResetAutoAlignTimer()))
+                        // .andThen(drivetrain.applyRequest(() -> ApproachReefRequest()).until(() ->
+                        // ReefClosingComplete()))
+                        .andThen(
+                                drivetrain.applyRequest(() -> ApproachReefRequest()).until(() -> ReefClosingComplete()))
 
-                                        .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
-          .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-          .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
-          .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-          .andThen(new WaitCommand(0.15))
-          .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-          
-          .andThen(new WaitUntilCommand(() ->
-          m_Elevator.reachedSetState()).withTimeout(0.5))
-          .andThen(new WaitCommand(0.6))
-          .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
-          
-          );
+                        .andThen(new InstantCommand(() -> m_Elevator.LevelTwo()))
+
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoral()))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        // .andThen(new InstantCommand(() -> this.SetSingleTargetMode(false)))
+
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
+                        .andThen(new WaitCommand(0.6))
+                        .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+
+        );
 
         /*
          * driverController.b().onTrue(
@@ -951,75 +996,49 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetScoreTrigger(true))));
 
         // Trigger to check bad elevator position and run zeroing if needed
-        //new Trigger(() -> m_Elevator.CheckBadElevatorPosition())
-        //        .onTrue(new InstantCommand(() -> m_Elevator.RunCurrentZeroing()));
+
         new Trigger(() -> m_Elevator.CheckBadElevatorPosition())
-            .onTrue(m_Elevator.runOnce(() -> m_Elevator.RunCurrentZeroing()));
+                .onTrue(m_Elevator.runOnce(() -> m_Elevator.RunCurrentZeroing()));
+                //.onTrue(m_Elevator.runOnce(() -> m_Elevator.ResetEncoders()));
 
         // Complete Scoring Action trigger
         new Trigger(() -> GetScoreTrigger()).onTrue(
                 new InstantCommand(() -> SetScoreTrigger(false))
-                        .andThen(new InstantCommand(() -> m_Elevator.ResetEncoders()))
-                        .andThen(new InstantCommand(() -> System.out.println("Scoring Trigger Activated.\n")))
+                        // .andThen(new InstantCommand(() -> m_Elevator.ResetEncoders()))
+                        .andThen(new WaitCommand(1.5)) // 0.22)
 
-                        // Add the magic wait here
-                        .andThen(new WaitCommand(0.15)
-
+                       // Realign
                         .andThen(drivetrain.applyRequest(() -> AlignShotRequestY())
-                                .withTimeout(4)
-                                .until(() -> CameraAlignmentCompleteY())
-                                .until(() -> DriverInterrupt())) 
+                                .until(() -> CameraAlignmentCompleteY()))
+                        /*.andThen(new WaitUntilCommand(() -> this.AutoAlignmentInActive()))
+                        .andThen(new WaitCommand(2.0)) // 0.22)
 
-                .andThen(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT))
-                                .andThen(drivetrain.applyRequest(() -> AlignShotRequestX())
-                                        .withTimeout(4)
-                                        .until(() -> CameraAlignmentCompleteX())
-                                        .until(() -> DriverInterrupt()))//);
+                         .andThen(drivetrain.applyRequest(() -> AlignShotRequestX())
+                                .until(() -> CameraAlignmentCompleteX()))
+                        .andThen(new WaitUntilCommand(() -> this.AutoAlignmentInActive()))
 
-                                /*
-                                 * // Align to target (Tre look here)
-                                 * .andThen(drivetrain.applyRequest(() -> AlignShotRequest())
-                                 * .withTimeout(2)
-                                 * .until(() -> CameraAlignmentComplete())
-                                 * .until(() -> DriverInterrupt()))
-                                 */
+                        // Close in on the reef
+                        .andThen(new InstantCommand(() -> ResetAutoAlignTimer()))
+                        .andThen( drivetrain.applyRequest(() -> ApproachReefRequest())
+                                 .until(() -> ReefClosingComplete()))
+                        .andThen(new WaitUntilCommand(() -> this.AutoAlignmentInActive()))
 
-                                // Align - Get close to reef
-                              /*  .andThen(drivetrain.applyRequest(() -> ApproachReefRequest())
-                                        .withTimeout(1.5)
-                                        .until(() -> m_DistanceSensorSystem.CloseEnoughToReef())
-                                        .until(() -> DriverInterrupt()))
+                        // Start moving elevator
+                        .andThen(new InstantCommand(() -> m_Elevator.SetLevel(GetElevatorDestination())))
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
 
-                                // Take this out later
-                                .andThen(drivetrain.applyRequest(() -> alignShotRobotRequest))
-                                .withTimeout(2)
-                                .until(() -> DriverInterrupt())
+                        .andThen(new InstantCommand(() -> m_Effector.ScoreCoralTeleOp(GetElevatorDestination())))
+                        .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                        .andThen(new WaitCommand(0.15))
+                        .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                        // .andThen(new InstantCommand(() -> this.SetSingleTargetMode(false)))
 
-                                .andThen(drivetrain.applyRequest(() -> StopRobotNow()) // Make sure the drive shuts off
-                                        .withTimeout(0.1))
-
-                                         */
-
-                                // Score
-                                .andThen(new InstantCommand(() -> m_Elevator.SetLevel(GetElevatorDestination())))
-                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                                .andThen(
-                                        new InstantCommand(() -> m_Effector.ScoreCoralTeleOp(GetElevatorDestination())))
-                                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                                .andThen(new WaitCommand(0.15))
-                                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-
-                                // Reset lift
-                                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(2))
-                                .andThen(new WaitCommand(0.6)) // was 0.6
-                                .andThen(m_Elevator.RunCurrentZeroing())
-                                .andThen(new InstantCommand(() -> resetElevatorDestination()))
-
-                        // Chain command here instead of resetting.
-                        // .andThen(new InstantCommand(() -> scoreTriggerActive = true)) // Set the flag
-                        // to false
-
-                        ));
+                        .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
+                        .andThen(new WaitCommand(0.6))
+                        .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                        .andThen(new WaitUntilCommand(()->m_Elevator.ZeroCompleted()))
+                        .andThen(new InstantCommand(() -> resetElevatorDestination()))*/
+                        );
 
         new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.RESET)
                 .onTrue(new ParallelCommandGroup(
