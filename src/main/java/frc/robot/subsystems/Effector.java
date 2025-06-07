@@ -27,7 +27,7 @@ public class Effector extends SubsystemBase  {
     
       public boolean debugSpew = false;
     private EffectorState m_EffectorState;
-    private TalonFX m_EffectorMotor;
+    private  TalonFX m_EffectorMotor;
     private TalonFX m_algeaArm;
 
     private CANrange m_FrontSensor;
@@ -150,6 +150,13 @@ public class Effector extends SubsystemBase  {
         m_EffectorMotor.set(-50);
     }
 
+    public void MoveAlgeaArmNoEffector()
+    {
+        //System.out.println("Moving Algea arm.");
+        final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+        m_algeaArm.setControl(positionRequest.withPosition(-2));//Constants.Effector.algeaArmScorePosition));
+    }
+
     public void StopNewArm()
     {
         final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
@@ -226,12 +233,11 @@ public class Effector extends SubsystemBase  {
         }
         
     }
-    
 
     public void ScoreL1()
     {
         m_EffectorState = EffectorState.Scoring;
-        RunEffector(1);
+        RunEffector(30);
     }
 
     public void EjectCoral()
