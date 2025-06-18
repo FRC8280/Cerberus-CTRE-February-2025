@@ -230,12 +230,6 @@ import edu.wpi.first.math.util.Units;
         public static final int leftAlignmentRangeId = 30;
         public static final int righttAlignmentRangeId = 31;
 
-        public static final int TargetArray0 = 32;
-        public static final int TargetArray1 = 33;
-        public static final int TargetArray2 = 34;
-        public static final int TargetArray3 = 35;
-        public static final int TargetArray4 = 36;
-
         //Change later when installed
         public static final int alignmentDetectionRange = 0;
         public static final int poleDetectionRange = 0;

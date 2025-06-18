@@ -43,7 +43,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
-import frc.robot.commands.IntakeReverse;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -111,12 +110,6 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                       // second
                                                                                       // max angular velocity
-    /*
-     * private final SwerveRequest.RobotCentric robotCentricDrive = new
-     * SwerveRequest.RobotCentric()
-     * .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop
-     * control for drive
-     */
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -317,40 +310,12 @@ public class RobotContainer {
 
     public boolean DriverInterrupt() {
 
-        /*
-         * dead code?
-         * if (m_cancelAutomovementTimer.isRunning() &&
-         * !m_cancelAutomovementTimer.hasElapsed(2))
-         * return false;
-         * else if (m_cancelAutomovementTimer.isRunning() &&
-         * m_cancelAutomovementTimer.hasElapsed(2))
-         * m_cancelAutomovementTimer.stop();
-         */
-
         boolean abort = ManualOperator.getRawButtonPressed(Constants.ManualOperatorConstants.ABORT) ||
                 Math.abs(driverController.getLeftX()) > 0.4 ||
                 Math.abs(driverController.getLeftY()) > 0.4 ||
                 Math.abs(driverController.getRightX()) > 0.4;
 
-        /*
-         * if (abort) {
-         * m_cancelAutomovementTimer.reset();
-         * m_cancelAutomovementTimer.start();
-         * //SetSingleTargetMode(false);
-         * }
-         */
-
         return abort;
-    }
-
-    SwerveRequest.RobotCentric stopRobotMovementRequest = new SwerveRequest.RobotCentric();
-
-    private SwerveRequest StopRobotNow() {
-
-        stopRobotMovementRequest.VelocityY = 0;
-        stopRobotMovementRequest.VelocityX = 0;
-        stopRobotMovementRequest.RotationalRate = 0;
-        return stopRobotMovementRequest;
     }
 
     SwerveRequest.RobotCentric alignShotRobotRequest = new SwerveRequest.RobotCentric();
@@ -378,11 +343,6 @@ public class RobotContainer {
         alignShotRobotRequestCombined.VelocityX = 0;
         alignShotRobotRequestCombined.VelocityY = 0;
 
-        /*if (Math.abs(currentX) >= 0.99 * Math.abs(destinationX))
-            deltaX = 0;
-        if (Math.abs(currentY) >= 0.99 * Math.abs(destinationY))    
-            deltaY = 0;*/
-        
         //Calculate the velocities
         if (deltaX < 0) {
             negativeX = true;
@@ -424,69 +384,6 @@ public class RobotContainer {
         m_autoAlignTimer.reset();
         m_autoAlignTimer.start();
         return alignShotRobotRequestCombined;
-    }
-
-    private SwerveRequest AlignShotRequestX() {
-        m_alignmentInactive = false;
-
-        double currentX = drivetrain.getState().Pose.getX();
-
-        Pose2d destinationPos = RetrieveDestination(Constants.Alignment.BRANCH);
-        double destinationX = destinationPos.getX();
-        double deltaX = destinationX - currentX;
-
-        // Set both motors for 0
-        alignShotRobotRequestX.VelocityY = 0;
-        alignShotRobotRequestX.VelocityX = 0;
-
-        if (Math.abs(currentX) >= 0.99 * Math.abs(destinationX))
-            deltaX = 0;
-
-        if (deltaX < 0) {
-            m_NegativeMovement = true;
-            alignShotRobotRequestX.VelocityX = -0.35;
-        } else if (deltaX > 0) {
-            m_NegativeMovement = false;
-            alignShotRobotRequestX.VelocityX = +0.35;
-        } else {
-            m_NegativeMovement = true;
-            alignShotRobotRequestX.VelocityX = 0;
-        }
-
-        m_autoAlignTimer.reset();
-        m_autoAlignTimer.start();
-        return alignShotRobotRequestX;
-    }
-
-    SwerveRequest.RobotCentric alignShotRobotRequestY = new SwerveRequest.RobotCentric();
-    private SwerveRequest AlignShotRequestY() {
-
-        m_alignmentInactive = false;
-
-        double currentY = drivetrain.getState().Pose.getY();
-        Pose2d destinationPos = RetrieveDestination(Constants.Alignment.BRANCH);
-        double destinationY = destinationPos.getY();
-        alignShotRobotRequestY.VelocityY = 0;
-        alignShotRobotRequestY.VelocityX = 0;
-
-        double deltaY = destinationY - currentY;
-        // if(Math.abs(currentY) >= 0.99 * Math.abs(destinationY))
-        // deltaY = 0;
-
-        if (deltaY < 0) {
-            m_NegativeMovement = true;
-            alignShotRobotRequestY.VelocityY = -0.35;
-        } else if (deltaY > 0) {
-            m_NegativeMovement = false;
-            alignShotRobotRequestY.VelocityY = 0.35;
-        } else {
-            m_NegativeMovement = true;
-            alignShotRobotRequestY.VelocityY = 0;
-        }
-
-        m_autoAlignTimer.reset();
-        m_autoAlignTimer.start();
-        return alignShotRobotRequestY;
     }
 
     private boolean CheckNegativeMovementAlignment(double current, double destination) {
@@ -664,18 +561,6 @@ public class RobotContainer {
 
     private void SetReefBranch(int branch) {
         m_selectedReef = branch;
-    }
-
-    private boolean isBranchOnLeft() {
-        if ((m_selectedReef == Constants.ReefOperatorConstants.TWELVE_LEFT) ||
-                (m_selectedReef == Constants.ReefOperatorConstants.TEN_LEFT) ||
-                (m_selectedReef == Constants.ReefOperatorConstants.EIGHT_LEFT) ||
-                (m_selectedReef == Constants.ReefOperatorConstants.SIX_LEFT) ||
-                (m_selectedReef == Constants.ReefOperatorConstants.FOUR_LEFT) ||
-                (m_selectedReef == Constants.ReefOperatorConstants.TWO_LEFT))
-            return true;
-        else
-            return false;
     }
 
     public boolean IsAlgeaHigh() {
@@ -875,11 +760,6 @@ public class RobotContainer {
                         .andThen (drivetrain.applyRequest(() -> AlignShotRequestCombined())
                                 .until(() -> CameraAlignmentCombined()))
 
-                         /* .andThen(drivetrain.applyRequest(() -> AlignShotRequestY())
-                                .until(() -> CameraAlignmentCompleteY()))
-                        .andThen(drivetrain.applyRequest(() -> AlignShotRequestX())
-                                .until(() -> CameraAlignmentCompleteX()))*/
-
                         // Close in on the reef
                         .andThen(new InstantCommand(() -> ResetAutoAlignTimer()))
                         .andThen(
@@ -902,17 +782,39 @@ public class RobotContainer {
 
 
         driverController.b().onTrue(
+   
              new WaitCommand(0.5)    
+             .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
+             .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+             .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArmNoEffector()))
+             .andThen(new WaitCommand(2))
+             .andThen(drivetrain.applyRequest(() -> ApproachReefRequest()).until(() -> ReefClosingComplete()))
+             .andThen(new InstantCommand(() -> m_Effector.ScoreL1()))
+             .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+             .andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
+             .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+
+                );
+
+                /*             new WaitCommand(0.1)    
                 .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArmNoEffector()))
-                .andThen(new WaitCommand(3))
+                //.andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArmNoEffector()))
+                .andThen(new WaitCommand(1))
+                .andThen(drivetrain.applyRequest(() -> ApproachReefRequest()).until(() -> ReefClosingComplete()))
                 .andThen(new InstantCommand(() -> m_Effector.ScoreL1()))
-                .andThen(new WaitCommand(4))
-                .andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
-                .andThen(new InstantCommand(() -> m_Effector.Stop()))
+                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                .andThen(new WaitCommand(2))
+
+                //.andThen(new WaitCommand(3))
+                //.andThen(new InstantCommand(() -> this.backUp(0.5)))
+                //.andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
+                
                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                );
+                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(2))
+                .andThen(new WaitCommand(0.6))
+                .andThen(m_Elevator.RunCurrentZeroing())
+                ); */
 
         /*
          * driverController.b().onTrue(
@@ -1156,7 +1058,7 @@ public class RobotContainer {
 
                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                 .andThen(new WaitCommand(0.6))
-                .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
+                .andThen(m_Elevator.RunCurrentZeroing()) 
                 .andThen(new WaitUntilCommand(()->m_Elevator.ZeroCompleted()))
                 .andThen(new InstantCommand(() -> resetElevatorDestination()))
             .andThen(() -> SetScoreTrigger(ScoringState.NotScoring))
@@ -1291,7 +1193,8 @@ public class RobotContainer {
 
         new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.REV)
                 .onTrue(new ParallelCommandGroup(
-                        new IntakeReverse(m_Effector), // Run the intake in reverse
+                        //new IntakeReverse(m_Effector), // Run the intake in reverse
+                        new InstantCommand(() -> m_Effector.EjectCoral()), // Zero the elevator
                         new InstantCommand(() -> m_Elevator.RunCurrentZeroing()) // Zero the elevator
                 ));
 

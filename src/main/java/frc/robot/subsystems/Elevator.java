@@ -159,7 +159,7 @@ public class Elevator extends SubsystemBase {
 
   public boolean CheckBadElevatorPosition()
   {
-  
+
     if (m_FrontMotor.getPosition().getValueAsDouble() < -3 || m_RearMotor.getPosition().getValueAsDouble() < -3) 
     {    
         //Test
@@ -168,7 +168,8 @@ public class Elevator extends SubsystemBase {
         return true;
     }
 
-      //Is this expensive?
+      //Is this expensive? 
+      //Todo add code to check elevator velocity
       if (m_FrontMotor.getPosition().getValueAsDouble() < -2.0 || m_RearMotor.getPosition().getValueAsDouble() < -2.0)
       {
             System.out.println("It's between 0 and -3, resetting");
@@ -313,7 +314,6 @@ public void checkAndFix(){
         .andThen(() -> this.ResetEncoders())
         .andThen(() -> this.SetPower(0))
         .finallyDo(() -> this.SetZeroingFlag(false));
-        //.finallyDo(() -> this.ResetEncoders());
   }
 
   @Override

@@ -244,6 +244,9 @@ public class Effector extends SubsystemBase  {
     {
         m_EffectorState = EffectorState.Ejecting;
         RunEffector(-Constants.Effector.kSpeed/2);
+
+        m_EffectorTimer.reset();
+        m_EffectorTimer.start();
     }
 
     public void Stop()
@@ -303,6 +306,8 @@ public class Effector extends SubsystemBase  {
         else if(m_EffectorState == EffectorState.Intaking && IntakeComplete())
             Stop();
         else if(m_EffectorState == EffectorState.Scoring && !DetectCoralFront())
+            Stop();
+        else if(m_EffectorState == EffectorState.Ejecting && !DetectCoralRear())
             Stop();
         //emergency measure
         else if(m_EffectorTimer.isRunning() && m_EffectorTimer.hasElapsed(Constants.Effector.intakeTimerMax))  //emergency shutdown if timer expires

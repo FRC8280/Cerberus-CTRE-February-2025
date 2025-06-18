@@ -327,7 +327,7 @@ public class Vision {
                     destination = new Pose2d(3.632, 5.589, Rotation2d.fromDegrees(-60));
                     break;
                 case 18:
-                    destination = new Pose2d(2.709, 4.103, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(3, 4.103, Rotation2d.fromDegrees(0));
                     break;
                 case 17:
                     destination = new Pose2d(3.596, 2.521, Rotation2d.fromDegrees(60));

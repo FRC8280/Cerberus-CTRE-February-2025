@@ -8,28 +8,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DistanceConstants;
 
-
-
 public class DistanceSensorSystem extends SubsystemBase {
-
-    public enum ReefPoleAlignment {
-        FAR_LEFT,
-        LEFT,
-        CENTER,
-        RIGHT,
-        FAR_RIGHT,
-        NOT_FOUND
-    }
 
     public double leftCompare = 1;
     public double centerCompare = 1;
     public double rightCompare =1 ;
     public final CANrange[] m_alignRanges;
     double[] alignValues;
-   
-    public final CANrange[] m_TargetArray;
-   double[] m_TargetArrayValues;
-   double[] m_TargetArrayValuesStd;
 
     public boolean CloseEnoughToReef()
     {
@@ -38,113 +23,6 @@ public class DistanceSensorSystem extends SubsystemBase {
             return true;
         else
             return false;
-    }
-
-    public boolean ReefScoreAligned()
-    {
-        //if(m_TargetArrayValues[2] <= Constants.DistanceConstants.reefScoringDistance)
-        if(m_TargetArray[2].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefScoringDistance)
-            return true;
-        else   
-            return false;
-    }
-    
-    public int getIndexOfLowestValue() {
-        double lowestValue = Double.MAX_VALUE; // Initialize with the maximum possible value
-        int lowestIndex = -1; // Initialize with an invalid index
-    
-        for (int i = 0; i < m_TargetArray.length; i++) {
-            double currentValue = m_TargetArray[i].getDistance().refresh().getValueAsDouble();
-            if (currentValue < lowestValue) {
-                lowestValue = currentValue;
-                lowestIndex = i;
-            }
-        }
-    
-        return lowestIndex; // Return the index of the lowest value
-    }
-
-    public boolean DetectCenteredPoleWIthCoral() {
-
-        // Retrieve the values at indexes 1, 2, and 3
-        double value1 = m_TargetArray[1].getDistance().refresh().getValueAsDouble();;
-        double value2 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
-        //double value3 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
-        
-        if((value1 > 0.4) || (value2 > 0.4))
-            return false;
-
-            centerCompare = value1/value2;
-        // Check if the minimum value is at least 95% of the maximum value
-        return value1 >= 0.90 * value2;
-    }
-
-    public boolean DetectLeftWithCoral() {
-
-        // Retrieve the values at indexes 1, 2, and 3
-        double value1 = m_TargetArray[4].getDistance().refresh().getValueAsDouble();;
-        double value2 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
-        //double value3 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
-        
-        if((value1 > 0.4) || (value2 > 0.4))
-            return false;
-
-        leftCompare = value1/value2;
-        // Check if the minimum value is at least 95% of the maximum value
-        return value1 >= 0.90 * value2;
-    }
-
-    public boolean DetectRightWithCoral() {
-
-        // Retrieve the values at indexes 1, 2, and 3
-        double value1 = m_TargetArray[0].getDistance().refresh().getValueAsDouble();;
-        double value2 = m_TargetArray[1].getDistance().refresh().getValueAsDouble();;
-        //double value3 = m_TargetArray[3].getDistance().refresh().getValueAsDouble();;
-        
-        if((value1 > 0.4) || (value2 > 0.4))
-            return false;
-
-        rightCompare = value1/value2;
-        // Check if the minimum value is at least 95% of the maximum value
-        return value1 >= 0.90 * value2;
-    }
-
-    
-
-    public ReefPoleAlignment LocateReefPole()
-    {
-        
-        //Special cases. 
-    
-        /*int lowIndex = getIndexOfLowestValue();
-        switch (lowIndex)
-        {
-            case 0:
-                return ReefPoleAlignment.FAR_LEFT;
-            case 1:
-                return ReefPoleAlignment.LEFT;
-            case 2:
-                return ReefPoleAlignment.CENTER;
-            case 3:
-                return ReefPoleAlignment.RIGHT;
-            case 4:
-                return ReefPoleAlignment.FAR_RIGHT;
-            default:
-                return ReefPoleAlignment.NOT_FOUND;
-        }*/
-
-        if( m_TargetArray[0].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.FAR_LEFT;
-        else if( m_TargetArray[1].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.LEFT;
-        else if( m_TargetArray[2].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefScoringDistance)
-            return ReefPoleAlignment.CENTER;
-        else if( m_TargetArray[3].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.RIGHT;
-        else if( m_TargetArray[4].getDistance().refresh().getValueAsDouble() <= Constants.DistanceConstants.reefDetectionThreshold)
-            return ReefPoleAlignment.FAR_RIGHT;
-        
-        return ReefPoleAlignment.FAR_RIGHT;
     }
 
     public double LongestDistance()
@@ -164,18 +42,6 @@ public class DistanceSensorSystem extends SubsystemBase {
         };
 
        alignValues = new double[m_alignRanges.length];
-
-        m_TargetArray = new CANrange[] {
-            new CANrange(DistanceConstants.TargetArray0),
-            new CANrange(DistanceConstants.TargetArray1),
-            new CANrange(DistanceConstants.TargetArray2),
-            new CANrange(DistanceConstants.TargetArray3),
-            new CANrange(DistanceConstants.TargetArray4)
-        };
-
-       m_TargetArrayValues = new double[m_TargetArray.length];
-       m_TargetArrayValuesStd = new double[m_TargetArray.length];
-
     }
 
     public void updateAlignValues() {
@@ -184,40 +50,14 @@ public class DistanceSensorSystem extends SubsystemBase {
         }
     }
     
-    public void updateTargetArrayValues() {
-        for (int i = 0; i < m_TargetArray.length; i++) {
-            m_TargetArrayValues[i] = m_TargetArray[i].getDistance().refresh().getValueAsDouble();
-            m_TargetArrayValuesStd[i] = m_TargetArray[i].getDistanceStdDev(true).getValueAsDouble();
-        }
-    }
 
 
     @Override
     public void periodic() {
-        //todo comment this back out
-    updateAlignValues();
-       updateTargetArrayValues();
-
-      
+       updateAlignValues();   
        for (int i = 0; i < alignValues.length; i++) {
             SmartDashboard.putNumber("Align Value " + i, alignValues[i]);
         }
-        
-        for (int i =0; i < m_TargetArrayValues.length; i++) {
-            SmartDashboard.putNumber("Array Value " + i, m_TargetArrayValues[i]);
-        } 
-
-        SmartDashboard.putBoolean("DetectCenteredPole", DetectCenteredPoleWIthCoral());
-        SmartDashboard.putBoolean("DetectLeftCoral", DetectLeftWithCoral());
-        SmartDashboard.putBoolean("DetectRightCoral", DetectRightWithCoral());
-
-        SmartDashboard.putNumber("Left Compate",leftCompare);
-        SmartDashboard.putNumber("Right Compate",rightCompare);
-        SmartDashboard.putNumber("Center Compate",centerCompare);
-        /* 
-        for (int i =0; i < m_TargetArrayValues.length; i++) {
-            SmartDashboard.putNumber("StdDev Value " + i, m_TargetArrayValuesStd[i]);
-        }*/ 
         
     }
     
