@@ -25,11 +25,15 @@
 package frc.robot;
 
 import static frc.robot.Constants.Vision.*;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -49,6 +53,8 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
+
+import java.util.ArrayList;
 //import org.photonvision.targeting.PhotonPipelineResult;
 import java.util.HashMap;
 
@@ -65,9 +71,14 @@ public class Vision {
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
 
+    //Vision offset calculations
+    List<Pose2d> leftBranchCoordinates = null;
+    List<Pose2d> rightBranchCoordinates = null; 
+    List<Pose2d> offReefCoordinates = null;
 
     // Lookup table for angles
     private Map<Integer, Double> angleLookupTable;
+    List<Integer> reefTagIds = List.of(6, 7, 8, 9, 10, 11,17, 18, 19, 20, 21, 22);
 
     private void populateAngleLookupTable() {
 
@@ -85,6 +96,37 @@ public class Vision {
         angleLookupTable.put(9, -60.0);
         angleLookupTable.put(10, 0.0);
         angleLookupTable.put(11, 60.0);
+    }
+
+    public static List<Pose2d> loadAprilTagPoses(List<Integer> tagIds) {
+        List<Pose2d> tagPoses2d = new ArrayList<>();
+
+        try {
+            AprilTagFieldLayout fieldLayout = AprilTagFields.k2025ReefscapeAndyMark.loadAprilTagLayoutField();
+
+            for (int tagId : tagIds) {
+                Optional<Pose3d> pose3dOpt = fieldLayout.getTagPose(tagId);
+
+                if (pose3dOpt.isPresent()) {
+                    Pose3d pose3d = pose3dOpt.get();
+
+                    // Convert 3D pose to 2D (drops Z and roll/pitch)
+                    Pose2d pose2d = new Pose2d(
+                        pose3d.getX(),
+                        pose3d.getY(),
+                        new Rotation2d(pose3d.getRotation().getZ())
+                    );
+
+                    tagPoses2d.add(pose2d);
+                } else {
+                    System.out.println("AprilTag " + tagId + " pose not found!");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading AprilTag field layout: " + e.getMessage());
+        }
+
+        return tagPoses2d;
     }
 
     public double normalizeAngle(double angle) {
@@ -221,6 +263,32 @@ public class Vision {
             return null;
     }
 
+
+    /**
+     * Returns the AprilTag ID associated with a reef branch ID (1–12).
+     * Uses DriverStation alliance to determine Red or Blue reef.
+     *
+     * @param branchID A number from 1 to 12 representing reef segment
+     * @return AprilTag ID corresponding to the given branch and alliance
+     */
+    public static int getReefTagId(int branchID) {
+        if (branchID < 1 || branchID > 12) {
+            throw new IllegalArgumentException("branchID must be between 1 and 12.");
+        }
+
+        // Tag IDs by face: [12:00, 10:00, 8:00, 6:00, 4:00, 2:00]
+        int[] blueTags = {21, 20, 19, 18, 17, 22};
+        int[] redTags  = {10, 11, 6, 7, 8, 9};
+
+        // Get alliance (default to Red if not connected)
+        Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
+
+        // Each face has 2 branches → faceIndex from 0 to 5
+        int faceIndex = (branchID - 1) / 2;
+
+        return (alliance == Alliance.Blue) ? blueTags[faceIndex] : redTags[faceIndex];
+    }
+
     public int GetAprilTagFromReefBranchId(int selectedReefBranch)
     {
         int aprilTag = 0;
@@ -294,22 +362,22 @@ public class Vision {
             switch(aprilTag)
             {
                 case 10:
-                    destination = new Pose2d(11.376, 4.055, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(11.57, 4.10, Rotation2d.fromDegrees(0));
                     break;
                 case 11:
-                    destination = new Pose2d(12.072, 2.628, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(12.24, 2.77, Rotation2d.fromDegrees(60));
                     break;
                 case 6:
-                    destination = new Pose2d(13.918, 2.485, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(13.73, 2.69, Rotation2d.fromDegrees(120));
                     break;
                 case 7:
-                    destination = new Pose2d(14.841, 4.031, Rotation2d.fromDegrees(180));
+                    destination = new Pose2d(14.55, 3.94, Rotation2d.fromDegrees(180));
                     break;
                 case 8:
-                    destination = new Pose2d(13.942, 5.517, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(13.87, 5.27, Rotation2d.fromDegrees(-120));
                     break;
                 case 9:
-                    destination = new Pose2d(12.215, 5.517, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(12.39, 5.35, Rotation2d.fromDegrees(-60));
                     break;
             }
         }
@@ -318,22 +386,22 @@ public class Vision {
             switch(aprilTag)
             {
                 case 21:
-                    destination = new Pose2d(6.222, 3.983, Rotation2d.fromDegrees(180));
+                    destination = new Pose2d(5.98, 3.94, Rotation2d.fromDegrees(180));
                     break;
                 case 20:
-                    destination = new Pose2d(5.442, 5.517, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(5.305, 5.507, Rotation2d.fromDegrees(-120));
                     break;
                 case 19:
-                    destination = new Pose2d(3.632, 5.589, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(3.82, 5.35, Rotation2d.fromDegrees(-60));
                     break;
                 case 18:
                     destination = new Pose2d(3, 4.103, Rotation2d.fromDegrees(0));
                     break;
                 case 17:
-                    destination = new Pose2d(3.596, 2.521, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(3.67, 2.77, Rotation2d.fromDegrees(60));
                     break;
                 case 22:
-                    destination = new Pose2d(5.370, 2.533, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(5.16, 2.69, Rotation2d.fromDegrees(120));
                     break;
             }
         }
@@ -495,63 +563,113 @@ public class Vision {
         return destination;
     }
 
+    public Pose2d GetOffReefDestinationEx(int selectedReefBranch)
+    {
+        Pose2d destination = null;
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        int aprilTag = GetAprilTagFromReefBranchId(selectedReefBranch);
+        int offsetIndex = reefTagIds.indexOf(aprilTag);
+
+        if (ally.get() == Alliance.Red)
+        {
+            switch(aprilTag)
+            {
+                
+            }
+        }
+        else //blue
+        {
+            switch(aprilTag)
+            {
+                case 18:
+                    Pose2d tempdestination = offReefCoordinates.get(offsetIndex);
+                    destination = new Pose2d(tempdestination.getX(), tempdestination.getY(), Rotation2d.fromDegrees(0));
+                    break;
+            }
+        }
+
+        return destination;
+    }
+
+    public Pose2d GetDestinationFromReefStandardEx(int selectedReefBranch) {
+        Pose2d destination = null;
+        Optional<Alliance> ally = DriverStation.getAlliance();
+
+        int tagIndex = GetAprilTagFromReefBranchId(selectedReefBranch);
+        int offsetIndex = reefTagIds.indexOf(tagIndex);
+
+        if (ally.get() == Alliance.Red) 
+        {
+            switch (selectedReefBranch) {}
+            
+        }
+        else
+        {
+            switch (selectedReefBranch) {
+                case Constants.ReefOperatorConstants.SIX_LEFT: // 7 left
+                
+                    destination = leftBranchCoordinates.get(offsetIndex);
+                    break;
+                case Constants.ReefOperatorConstants.SIX_RIGHT: // 7 right
+                    destination = rightBranchCoordinates.get(offsetIndex);
+                    break;
+            }
+        }
+
+        return destination;
+
+    }
     public Pose2d GetDestinationFromReefStandard(int selectedReefBranch) {
         Pose2d destination = null;
         Optional<Alliance> ally = DriverStation.getAlliance();
         if (ally.get() == Alliance.Red) {
             switch (selectedReefBranch) {
                 case Constants.ReefOperatorConstants.TWELVE_LEFT: // 10 left
-                    //destination = new Pose2d(11.6626, 4.2804, Rotation2d.fromDegrees(0));
-                    //destination = new Pose2d(11.565, 4.228, Rotation2d.fromDegrees(0));
-                    destination = new Pose2d(11.632, 4.415, Rotation2d.fromDegrees(0));
+                    //destination = new Pose2d(11.632, 4.415, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(11.67, 4.32, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.TWELVE_RIGHT: // 10 right
-                    //destination = new Pose2d(11.642077225482328, 3.919858379891, Rotation2d.fromDegrees(0));
-                    //destination = new Pose2d(11.584, 3.927, Rotation2d.fromDegrees(0));
-                    destination = new Pose2d(11.602, 4.122, Rotation2d.fromDegrees(0));
+                    //destination = new Pose2d(11.602, 4.122, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(11.67, 3.97, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.TEN_LEFT: // 11 left
-                    //destination = new Pose2d(12.110, 2.8954, Rotation2d.fromDegrees(57.55));
-                    //destination = new Pose2d(12.159, 2.842, Rotation2d.fromDegrees(60));
-                    destination = new Pose2d(12.071, 3.021, Rotation2d.fromDegrees(60));
+                    //destination = new Pose2d(12.071, 3.021, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(12.10, 2.97, Rotation2d.fromDegrees(60));
                     break;
                 case Constants.ReefOperatorConstants.TEN_RIGHT: // 11 right
-                    //destination = new Pose2d(12.4160, 2.802, Rotation2d.fromDegrees(58.64));
-                    destination = new Pose2d(12.285, 2.787, Rotation2d.fromDegrees(60));
+                    //destination = new Pose2d(12.285, 2.787, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(12.41, 2.79, Rotation2d.fromDegrees(60));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_LEFT: // 6 left
-                    //destination = new Pose2d(13.524, 2.66, Rotation2d.fromDegrees(120));
-                    destination = new Pose2d(13.377, 2.660, Rotation2d.fromDegrees(120));
+                    //destination = new Pose2d(13.377, 2.660, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(113.49, 2.67, Rotation2d.fromDegrees(120));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 6 right
-                    //destination = new Pose2d(13.524, 2.66, Rotation2d.fromDegrees(120));
                     destination = new Pose2d(13.708, 2.757, Rotation2d.fromDegrees(120));
                     break;
                 case Constants.ReefOperatorConstants.SIX_LEFT: // 7 left
-                    //destination = new Pose2d(14.437, 3.742, Rotation2d.fromDegrees(180));
-                    destination = new Pose2d(14.437, 3.615, Rotation2d.fromDegrees(180));
+                    //destination = new Pose2d(14.437, 3.615, Rotation2d.fromDegrees(180));
+                    destination = new Pose2d(14.45, 3.72, Rotation2d.fromDegrees(180));
                     break;
                 case Constants.ReefOperatorConstants.SIX_RIGHT: // 7 right
-                    //destination = new Pose2d(14.437, 4.06, Rotation2d.fromDegrees(180));
-                    destination = new Pose2d(14.430, 3.975, Rotation2d.fromDegrees(180));
+                    //destination = new Pose2d(14.430, 3.975, Rotation2d.fromDegrees(180));
+                    destination = new Pose2d(14.45, 4.07, Rotation2d.fromDegrees(180));
                     break;
                 case Constants.ReefOperatorConstants.FOUR_LEFT: // 8 left
-                    //destination = new Pose2d(13.993, 5.0645, Rotation2d.fromDegrees(-120));
-                    destination = new Pose2d(14.157, 5, Rotation2d.fromDegrees(-120));
+                    //destination = new Pose2d(14.157, 5, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(14.01, 5.08, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.FOUR_RIGHT: // 8 right
-                    //destination = new Pose2d(13.59, 5.211, Rotation2d.fromDegrees(-120));
-                    destination = new Pose2d(13.77, 5.195, Rotation2d.fromDegrees(-120));
+                    //destination = new Pose2d(13.77, 5.195, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(13.71, 5.25, Rotation2d.fromDegrees(-120));
                     break;
-                case Constants.ReefOperatorConstants.TWO_LEFT: // 9 legy
-                    //destination = new Pose2d(12.651, 5.248, Rotation2d.fromDegrees(-62.06));
-                    //destination = new Pose2d(12.483, 5.448, Rotation2d.fromDegrees(-60));
-                    destination = new Pose2d(12.685, 3.536, Rotation2d.fromDegrees(-60));
+                case Constants.ReefOperatorConstants.TWO_LEFT: // 9 left
+                    //destination = new Pose2d(12.685, 3.536, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(12.62, 5.68, Rotation2d.fromDegrees(-60));
                     break;
                 case Constants.ReefOperatorConstants.TWO_RIGHT: // 9 right
-                    //destination = new Pose2d(12.256, 5.193, Rotation2d.fromDegrees(-61.12));
-                    //destination = new Pose2d(12.248, 5.276, Rotation2d.fromDegrees(-60));
-                    destination = new Pose2d(12.451, 5.380, Rotation2d.fromDegrees(-60));
+                    //destination = new Pose2d(12.451, 5.380, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(12.32, 5.2, Rotation2d.fromDegrees(-60));
                     break;
                 default:
                     destination = null;
@@ -560,44 +678,53 @@ public class Vision {
         } else {
             switch (selectedReefBranch) {
                 case Constants.ReefOperatorConstants.TWELVE_LEFT: // 21 left
-                    destination = new Pose2d(5.996, 3.816, Rotation2d.fromDegrees(180));
+                    //destination = new Pose2d(5.996, 3.816, Rotation2d.fromDegrees(180));
+                    destination = new Pose2d(5.88, 3.72, Rotation2d.fromDegrees(180));
                     break;
                 case Constants.ReefOperatorConstants.TWELVE_RIGHT: // 21 right
-                    destination = new Pose2d(5.983, 4.123, Rotation2d.fromDegrees(-180));
+                    //destination = new Pose2d(5.983, 4.123, Rotation2d.fromDegrees(-180));
+                    destination = new Pose2d(5.88, 4.07, Rotation2d.fromDegrees(-180));
                     break;
                 case Constants.ReefOperatorConstants.TEN_LEFT: // 20 left
-                    //destination = new Pose2d(5.37180, 5.095107, Rotation2d.fromDegrees(-121.58));
-                    destination = new Pose2d(5.484, 5.189, Rotation2d.fromDegrees(-120));
+                    //destination = new Pose2d(5.484, 5.189, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(5.458, 5.225, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.TEN_RIGHT: // 20 right
-                    //destination = new Pose2d(5.12041, 5.28087, Rotation2d.fromDegrees(-119.38));
-                    destination = new Pose2d(5.205, 5.372, Rotation2d.fromDegrees(-120));
+                    //destination = new Pose2d(5.205, 5.372, Rotation2d.fromDegrees(-120));
+                    //destination = new Pose2d(5.14, 5.25, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(5.135, 5.416, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_LEFT: // 19 left
-                   // original destination = new Pose2d(3.99474, 5.34948, Rotation2d.fromDegrees(-57.4));
-                    //Pathplanner update
-                    destination = new Pose2d(3.978,5.400,Rotation2d.fromDegrees((-60)));
+                    //destination = new Pose2d(4.015,5.390,Rotation2d.fromDegrees((-60)));
+                    destination = new Pose2d(4.05,5.38,Rotation2d.fromDegrees((-60)));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right
-                    destination = new Pose2d(3.6625, 5.2106, Rotation2d.fromDegrees(-60));
+                    //destination = new Pose2d(3.697, 5.262, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(3.75, 5.20, Rotation2d.fromDegrees(-60));
                     break;
                 case Constants.ReefOperatorConstants.SIX_LEFT: // 18 left
-                    destination = new Pose2d(3.1, 4.32, Rotation2d.fromDegrees(0));
+                    //destination = new Pose2d(3.1, 4.32, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(3.10, 4.32, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.SIX_RIGHT: // 18 right
+                    //destination = new Pose2d(3.1, 3.97, Rotation2d.fromDegrees(0));
                     destination = new Pose2d(3.1, 3.97, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.FOUR_LEFT: // 17 left
-                    destination = new Pose2d(3.524, 2.952, Rotation2d.fromDegrees(60/* 53.6 */));
+                    //destination = new Pose2d(3.560, 2.955, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(3.53, 2.97, Rotation2d.fromDegrees(60));
+                    break;
                 case Constants.ReefOperatorConstants.FOUR_RIGHT: // 17 right
-                    destination = new Pose2d(3.9644, 2.636, Rotation2d.fromDegrees(60));
+                    //destination = new Pose2d(3.805, 2.717, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(3.84, 2.79, Rotation2d.fromDegrees(60));
                     break;
                 case Constants.ReefOperatorConstants.TWO_LEFT: // 22 left
-                    //destination = new Pose2d(4.9515, 2.698, Rotation2d.fromDegrees(118.77)); //original
-                    destination = new Pose2d(5.044, 2.638, Rotation2d.fromDegrees(120)); //pathplanner
+                    //destination = new Pose2d(5.044, 2.638, Rotation2d.fromDegrees(120)); 
+                    destination = new Pose2d(4.92, 2.67, Rotation2d.fromDegrees(120)); 
+                    break;
                 case Constants.ReefOperatorConstants.TWO_RIGHT: // 22 right
-                    //destination = new Pose2d(5.32, 2.884, Rotation2d.fromDegrees(119.06));
-                    destination = new Pose2d(5.338, 2.800, Rotation2d.fromDegrees(120));
+                    //destination = new Pose2d(5.338, 2.800, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(5.23, 2.84, Rotation2d.fromDegrees(120));
                     break;
                 default:
                     destination = null;
@@ -608,8 +735,139 @@ public class Vision {
         return destination;
     }
 
+    public static void printTagPoses(List<Integer> tagIds, List<Pose2d> poses) {
+        if (tagIds.size() != poses.size()) {
+            System.out.println("Error: tag ID list and pose list are not the same size!");
+            return;
+        }
+
+        for (int i = 0; i < poses.size(); i++) {
+            int tagId = tagIds.get(i);
+            Pose2d pose = poses.get(i);
+
+            double x = pose.getX();
+            double y = pose.getY();
+            double headingDeg = pose.getRotation().getDegrees();
+
+            System.out.printf(
+                "AprilTag %d: X = %.2f m, Y = %.2f m, Rotation = %.1f°%n",
+                tagId, x, y, headingDeg
+            );
+        }
+    }
+
+    public static void printTag18Poses(List<Integer> tagIds, List<Pose2d> poses) {
+        if (tagIds.size() != poses.size()) {
+            System.out.println("Error: tag ID list and pose list are not the same size!");
+            return;
+        }
+
+        for (int i = 0; i < poses.size(); i++) {
+            int tagId = tagIds.get(i);
+            Pose2d pose = poses.get(i);
+
+            double x = pose.getX();
+            double y = pose.getY();
+            double headingDeg = pose.getRotation().getDegrees();
+
+            System.out.printf(
+                "AprilTag %d: X = %.2f m, Y = %.2f m, Rotation = %.1f°%n",
+                tagId, x, y, headingDeg
+            );
+        }
+    }
+
+
+    /**
+     * Calculates offset poses relative to a list of AprilTag IDs.
+     * Offsets are applied in the tag's local 2D coordinate frame (horizontal = forward, vertical = left).
+     *
+     * @param tagIds           List of AprilTag IDs
+     * @param horizontalOffset Offset in meters forward/backward (along tag's X)
+     * @param verticalOffset   Offset in meters left/right (along tag's Y)
+     * @return List of Pose2d with the given offsets applied
+     */
+    public static List<Pose2d> calculateOffsetsWithXY(List<Integer> tagIds, double horizontalOffset, double verticalOffset) {
+        List<Pose2d> offsetPoses = new ArrayList<>();
+
+        try {
+            AprilTagFieldLayout fieldLayout = AprilTagFields.k2025ReefscapeAndyMark.loadAprilTagLayoutField();
+
+            for (int tagId : tagIds) {
+                Optional<Pose3d> tagPoseOpt = fieldLayout.getTagPose(tagId);
+
+                if (tagPoseOpt.isPresent()) {
+                    Pose3d tagPose3d = tagPoseOpt.get();
+
+                    // Convert Pose3d to Pose2d using only X, Y, and yaw (Z-axis rotation)
+                    double x = tagPose3d.getX();
+                    double y = tagPose3d.getY();
+                    Rotation3d rot3d = tagPose3d.getRotation();
+                    Rotation2d heading = new Rotation2d(rot3d.getZ());  // assumes Z is yaw in radians
+
+                    // Apply offset relative to tag's heading
+                    double offsetX = horizontalOffset * heading.getCos() - verticalOffset * heading.getSin();
+                    double offsetY = horizontalOffset * heading.getSin() + verticalOffset * heading.getCos();
+
+                    Pose2d offsetPose = new Pose2d(
+                        x + offsetX,
+                        y + offsetY,
+                        heading  // Keep same rotation
+                    );
+
+                    offsetPoses.add(offsetPose);
+                } else {
+                    System.out.println("AprilTag " + tagId + " not found in field layout!");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading AprilTag field layout: " + e.getMessage());
+        }
+
+        return offsetPoses;
+    }
+
     public Vision(int index) {
 
+        //Grab the base tag IDs
+        
+        //List<Pose2d> poses = loadAprilTagPoses(reefTagIds);
+        //printTagPoses(reefTagIds, poses);
+
+        //Generate the list of coordinates based onoffsets. 
+        //todo: move to constants
+        double leftBranchHorz = 0.56;
+        double leftBranchVert = -0.3;
+        double rightBranchHorz = 0.56;
+        double rightBranchVert = 0.05;
+        double offReedHorz = 0.658;
+        double offReefVert = -0.082;
+        
+        leftBranchCoordinates = calculateOffsetsWithXY(reefTagIds, leftBranchHorz, leftBranchVert);
+        rightBranchCoordinates = calculateOffsetsWithXY(reefTagIds, rightBranchHorz, rightBranchVert);
+        offReefCoordinates = calculateOffsetsWithXY(reefTagIds, offReedHorz, offReefVert);
+
+        printTagPoses(reefTagIds, offReefCoordinates);
+
+        /*int tagIndex = reefTagIds.indexOf(19);
+        Pose2d tag18OffsetPose = leftBranchCoordinates.get(tagIndex);
+        System.out.printf("Left Offset pose for Tag 18: (X=%.2f, Y=%.2f, Rot=%.1f°)%n",
+            tag18OffsetPose.getX(),
+            tag18OffsetPose.getY(),
+            tag18OffsetPose.getRotation().getDegrees());
+
+        tag18OffsetPose = rightBranchCoordinates.get(tagIndex);
+            System.out.printf("Right Offset pose for Tag 18: (X=%.2f, Y=%.2f, Rot=%.1f°)%n",
+                tag18OffsetPose.getX(),
+                tag18OffsetPose.getY(),
+                tag18OffsetPose.getRotation().getDegrees());
+
+        tag18OffsetPose = offReefCoordinates.get(tagIndex);
+        System.out.printf("Offreef pose for Tag 18: (X=%.2f, Y=%.2f, Rot=%.1f°)%n",
+            tag18OffsetPose.getX(),
+            tag18OffsetPose.getY(),
+            tag18OffsetPose.getRotation().getDegrees());*/
+    
         populateAngleLookupTable();
         camera = new PhotonCamera(Constants.Vision.CamNames[index]);
 

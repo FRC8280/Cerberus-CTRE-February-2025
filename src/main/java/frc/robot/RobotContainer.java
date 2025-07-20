@@ -324,7 +324,8 @@ public class RobotContainer {
     SwerveRequest.RobotCentric alignShotRobotRequestX = new SwerveRequest.RobotCentric();
 
 
-    SwerveRequest.RobotCentric alignShotRobotRequestCombined = new SwerveRequest.RobotCentric();
+    //SwerveRequest.RobotCentric alignShotRobotRequestCombined = new SwerveRequest.RobotCentric();
+    SwerveRequest.FieldCentric alignShotRobotRequestCombined = new SwerveRequest.FieldCentric();
     private SwerveRequest AlignShotRequestCombined(){
 
         boolean negativeX = false;
@@ -754,7 +755,7 @@ public class RobotContainer {
 
         driverController.y().onTrue(
 
-                new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT))
+                new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_LEFT))
                         // Realign
     
                         .andThen (drivetrain.applyRequest(() -> AlignShotRequestCombined())
@@ -915,22 +916,7 @@ public class RobotContainer {
         // Bindings to control Elevator Level, wait until it aligns, then runs
         // sequential command gorup to score
 
-        JoystickButton twelveLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWELVE_LEFT);
-        new Trigger(() -> twelveLeftButton.getAsBoolean() && ElevatorHasDestination())
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_LEFT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-
-        JoystickButton twelveRightButton = new JoystickButton(ReefOperator,
-                Constants.ReefOperatorConstants.TWELVE_RIGHT);
-        new Trigger(() -> twelveRightButton.getAsBoolean() && ElevatorHasDestination())
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+        /*
 
         JoystickButton tenLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_LEFT);
         new Trigger(() -> tenLeftButton.getAsBoolean() && ElevatorHasDestination())
@@ -949,21 +935,77 @@ public class RobotContainer {
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
-        JoystickButton eightLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_LEFT);
-        new Trigger(() -> eightLeftButton.getAsBoolean() && ElevatorHasDestination())
+        
+  */
+        JoystickButton tenLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_LEFT);
+        new Trigger(() -> tenLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_LEFT)))
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_LEFT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+        JoystickButton tenRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_RIGHT);
+        new Trigger(() -> tenRightButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_RIGHT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+        
+        /*JoystickButton tenRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_RIGHT);
+        new Trigger(() -> tenRightButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_RIGHT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));*/
+                        
+        JoystickButton twelveLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWELVE_LEFT);
+        new Trigger(() -> twelveLeftButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_LEFT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+        JoystickButton twelveRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWELVE_RIGHT);
+        new Trigger(() -> twelveRightButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
-        JoystickButton eightRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_RIGHT);
-        new Trigger(() -> eightRightButton.getAsBoolean() && ElevatorHasDestination())
+        
+        JoystickButton twoLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_LEFT);
+        new Trigger(() -> twoLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_RIGHT)))
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_LEFT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+        JoystickButton twoRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_RIGHT);
+        new Trigger(() -> twoRightButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+
+        JoystickButton fourLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.FOUR_LEFT);
+        new Trigger(() -> fourLeftButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_LEFT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                JoystickButton fourRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.FOUR_RIGHT);
+        new Trigger(() -> fourRightButton.getAsBoolean() && ElevatorHasDestination())
+                .onTrue(new InstantCommand(() -> NewScoreAttempt())
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_RIGHT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+
 
         JoystickButton sixLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.SIX_LEFT);
         new Trigger(() -> sixLeftButton.getAsBoolean() && ElevatorHasDestination())
@@ -981,34 +1023,19 @@ public class RobotContainer {
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
-        JoystickButton fourLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.FOUR_LEFT);
-        new Trigger(() -> fourLeftButton.getAsBoolean() && ElevatorHasDestination())
+        JoystickButton eightLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_LEFT);
+        new Trigger(() -> eightLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_LEFT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_LEFT)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
-        JoystickButton fourRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.FOUR_RIGHT);
-        new Trigger(() -> fourRightButton.getAsBoolean() && ElevatorHasDestination())
+        
+        JoystickButton eightRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_RIGHT);
+        new Trigger(() -> eightRightButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-
-        JoystickButton twoLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_LEFT);
-        new Trigger(() -> twoLeftButton.getAsBoolean() && ElevatorHasDestination())
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_LEFT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-
-        JoystickButton twoRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_RIGHT);
-        new Trigger(() -> twoRightButton.getAsBoolean() && ElevatorHasDestination())
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_RIGHT)))
+                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
