@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Climber extends SubsystemBase {
 
     private final TalonFX m_ClimbMotor;
+    private final TalonFX m_IntakeMotor;
 
     private final Servo m_RampServo;
     private final Servo m_FootServo;
@@ -24,6 +25,7 @@ public class Climber extends SubsystemBase {
 
         // Set up the climb motor as a brushless motor
         m_ClimbMotor = new TalonFX(ClimberConstants.CLIMBER_MOTOR_ID);
+        m_IntakeMotor = new TalonFX(ClimberConstants.INTAKE_MOTOR_ID);
         
         m_RampServo = new Servo(9);
         m_FootServo = new Servo(8);
@@ -35,6 +37,13 @@ public class Climber extends SubsystemBase {
         // Set the neutral mode to Brake
         m_ClimbMotor.setNeutralMode(NeutralModeValue.Brake);
         m_ClimbMotor.getConfigurator().apply(currentLimits);
+
+        CurrentLimitsConfigs intakeCurrentLimits = new CurrentLimitsConfigs();
+        intakeCurrentLimits.SupplyCurrentLimitEnable = true;
+        intakeCurrentLimits.SupplyCurrentLimit = ClimberConstants.INTAKE_MOTOR_CURRENT_LIMIT;
+
+        m_IntakeMotor.setNeutralMode(NeutralModeValue.Brake);
+        m_IntakeMotor.getConfigurator().apply(intakeCurrentLimits);
     }
 
     @Override
@@ -52,6 +61,20 @@ public class Climber extends SubsystemBase {
      */
     public void runClimber(double speed){
         m_ClimbMotor.set(speed);
+    }
+
+    /**
+     * Runs the intake motor at 15% power.
+     */
+    public void IntakeCage() {
+        m_IntakeMotor.set(-0.15);
+    }
+
+    /**
+     * Stops the intake motor by setting power to 0%.
+     */
+    public void StopIntakeCage() {
+        m_IntakeMotor.set(0.0);
     }
 
     public void ArmClimber(){

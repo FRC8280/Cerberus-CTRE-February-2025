@@ -1099,6 +1099,9 @@ public class RobotContainer {
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.MANUAL_SCORE)
                 .onTrue(new InstantCommand(() -> m_Effector.ScoreCoral()));
 
+        new JoystickButton(ElevatorOperator,Constants.ElevatorOperatorConstants.ALGAE)
+                .onTrue(new InstantCommand(()-> m_Climber.IntakeCage()))
+                .onFalse(new InstantCommand(()->m_Climber.StopIntakeCage()));
         /*
          * JoystickButton algeaButton = new JoystickButton(ElevatorOperator,
          * Constants.ElevatorOperatorConstants.ALGAE);
@@ -1224,11 +1227,6 @@ public class RobotContainer {
                         new InstantCommand(() -> m_Effector.EjectCoral()), // Zero the elevator
                         new InstantCommand(() -> m_Elevator.RunCurrentZeroing()) // Zero the elevator
                 ));
-
-        /*
-         * new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.REV)
-         * .whileTrue(new IntakeReverse(m_Effector));
-         */
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }
