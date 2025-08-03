@@ -642,7 +642,7 @@ public class Vision {
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_LEFT: // 6 left
                     //destination = new Pose2d(13.377, 2.660, Rotation2d.fromDegrees(120));
-                    destination = new Pose2d(113.49, 2.67, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(13.49, 2.67, Rotation2d.fromDegrees(120));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 6 right
                     destination = new Pose2d(13.708, 2.757, Rotation2d.fromDegrees(120));
@@ -677,54 +677,41 @@ public class Vision {
             }
         } else {
             switch (selectedReefBranch) {
-                case Constants.ReefOperatorConstants.TWELVE_LEFT: // 21 left
-                    //destination = new Pose2d(5.996, 3.816, Rotation2d.fromDegrees(180));
-                    destination = new Pose2d(5.88, 3.72, Rotation2d.fromDegrees(180));
+                case Constants.ReefOperatorConstants.TWELVE_LEFT: // 21 left UPDATED 8/3
+                    destination = new Pose2d(5.984, 3.775, Rotation2d.fromDegrees(180));
                     break;
-                case Constants.ReefOperatorConstants.TWELVE_RIGHT: // 21 right
-                    //destination = new Pose2d(5.983, 4.123, Rotation2d.fromDegrees(-180));
+                case Constants.ReefOperatorConstants.TWELVE_RIGHT: // 21 right UPDATED 8/3
                     destination = new Pose2d(5.88, 4.07, Rotation2d.fromDegrees(-180));
                     break;
-                case Constants.ReefOperatorConstants.TEN_LEFT: // 20 left
-                    //destination = new Pose2d(5.484, 5.189, Rotation2d.fromDegrees(-120));
-                    destination = new Pose2d(5.458, 5.225, Rotation2d.fromDegrees(-120));
+                case Constants.ReefOperatorConstants.TEN_LEFT: // 20 left  UPDATED 8/3
+                    destination = new Pose2d(5.486, 5.225, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.TEN_RIGHT: // 20 right
-                    //destination = new Pose2d(5.205, 5.372, Rotation2d.fromDegrees(-120));
-                    //destination = new Pose2d(5.14, 5.25, Rotation2d.fromDegrees(-120));
-                    destination = new Pose2d(5.135, 5.416, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(5.240, 5.416, Rotation2d.fromDegrees(-120));
                     break;
-                case Constants.ReefOperatorConstants.EIGHT_LEFT: // 19 left
-                    //destination = new Pose2d(4.015,5.390,Rotation2d.fromDegrees((-60)));
-                    destination = new Pose2d(4.05,5.38,Rotation2d.fromDegrees((-60)));
+                case Constants.ReefOperatorConstants.EIGHT_LEFT: // 19 left UPDATED 8/3
+                    destination = new Pose2d(3.93,5.416,Rotation2d.fromDegrees((-60)));
                     break;
-                case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right
-                    //destination = new Pose2d(3.697, 5.262, Rotation2d.fromDegrees(-60));
-                    destination = new Pose2d(3.75, 5.20, Rotation2d.fromDegrees(-60));
+                case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right UPDATED 8/3
+                    destination = new Pose2d(3.702, 5.197, Rotation2d.fromDegrees(-60));
                     break;
-                case Constants.ReefOperatorConstants.SIX_LEFT: // 18 left
-                    //destination = new Pose2d(3.1, 4.32, Rotation2d.fromDegrees(0));
-                    destination = new Pose2d(3.10, 4.32, Rotation2d.fromDegrees(0));
+                case Constants.ReefOperatorConstants.SIX_LEFT: // 18 left UPDATED 8/3
+                    destination = new Pose2d(3.0, 4.29, Rotation2d.fromDegrees(0));
                     break;
-                case Constants.ReefOperatorConstants.SIX_RIGHT: // 18 right
-                    //destination = new Pose2d(3.1, 3.97, Rotation2d.fromDegrees(0));
-                    destination = new Pose2d(3.1, 3.97, Rotation2d.fromDegrees(0));
+                case Constants.ReefOperatorConstants.SIX_RIGHT: // 18 right UPDATED 8/3
+                    destination = new Pose2d(3.1, 3.93, Rotation2d.fromDegrees(0));
                     break;
-                case Constants.ReefOperatorConstants.FOUR_LEFT: // 17 left
-                    //destination = new Pose2d(3.560, 2.955, Rotation2d.fromDegrees(60));
-                    destination = new Pose2d(3.53, 2.97, Rotation2d.fromDegrees(60));
+                case Constants.ReefOperatorConstants.FOUR_LEFT: // 17 left UPDATED 8/3
+                    destination = new Pose2d(3.51, 2.897, Rotation2d.fromDegrees(60));
                     break;
-                case Constants.ReefOperatorConstants.FOUR_RIGHT: // 17 right
-                    //destination = new Pose2d(3.805, 2.717, Rotation2d.fromDegrees(60));
+                case Constants.ReefOperatorConstants.FOUR_RIGHT: // 17 right UPDATED 8/3
                     destination = new Pose2d(3.84, 2.79, Rotation2d.fromDegrees(60));
                     break;
-                case Constants.ReefOperatorConstants.TWO_LEFT: // 22 left
-                    //destination = new Pose2d(5.044, 2.638, Rotation2d.fromDegrees(120)); 
-                    destination = new Pose2d(4.92, 2.67, Rotation2d.fromDegrees(120)); 
+                case Constants.ReefOperatorConstants.TWO_LEFT: // 22 left UPDATED 8/3
+                    destination = new Pose2d(5.000, 2.633, Rotation2d.fromDegrees(120)); 
                     break;
-                case Constants.ReefOperatorConstants.TWO_RIGHT: // 22 right
-                    //destination = new Pose2d(5.338, 2.800, Rotation2d.fromDegrees(120));
-                    destination = new Pose2d(5.23, 2.84, Rotation2d.fromDegrees(120));
+                case Constants.ReefOperatorConstants.TWO_RIGHT: // 22 right UPDATED 8/3
+                    destination = new Pose2d(5.33, 2.8, Rotation2d.fromDegrees(120));
                     break;
                 default:
                     destination = null;
