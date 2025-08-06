@@ -16,7 +16,6 @@ public class Climber extends SubsystemBase {
     private final TalonFX m_IntakeMotor;
 
     private final Servo m_RampServo;
-    private final Servo m_FootServo;
 
     /**
      * This subsytem that controls the climber.
@@ -28,8 +27,7 @@ public class Climber extends SubsystemBase {
         m_IntakeMotor = new TalonFX(ClimberConstants.INTAKE_MOTOR_ID);
         
         m_RampServo = new Servo(9);
-        m_FootServo = new Servo(8);
-
+       
         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
         currentLimits.SupplyCurrentLimitEnable = true;
         currentLimits.SupplyCurrentLimit = ClimberConstants.CLIMBER_MOTOR_CURRENT_LIMIT;
@@ -50,7 +48,6 @@ public class Climber extends SubsystemBase {
     public void periodic() {
         //todo check for position and prvent from it from moving too far up or down
         SmartDashboard.putNumber("Ramp Servo Angle", m_RampServo.getAngle());
-        SmartDashboard.putNumber("Foot Servo Angle", m_FootServo.getAngle());
     }
 
     /**
@@ -71,7 +68,7 @@ public class Climber extends SubsystemBase {
     }
 
     /**
-     * Stops the intake motor by setting power to 0%.
+     * Stops the intake motor by settinAg power to 0%.
      */
     public void StopIntakeCage() {
         m_IntakeMotor.set(0.0);
@@ -79,12 +76,10 @@ public class Climber extends SubsystemBase {
 
     public void ArmClimber(){
         m_RampServo.setAngle(180);
-        m_FootServo.setAngle(80);
     }
 
     public void ResetClimber(){
         m_RampServo.setAngle(00);
-        m_FootServo.setAngle(149);
     }
 
 }

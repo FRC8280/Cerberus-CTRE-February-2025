@@ -216,6 +216,7 @@ public class RobotContainer {
     }
 
     public void NewScoreAttempt() {
+        SetSingleTargetMode(true);
         m_scoreCommandAborted = false;
     }
 
@@ -323,8 +324,6 @@ public class RobotContainer {
     boolean m_NegativeMovement = false;
     SwerveRequest.RobotCentric alignShotRobotRequestX = new SwerveRequest.RobotCentric();
 
-
-    //SwerveRequest.RobotCentric alignShotRobotRequestCombined = new SwerveRequest.RobotCentric();
     SwerveRequest.FieldCentric alignShotRobotRequestCombined = new SwerveRequest.FieldCentric();
     private SwerveRequest AlignShotRequestCombined(){
 
@@ -382,6 +381,13 @@ public class RobotContainer {
             alignShotRobotRequestCombined.VelocityX = alignShotRobotRequestCombined.VelocityX * (Math.abs(deltaX)/Math.abs(deltaY));
         }
 
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        if(ally.isPresent() && ally.get() == Alliance.Red)
+        {
+            alignShotRobotRequestCombined.VelocityY*=-1;
+            alignShotRobotRequestCombined.VelocityX*=-1;
+        }
+            
         m_autoAlignTimer.reset();
         m_autoAlignTimer.start();
         return alignShotRobotRequestCombined;
@@ -484,15 +490,15 @@ public class RobotContainer {
         double destinationY = destinationPos.getY();
 
         boolean test;
-        System.out.println("Current Y: " + currentY + " Destination Y: " + destinationY);
+        //System.out.println("Current Y: " + currentY + " Destination Y: " + destinationY);
         if (m_NegativeMovement)
             test = CheckNegativeMovementAlignment(currentY, destinationY);
         else
             test = CheckPositiveMovementAlignment(currentY, destinationY);
 
         if (test) {
-            System.out.println("The values of test is: " + test);
-            System.out.println("90% reached - Camera Alignment Complete Y");
+            //System.out.println("The values of test is: " + test);
+            //System.out.println("90% reached - Camera Alignment Complete Y");
             m_alignmentInactive = true;
         }
 
@@ -721,7 +727,7 @@ public class RobotContainer {
                 (Math.abs(driverController.getRightY()) > 0.4) ||
                 ManualOperator.getRawButtonPressed(Constants.ManualOperatorConstants.ABORT))
                 .onTrue(new InstantCommand(() -> this.CancelAutomaticMovement())
-                        // .andThen(new InstantCommand(() -> SetSingleTargetMode(false)))
+                        .andThen(new InstantCommand(() -> SetSingleTargetMode(false)))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring)))
                         .andThen(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()))
                         .andThen(new InstantCommand(() -> m_Elevator.Stow()))
@@ -731,29 +737,30 @@ public class RobotContainer {
                 .onTrue(new InstantCommand(() -> EnableManualMode()))
                 .onFalse(new InstantCommand(() -> DisableManualMode()));
 
-        // Manual algea
-        /*
-         * driverController.x().onTrue(
-         * new InstantCommand(() -> m_Elevator.AlgeaHigh())
-         * .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-         * .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm()))
-         * );
-         * 
-         * driverController.a().onTrue(
-         * new InstantCommand(() -> m_Elevator.AlgaeCheckpoint())
-         * .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-         * .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm()))
-         * .andThen(new InstantCommand(() -> m_Elevator.AlgeaLow()))
-         * );
-         * 
-         * driverController.rightBumper().onTrue(
-         * new InstantCommand(() -> m_Effector.Stop())
-         * .andThen(new WaitUntilCommand(() -> m_Effector.reachedSetState()))
-         * .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-         * );
-         */
+          // Manual algea
+          driverController.y().onTrue(
+          new InstantCommand(() -> m_Elevator.AlgaeCheckpoint())
+          .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+          .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm()))
+            .andThen(new InstantCommand(() -> m_Elevator.AlgeaHigh()))
+          );
+          
+          driverController.a().onTrue(
+          new InstantCommand(() -> m_Elevator.AlgaeCheckpoint())
+          .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+          .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm()))
+          .andThen(new InstantCommand(() -> m_Elevator.AlgeaLow()))
+          );
+          
+          driverController.rightBumper().onTrue(
+          new InstantCommand(() -> m_Effector.Stop())
+          .andThen(new WaitUntilCommand(() -> m_Effector.reachedSetState()).withTimeout(0.5))
+          .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+          
+          );
+        
 
-        driverController.y().onTrue(
+       /*driverController.y().onTrue( //test new alignment
 
                 new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_LEFT))
                         // Realign
@@ -779,11 +786,12 @@ public class RobotContainer {
                         .andThen(new WaitCommand(0.6))
                         .andThen(m_Elevator.RunCurrentZeroing()) // Todo make a proper reverse.
 
-        );
+        );*/
 
 
-        driverController.b().onTrue(
+        /*driverController.b().onTrue(
    
+            //coral level 1
              new WaitCommand(0.5)    
              .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
              .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
@@ -795,7 +803,7 @@ public class RobotContainer {
              .andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
              .andThen(new InstantCommand(() -> m_Elevator.Stow()))
 
-                );
+                );*/
 
                 /*             new WaitCommand(0.1)    
                 .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
@@ -915,28 +923,6 @@ public class RobotContainer {
 
         // Bindings to control Elevator Level, wait until it aligns, then runs
         // sequential command gorup to score
-
-        /*
-
-        JoystickButton tenLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_LEFT);
-        new Trigger(() -> tenLeftButton.getAsBoolean() && ElevatorHasDestination())
-
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_LEFT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-
-        JoystickButton tenRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_RIGHT);
-        new Trigger(() -> tenRightButton.getAsBoolean() && ElevatorHasDestination())
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-
-        
-  */
         JoystickButton tenLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_LEFT);
         new Trigger(() -> tenLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
@@ -951,15 +937,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-        
-        /*JoystickButton tenRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_RIGHT);
-        new Trigger(() -> tenRightButton.getAsBoolean() && ElevatorHasDestination())
-                .onTrue(new InstantCommand(() -> NewScoreAttempt())
-                        .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
-                        .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));*/
-                        
+                       
         JoystickButton twelveLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWELVE_LEFT);
         new Trigger(() -> twelveLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
@@ -974,8 +952,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
-
-        
+       
         JoystickButton twoLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_LEFT);
         new Trigger(() -> twoLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
@@ -1006,7 +983,6 @@ public class RobotContainer {
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
-
         JoystickButton sixLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.SIX_LEFT);
         new Trigger(() -> sixLeftButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
@@ -1031,7 +1007,6 @@ public class RobotContainer {
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
-        
         JoystickButton eightRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_RIGHT);
         new Trigger(() -> eightRightButton.getAsBoolean() && ElevatorHasDestination())
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
@@ -1041,9 +1016,8 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
 
         // Trigger to check bad elevator position and run zeroing if needed
-
         new Trigger(() -> m_Elevator.CheckBadElevatorPosition())
-                .onTrue(m_Elevator.runOnce(() -> m_Elevator.RunCurrentZeroing()));
+                .onTrue(m_Elevator.runOnce(() -> m_Elevator.RunCurrentZeroingTrap()));
                 //.onTrue(m_Elevator.runOnce(() -> m_Elevator.ResetEncoders()));
 
         // Complete Scoring Action trigger 
@@ -1081,7 +1055,7 @@ public class RobotContainer {
                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
                 .andThen(new WaitCommand(0.15))
                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                // .andThen(new InstantCommand(() -> this.SetSingleTargetMode(false)))
+                .andThen(new InstantCommand(() -> this.SetSingleTargetMode(false)))
 
                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
                 .andThen(new WaitCommand(0.6))

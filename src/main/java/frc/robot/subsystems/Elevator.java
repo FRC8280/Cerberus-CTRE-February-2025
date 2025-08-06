@@ -160,7 +160,9 @@ public class Elevator extends SubsystemBase {
   public boolean CheckBadElevatorPosition()
   {
 
-    if (m_FrontMotor.getPosition().getValueAsDouble() < -3 || m_RearMotor.getPosition().getValueAsDouble() < -3) 
+    //if (m_FrontMotor.getPosition().getValueAsDouble() < -3 || m_RearMotor.getPosition().getValueAsDouble() < -3) 
+    if (m_RearMotor.getPosition().getValueAsDouble() < -3) 
+    
     {    
         //Test
         System.out.println("BAD ELEVATOR POSITION DETECTED Front Motor %: " + m_FrontMotor.getPosition().getValueAsDouble() + " Rear Motor %: " + m_RearMotor.getPosition().getValueAsDouble());
@@ -204,7 +206,7 @@ public class Elevator extends SubsystemBase {
 
   public void AlgeaHigh()
   {
-    setPosition(19.07);
+    setPosition(15.50);//(19.07);
     targetElevatorPosition = 19.07;
   }
 
@@ -307,6 +309,12 @@ public void checkAndFix(){
     m_RearMotor.setPosition(0);
   }
   
+  public Command RunCurrentZeroingTrap(){
+    int x;
+    x =10;
+    return RunCurrentZeroing();
+
+  }
   public Command RunCurrentZeroing() {
     return this.run(() -> this.SetPower(-.10))
         .andThen(() -> this.SetZeroingFlag(true))
