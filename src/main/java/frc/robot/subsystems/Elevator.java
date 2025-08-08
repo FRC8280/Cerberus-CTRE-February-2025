@@ -309,12 +309,7 @@ public void checkAndFix(){
     m_RearMotor.setPosition(0);
   }
   
-  public Command RunCurrentZeroingTrap(){
-    int x;
-    x =10;
-    return RunCurrentZeroing();
 
-  }
   public Command RunCurrentZeroing() {
     return this.run(() -> this.SetPower(-.10))
         .andThen(() -> this.SetZeroingFlag(true))

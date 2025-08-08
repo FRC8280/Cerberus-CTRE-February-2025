@@ -26,14 +26,14 @@ package frc.robot;
 
 import static frc.robot.Constants.Vision.*;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
+//import edu.wpi.first.apriltag.AprilTagFieldLayout;
+//import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
+//import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -54,7 +54,7 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 //import org.photonvision.targeting.PhotonPipelineResult;
 import java.util.HashMap;
 
@@ -98,7 +98,7 @@ public class Vision {
         angleLookupTable.put(11, 60.0);
     }
 
-    public static List<Pose2d> loadAprilTagPoses(List<Integer> tagIds) {
+    /*public static List<Pose2d> loadAprilTagPoses(List<Integer> tagIds) {
         List<Pose2d> tagPoses2d = new ArrayList<>();
 
         try {
@@ -127,7 +127,7 @@ public class Vision {
         }
 
         return tagPoses2d;
-    }
+    }*/
 
     public double normalizeAngle(double angle) {
         // Normalize the angle to be within the range [0, 360)
@@ -763,7 +763,7 @@ public class Vision {
      * @param verticalOffset   Offset in meters left/right (along tag's Y)
      * @return List of Pose2d with the given offsets applied
      */
-    public static List<Pose2d> calculateOffsetsWithXY(List<Integer> tagIds, double horizontalOffset, double verticalOffset) {
+    /*public static List<Pose2d> calculateOffsetsWithXY(List<Integer> tagIds, double horizontalOffset, double verticalOffset) {
         List<Pose2d> offsetPoses = new ArrayList<>();
 
         try {
@@ -801,7 +801,7 @@ public class Vision {
         }
 
         return offsetPoses;
-    }
+    }*/
 
     public Vision(int index) {
 
@@ -812,7 +812,7 @@ public class Vision {
 
         //Generate the list of coordinates based onoffsets. 
         //todo: move to constants
-        double leftBranchHorz = 0.56;
+        /*double leftBranchHorz = 0.56;
         double leftBranchVert = -0.3;
         double rightBranchHorz = 0.56;
         double rightBranchVert = 0.05;
@@ -823,7 +823,7 @@ public class Vision {
         rightBranchCoordinates = calculateOffsetsWithXY(reefTagIds, rightBranchHorz, rightBranchVert);
         offReefCoordinates = calculateOffsetsWithXY(reefTagIds, offReedHorz, offReefVert);
 
-        printTagPoses(reefTagIds, offReefCoordinates);
+        printTagPoses(reefTagIds, offReefCoordinates);*/
 
         /*int tagIndex = reefTagIds.indexOf(19);
         Pose2d tag18OffsetPose = leftBranchCoordinates.get(tagIndex);
