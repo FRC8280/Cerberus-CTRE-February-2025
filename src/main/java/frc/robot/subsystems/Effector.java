@@ -237,7 +237,7 @@ public class Effector extends SubsystemBase  {
     public void ScoreL1()
     {
         m_EffectorState = EffectorState.Scoring;
-        RunEffector(30);
+        RunEffector(40);
     }
 
     public void EjectCoral()

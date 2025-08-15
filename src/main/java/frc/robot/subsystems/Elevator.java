@@ -172,9 +172,9 @@ public class Elevator extends SubsystemBase {
 
       //Is this expensive? 
       //Todo add code to check elevator velocity
-      if (m_FrontMotor.getPosition().getValueAsDouble() < -2.0 || m_RearMotor.getPosition().getValueAsDouble() < -2.0)
+      if (/*m_FrontMotor.getPosition().getValueAsDouble() < -2.0 ||*/ m_RearMotor.getPosition().getValueAsDouble() < -2.0)
       {
-            System.out.println("It's between 0 and -3, resetting");
+            System.out.println("It's between 0 and -2, resetting");
             ResetEncoders();
       } 
     
@@ -309,11 +309,18 @@ public void checkAndFix(){
     m_RearMotor.setPosition(0);
   }
   
+  public boolean RunAwayZero() {
+    //Is this a sufficient test? or do we need a timer. Test it first on dashboard. 
+    if(!m_RunZeroFunction && (m_RearMotor.getStatorCurrent().refresh().getValueAsDouble() > 40.0)) 
+        return true;
+    else
+        return false;
+  }
 
   public Command RunCurrentZeroing() {
     return this.run(() -> this.SetPower(-.10))
         .andThen(() -> this.SetZeroingFlag(true))
-        .until(() -> m_FrontMotor.getStatorCurrent().refresh().getValueAsDouble() > 40.0)
+        .until(() -> m_RearMotor.getStatorCurrent().refresh().getValueAsDouble() > 40.0)
         .andThen(() -> this.ResetEncoders())
         .andThen(() -> this.SetPower(0))
         .finallyDo(() -> this.SetZeroingFlag(false));
@@ -330,6 +337,8 @@ public void checkAndFix(){
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator/Front/Pos",  m_FrontMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator/Rear/Pos",  m_RearMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putBoolean("Zero Flag Status", m_RunZeroFunction);   
+    
     /*SmartDashboard.putNumber("Elevator Target",targetElevatorPosition);
     //SmartDashboard.putNumber("Elevator Speed", m_RearMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putBoolean("Elevator Jacked Up", atStowed() && !ElevatorAtZero());

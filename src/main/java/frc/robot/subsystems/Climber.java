@@ -2,7 +2,12 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
@@ -15,17 +20,33 @@ public class Climber extends SubsystemBase {
     private final TalonFX m_ClimbMotor;
     private final TalonFX m_IntakeMotor;
 
+    private final CANcoder absoluteEncoder = new CANcoder(50);
+
     private final Servo m_RampServo;
+
+    private final double climberOut = -0.067;
+    private final double climberIn = 0.113525;
+
 
     /**
      * This subsytem that controls the climber.
      */
     public Climber () {
+        TalonFXConfiguration config = new TalonFXConfiguration();
+
+        // Set CANcoder as the feedback sensor
+        FeedbackConfigs feedbackConfigs = new FeedbackConfigs();
+        feedbackConfigs.FeedbackSensorSource = com.ctre.phoenix6.signals.FeedbackSensorSourceValue.RemoteCANcoder;
+        feedbackConfigs.FeedbackRemoteSensorID = absoluteEncoder.getDeviceID();
+
+        config.Feedback = feedbackConfigs;
 
         // Set up the climb motor as a brushless motor
         m_ClimbMotor = new TalonFX(ClimberConstants.CLIMBER_MOTOR_ID);
         m_IntakeMotor = new TalonFX(ClimberConstants.INTAKE_MOTOR_ID);
-        
+
+        m_ClimbMotor.getConfigurator().apply(config);
+
         m_RampServo = new Servo(9);
        
         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
@@ -80,6 +101,20 @@ public class Climber extends SubsystemBase {
 
     public void ResetClimber(){
         m_RampServo.setAngle(00);
+    }
+
+    private void moveToPosition(double rotations) {
+        // Use PositionVoltage to request position with voltage control (PIDF)
+        final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+        m_ClimbMotor.setControl(positionRequest.withPosition(rotations));
+    }
+
+    public void engageClimber(){
+        moveToPosition(climberOut);
+    }
+
+    public void retractClimber(){
+        moveToPosition(climberIn);
     }
 
 }
