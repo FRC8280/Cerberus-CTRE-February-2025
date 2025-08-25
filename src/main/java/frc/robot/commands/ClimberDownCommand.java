@@ -30,7 +30,10 @@ public class ClimberDownCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_climber.runClimber(ClimberConstants.CLIMBER_SPEED_DOWN);
+    if(!m_climber.AtMaxContraction())
+        m_climber.runClimber(ClimberConstants.CLIMBER_SPEED_DOWN);
+    else
+        m_climber.runClimber(0);
   }
 
   // Called once the command ends or is interrupted. Here we ensure the climber is not

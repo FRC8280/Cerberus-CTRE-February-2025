@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.262602459016393,
-        "y": 5.0379610655737705
+        "x": 5.265,
+        "y": 5.029249999999999
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.92663125539258,
-        "y": 6.396672778257116
+        "x": 4.929028796376187,
+        "y": 6.387961712683345
       },
       "isLocked": false,
       "linkedName": "End Initial Side Path"

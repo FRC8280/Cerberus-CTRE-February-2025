@@ -448,7 +448,7 @@ public class RobotContainer {
             test = CameraAlignmentCompleteX();
 
         if (test) {
-            System.out.println("90% reached - Camera Alignment Combined");
+            //System.out.println("90% reached - Camera Alignment Combined");
             m_alignmentInactive = true;
         }
 
@@ -478,7 +478,7 @@ public class RobotContainer {
             test = CheckPositiveMovementAlignment(currentX, destinationX);
 
         if (test) {
-            System.out.println("90% reached - Camera Alignment Complete X");
+            //System.out.println("90% reached - Camera Alignment Complete X");
             m_alignmentInactive = true;
         }
 
@@ -835,14 +835,21 @@ public class RobotContainer {
                 .onTrue(new InstantCommand(() -> ArmClimber()));
 
         // Winch Code
-        new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_DN)
-                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-                //.whileTrue(new ClimberDownCommand(m_Climber));
-                .onTrue(new InstantCommand(() -> m_Climber.retractClimber()));
+
+        /*driverController.x()
+            .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
+            .onTrue(new InstantCommand(() -> m_Climber.moveToPosition(0)));
+
+        driverController.b()
+            .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
+            .onTrue(new InstantCommand(() -> m_Climber.moveToPosition(0.153)));*/
+        
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_UP)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-                //.whileTrue(new ClimberUpCommand(m_Climber));
-                .onTrue(new InstantCommand(() -> m_Climber.engageClimber()));
+                .whileTrue(new ClimberDownCommand(m_Climber));
+        new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_DN)
+                .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
+                .whileTrue(new ClimberUpCommand(m_Climber));
 
         // Code to make buttons set elevator destination
         JoystickButton l1Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L1);
