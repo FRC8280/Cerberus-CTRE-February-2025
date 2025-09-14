@@ -35,12 +35,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.RobotContainer.ScoringState;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
 import frc.robot.generated.TunerConstants;
@@ -62,9 +64,12 @@ public class RobotContainer {
         CorrectPosition,
         CorrectDistance,
         CompleteScore,
-        CorrectPositionL1,
+        CorrectPositionL1, //scoring states for L1 are different
         CorrectDistanceL1,
-        CompleteScoreL1
+        CompleteScoreL1,
+        CorrectPositionEx, //New revision for faster scoring
+        CorrectDistanceEx, 
+        CompleteScoreEx
     };
 
     // private Timer m_cancelAutomovementTimer = new Timer();
@@ -247,6 +252,19 @@ public class RobotContainer {
         return (m_RunScoringState == ScoringState.CompleteScore) && !CommandAborted();
     }
 
+    //High Speed Versions
+        
+    public boolean GetCorrectCombinedScoreTriggerEx() {
+        return (m_RunScoringState == ScoringState.CorrectPositionEx) && !CommandAborted();
+    }
+
+    public boolean GetCorrectDistanceScoreTriggerEx() {
+        return (m_RunScoringState == ScoringState.CorrectDistanceEx) && !CommandAborted();
+    }
+    public boolean GetCompleteScoreTriggerEx() {
+        return (m_RunScoringState == ScoringState.CompleteScoreEx) && !CommandAborted();
+    }
+
     //L1 Versions
     public boolean GetCorrectCombinedScoreTriggerL1() {
         return (m_RunScoringState == ScoringState.CorrectPositionL1) && !CommandAborted();
@@ -315,6 +333,7 @@ public class RobotContainer {
     public void RobotInit() {
         System.out.println("Initializing ROBOT LOOK AT ME");
         m_Climber.ResetClimber();
+        m_Elevator.Stow();  //Attempt to fix elevator moving up. 
         // m_Elevator.RunCurrentZeroing();
     }
 
@@ -340,7 +359,11 @@ public class RobotContainer {
     SwerveRequest.RobotCentric alignShotRobotRequestX = new SwerveRequest.RobotCentric();
 
     SwerveRequest.FieldCentric alignShotRobotRequestCombined = new SwerveRequest.FieldCentric();
-    private SwerveRequest AlignShotRequestCombined(){
+    private SwerveRequest AlignShotRequestCombined(boolean highSpeed){
+
+        double speed = Constants.AutoAlignment.AutoAlignmentSpeed;
+        if(highSpeed)
+            speed = Constants.AutoAlignment.AutoAlignmentSpeedFast;
 
         boolean negativeX = false;
         boolean negativeY = false;
@@ -361,10 +384,10 @@ public class RobotContainer {
         //Calculate the velocities
         if (deltaX < 0) {
             negativeX = true;
-            alignShotRobotRequestCombined.VelocityX = -0.35;
+            alignShotRobotRequestCombined.VelocityX = -speed;
         } else if (deltaX > 0) {
             negativeX = false;
-            alignShotRobotRequestCombined.VelocityX = +0.35;
+            alignShotRobotRequestCombined.VelocityX = +speed;
         } else {
             negativeX = true;
             alignShotRobotRequestCombined.VelocityX = 0;
@@ -372,10 +395,10 @@ public class RobotContainer {
 
         if (deltaY < 0) {
             negativeY = true;
-            alignShotRobotRequestCombined.VelocityY = -0.35;
+            alignShotRobotRequestCombined.VelocityY = -speed;
         } else if (deltaY > 0) {
             negativeY = false;
-            alignShotRobotRequestCombined.VelocityY = +0.35;
+            alignShotRobotRequestCombined.VelocityY = +speed;
         } else {
             negativeY = true;
             alignShotRobotRequestCombined.VelocityY = 0;
@@ -541,14 +564,18 @@ public class RobotContainer {
 
     SwerveRequest.RobotCentric alignReefEdgeRequest = new SwerveRequest.RobotCentric();
 
-    private SwerveRequest ApproachReefRequest() {
+    private SwerveRequest ApproachReefRequest(boolean highSpeed) {
+
+        double speed = Constants.AutoAlignment.AutoApproachReefSpeed;
+        if(highSpeed)
+            speed = Constants.AutoAlignment.AutoApproachReefSpeedFast;
 
         m_alignmentInactive = false;
 
         double distance = m_DistanceSensorSystem.LongestDistance();
 
         if (distance >= Constants.DistanceConstants.reefAlignedDistance)
-            alignReefEdgeRequest.VelocityX = Constants.AutoAlignment.AutoReefAlignmentSpeed;
+            alignReefEdgeRequest.VelocityX = speed;
         else
             alignReefEdgeRequest.VelocityX = 0.0;
 
@@ -774,43 +801,6 @@ public class RobotContainer {
           
           );
         
-
-        /*driverController.b().onTrue(
-   
-            //coral level 1
-             new WaitCommand(0.5)    
-             .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
-             .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-             .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArmNoEffector()))
-             .andThen(new WaitCommand(2))
-             .andThen(drivetrain.applyRequest(() -> ApproachReefRequest()).until(() -> ReefClosingComplete()))
-             .andThen(new InstantCommand(() -> m_Effector.ScoreL1()))
-             .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-             .andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
-             .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-
-                );*/
-
-                /*             new WaitCommand(0.1)    
-                .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
-                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
-                //.andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArmNoEffector()))
-                .andThen(new WaitCommand(1))
-                .andThen(drivetrain.applyRequest(() -> ApproachReefRequest()).until(() -> ReefClosingComplete()))
-                .andThen(new InstantCommand(() -> m_Effector.ScoreL1()))
-                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                .andThen(new WaitCommand(2))
-
-                //.andThen(new WaitCommand(3))
-                //.andThen(new InstantCommand(() -> this.backUp(0.5)))
-                //.andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
-                
-                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
-                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(2))
-                .andThen(new WaitCommand(0.6))
-                .andThen(m_Elevator.RunCurrentZeroing())
-                ); */
-
        
         driverController.pov(0)
                 .whileTrue(drivetrain.applyRequest(
@@ -830,26 +820,21 @@ public class RobotContainer {
         driverController.start().and(driverController.x())
                 .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
+        /*Shyann add the command here */
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.ARM_CLIMBER)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-                .onTrue(new InstantCommand(() -> ArmClimber()));
-
-        // Winch Code
-
-        /*driverController.x()
-            .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-            .onTrue(new InstantCommand(() -> m_Climber.moveToPosition(0)));
-
-        driverController.b()
-            .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-            .onTrue(new InstantCommand(() -> m_Climber.moveToPosition(0.153)));*/
+                .onTrue(new InstantCommand(() -> ArmClimber()))
+                .onTrue(new InstantCommand(() -> m_Climber.engageClimber())); 
+                
         
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_UP)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
+                //.onTrue(new InstantCommand(() -> m_Climber.retractClimber())); 
                 .whileTrue(new ClimberDownCommand(m_Climber));
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_DN)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-                .whileTrue(new ClimberUpCommand(m_Climber));
+                .onTrue(new InstantCommand(() -> m_Climber.engageClimber())); 
+                //.whileTrue(new ClimberUpCommand(m_Climber));
 
         // Code to make buttons set elevator destination
         JoystickButton l1Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L1);
@@ -896,14 +881,14 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_LEFT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
         JoystickButton tenRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TEN_RIGHT);
         new Trigger(() -> tenRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
                        
         JoystickButton twelveLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWELVE_LEFT);
         new Trigger(() -> twelveLeftButton.getAsBoolean() && ElevatorHasDestination() && !m_L1Scoring)
@@ -911,14 +896,14 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_LEFT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
         JoystickButton twelveRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWELVE_RIGHT);
         new Trigger(() -> twelveRightButton.getAsBoolean() && ElevatorHasDestination() &&!m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
        
         JoystickButton twoLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_LEFT);
         new Trigger(() -> twoLeftButton.getAsBoolean() && ElevatorHasDestination() && !m_L1Scoring)
@@ -926,14 +911,14 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_LEFT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
         JoystickButton twoRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.TWO_RIGHT);
         new Trigger(() -> twoRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
         JoystickButton fourLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.FOUR_LEFT);
         new Trigger(() -> fourLeftButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
@@ -941,14 +926,14 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_LEFT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
                 JoystickButton fourRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.FOUR_RIGHT);
         new Trigger(() -> fourRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
         JoystickButton sixLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.SIX_LEFT);
         new Trigger(() -> sixLeftButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
@@ -956,7 +941,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_LEFT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
         JoystickButton sixRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.SIX_RIGHT);
         new Trigger(() -> sixRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
@@ -964,7 +949,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
         JoystickButton eightLeftButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_LEFT);
         new Trigger(() -> eightLeftButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
@@ -972,7 +957,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_LEFT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
         JoystickButton eightRightButton = new JoystickButton(ReefOperator, Constants.ReefOperatorConstants.EIGHT_RIGHT);
         new Trigger(() -> eightRightButton.getAsBoolean() && ElevatorHasDestination() && !m_L1Scoring)
@@ -980,24 +965,90 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_RIGHT)))
                         .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
-                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPosition))));
+                        .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
+
+         // Todo Trigger. Check to see if it's running. 
+        //new Trigger(() -> m_Elevator.RunAwayZero())
+        //        .onTrue(m_Elevator.runOnce(() -> m_Elevator.SetPower(0)));
 
         // Trigger to check bad elevator position and run zeroing if needed
         new Trigger(() -> m_Elevator.CheckBadElevatorPosition())
                 .onTrue(m_Elevator.runOnce(() -> m_Elevator.RunCurrentZeroing()));
 
-        // Todo Trigger. Check to see if it's running. 
-        //new Trigger(() -> m_Elevator.RunAwayZero())
-        //        .onTrue(m_Elevator.runOnce(() -> m_Elevator.SetPower(0)));
+        /* new speed test code */
+        //These are the original manual triggers
+        /*driverController.x()
+            .onTrue(new InstantCommand(() -> NewScoreAttempt())
+            .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_LEFT)))
+            .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+            .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+            .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
+
+        driverController.b()
+            .onTrue(new InstantCommand(() -> NewScoreAttempt())
+            .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT)))
+            .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+            .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+            .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));*/
+
+        //First Trigger to check the position. 
+        new Trigger(() -> GetCorrectCombinedScoreTriggerEx()).onTrue(
+            new ParallelCommandGroup(
+                // Call SetLevel on the elevator in parallel with the adjustment. 
+                new InstantCommand(() -> m_Elevator.SetLevel(GetElevatorDestination())),
+
+                // Run the existing highlighted code
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
+                        .andThen(drivetrain.applyRequest(() -> AlignShotRequestCombined(true))
+                        .until(() -> CameraAlignmentCombined()))
+                        .andThen(() -> SetScoreTrigger(ScoringState.CorrectDistanceEx))
+                )
+            )
+        );
+
+        //Second trigger closes distance to the reef
+        new Trigger(() -> GetCorrectDistanceScoreTriggerEx()).onTrue(
+            // Close in on the reef
+            new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
+            .andThen(new InstantCommand(() -> ResetAutoAlignTimer()))
+            .andThen( drivetrain.applyRequest(() -> ApproachReefRequest(true))
+                        .until(() -> ReefClosingComplete()))
+            .andThen(new WaitUntilCommand(() -> this.AutoAlignmentInActive()))
+            .andThen(() -> SetScoreTrigger(ScoringState.CompleteScoreEx))
+        );
+
+        //Third trigger is the scoring process
+        new Trigger(() -> GetCompleteScoreTriggerEx()).onTrue(
+            new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
+                // Start moving elevator
+                //.andThen(new InstantCommand(() -> m_Elevator.SetLevel(GetElevatorDestination())))
+                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
+
+                .andThen(new InstantCommand(() -> m_Effector.ScoreCoralTeleOp(GetElevatorDestination())))
+                .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
+                .andThen(new WaitCommand(0.25))//0.15))
+                .andThen(new InstantCommand(() -> m_Elevator.Stow()))
+                .andThen(new InstantCommand(() -> this.SetSingleTargetMode(false)))
+
+                .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
+                .andThen(new WaitCommand(0.6))
+                .andThen(m_Elevator.RunCurrentZeroing()) 
+                .andThen(new WaitUntilCommand(()->m_Elevator.ZeroCompleted()))
+                .andThen(new InstantCommand(() -> resetElevatorDestination()))
+            .andThen(() -> SetScoreTrigger(ScoringState.NotScoring))
+        );
 
         // Complete Scoring Action trigger 
         /* Note had to turn this into a state machine and 3 independent triggers
            We don't know why it won't work under a single trigger like the unit test 
            but this works and is repeatable.  */
-        //Frist Trigger to check the position. 
-        new Trigger(() -> GetCorrectCombinedScoreTrigger()).onTrue(
+        //First Trigger to check the position. 
+        
+        /* the old scoring system
+            new Trigger(() -> GetCorrectCombinedScoreTrigger()).onTrue(
             new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
-           .andThen (drivetrain.applyRequest(() -> AlignShotRequestCombined())
+           .andThen (drivetrain.applyRequest(() -> AlignShotRequestCombined(false))
             .until(() -> CameraAlignmentCombined()))
             .andThen(() -> SetScoreTrigger(ScoringState.CorrectDistance))
         );
@@ -1007,7 +1058,7 @@ public class RobotContainer {
             // Close in on the reef
             new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
             .andThen(new InstantCommand(() -> ResetAutoAlignTimer()))
-            .andThen( drivetrain.applyRequest(() -> ApproachReefRequest())
+            .andThen( drivetrain.applyRequest(() -> ApproachReefRequest(false))
                         .until(() -> ReefClosingComplete()))
             .andThen(new WaitUntilCommand(() -> this.AutoAlignmentInActive()))
             .andThen(() -> SetScoreTrigger(ScoringState.CompleteScore))
@@ -1032,7 +1083,8 @@ public class RobotContainer {
                 .andThen(new WaitUntilCommand(()->m_Elevator.ZeroCompleted()))
                 .andThen(new InstantCommand(() -> resetElevatorDestination()))
             .andThen(() -> SetScoreTrigger(ScoringState.NotScoring))
-        );
+        );*/
+
         //********************************************************************************************* */
         //L1 Scoring. 
         new Trigger(() -> twelveLeftButton.getAsBoolean() && ElevatorHasDestination()&& m_L1Scoring)
@@ -1135,7 +1187,7 @@ public class RobotContainer {
             // Close in on the reef
             new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
             .andThen(new InstantCommand(() -> ResetAutoAlignTimer()))
-            .andThen( drivetrain.applyRequest(() -> ApproachReefRequest())
+            .andThen( drivetrain.applyRequest(() -> ApproachReefRequest(false))
                        .until(() -> ReefClosingComplete()))
             .andThen(new WaitUntilCommand(() -> this.AutoAlignmentInActive()))
             .andThen(() -> SetScoreTrigger(ScoringState.CompleteScoreL1))

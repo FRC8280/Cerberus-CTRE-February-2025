@@ -30,9 +30,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    PortForwarder.add(5800, "photonvision-1.local", 5800);
+    //PortForwarder.add(5800, "photonvision-1.local", 5800);
     //PortForwarder.add(5800, "photonvision-2.local", 5800);
-    //PortForwarder.add(5800, "photonvision-3.local", 5800);
+    PortForwarder.add(5800, "photonvision-3.local", 5800);
     SignalLogger.enableAutoLogging(false);
     RobotContainer.threadCommand();
   }

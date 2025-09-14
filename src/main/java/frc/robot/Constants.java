@@ -54,9 +54,13 @@ import edu.wpi.first.math.util.Units;
         public static double MaxAngularRate = Units.degreesToRadians(200);//360;
         public static double MaxAngularAcceleration = Units.degreesToRadians(300) ;//540; 
      
-        public static double AutoAlignmentSpeed = 0.5;
-        //0.6;//0.60; //0.40;//0.25;
-        public static double AutoReefAlignmentSpeed = 0.55;//0.50;//0.35;
+        public static double AutoAlignmentSpeed = 0.35;
+        public static double AutoAlignmentSpeedFast = 0.35;//0.8;//0.9;
+        
+        public static double AutoApproachReefSpeed = 0.55;
+        public static double AutoApproachReefSpeedFast = 0.55;//0.70;
+        
+        //AutoAlignment
     }
      public static class Vision {
 

@@ -16,7 +16,14 @@ public class AlignmentCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    
+    /*
+
+    Check is this max or min extension? Which direction is out. 
+     * if(!m_climber.AtMaxExtensions()) 
+        m_climber.runClimber(ClimberConstants.CLIMBER_SPEED_UP);
+    else
+        m_climber.runClimber(0);
+     */
   }
 
   // Called once the command ends or is interrupted. Here we ensure the climber is not
@@ -29,6 +36,9 @@ public class AlignmentCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+
+    //if(!m_climber.AtMaxExtensions())
+    //return false?
     return false;
   }
 }

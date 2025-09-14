@@ -177,11 +177,11 @@ public class Climber extends SubsystemBase {
         m_ClimbMotor.setControl(positionRequest.withPosition(rotations));
     }
 
-    public void engageClimber(){
+    public void retractClimber(){
         moveToPosition(climberOut);
     }
 
-    public void retractClimber(){
+    public void engageClimber(){
         moveToPosition(climberIn);
     }
 
