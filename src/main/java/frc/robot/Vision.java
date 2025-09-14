@@ -641,7 +641,7 @@ public class Vision {
                     destination = new Pose2d(13.583, 2.595, Rotation2d.fromDegrees(120));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 6 right  Updated 8/3
-                    destination = new Pose2d(13.945, 2.770, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(13.875, 2.725, Rotation2d.fromDegrees(120));
                     break;
                 case Constants.ReefOperatorConstants.SIX_LEFT: // 7 left Updated 8/3
                     destination = new Pose2d(14.566, 3.7575, Rotation2d.fromDegrees(180));
@@ -659,7 +659,7 @@ public class Vision {
                     destination = new Pose2d(12.570, 5.469, Rotation2d.fromDegrees(-60));
                     break;
                 case Constants.ReefOperatorConstants.TWO_RIGHT: // 9 right Updated 8/3
-                    destination = new Pose2d(12.17375, 5.332, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(12.224, 5.352, Rotation2d.fromDegrees(-60));
                     break;
                 default:
                     destination = null;
@@ -671,37 +671,38 @@ public class Vision {
                     destination = new Pose2d(5.984, 3.775, Rotation2d.fromDegrees(180));
                     break;
                 case Constants.ReefOperatorConstants.TWELVE_RIGHT: // 21 right UPDATED 8/3
-                    destination = new Pose2d(5.88, 4.07, Rotation2d.fromDegrees(-180));
+                    destination = new Pose2d(5.88, 4.07 , Rotation2d.fromDegrees(-180));
                     break;
                 case Constants.ReefOperatorConstants.TEN_LEFT: // 20 left  UPDATED 8/3
                     destination = new Pose2d(5.486, 5.225, Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.TEN_RIGHT: // 20 right
-                    destination = new Pose2d(5.240, 5.416, Rotation2d.fromDegrees(-120));
+                    destination = new Pose2d(5.240 ,5.416 ,Rotation2d.fromDegrees(-120));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_LEFT: // 19 left UPDATED 8/3
                     destination = new Pose2d(3.93,5.416,Rotation2d.fromDegrees((-60)));
                     break;
-                case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right UPDATED 8/3
-                    destination = new Pose2d(3.702, 5.197, Rotation2d.fromDegrees(-60));
+                case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right UPDATED 9/14
+                    destination = new Pose2d(3.752,5.240, Rotation2d.fromDegrees(-60));
                     break;
                 case Constants.ReefOperatorConstants.SIX_LEFT: // 18 left UPDATED 8/3
                     destination = new Pose2d(3.0, 4.29, Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.SIX_RIGHT: // 18 right UPDATED 8/3
-                    destination = new Pose2d(3.1, 3.93, Rotation2d.fromDegrees(0));
+                    destination = new Pose2d(3.1, 3.93 + Constants.AutoAlignment.rightPoleOffset, 
+                                             Rotation2d.fromDegrees(0));
                     break;
                 case Constants.ReefOperatorConstants.FOUR_LEFT: // 17 left UPDATED 8/3
                     destination = new Pose2d(3.51, 2.897, Rotation2d.fromDegrees(60));
                     break;
                 case Constants.ReefOperatorConstants.FOUR_RIGHT: // 17 right UPDATED 8/3
-                    destination = new Pose2d(3.84, 2.79, Rotation2d.fromDegrees(60));
+                    destination = new Pose2d(3.84,2.79,Rotation2d.fromDegrees(60));
                     break;
                 case Constants.ReefOperatorConstants.TWO_LEFT: // 22 left UPDATED 8/3
                     destination = new Pose2d(5.000, 2.633, Rotation2d.fromDegrees(120)); 
                     break;
                 case Constants.ReefOperatorConstants.TWO_RIGHT: // 22 right UPDATED 8/3
-                    destination = new Pose2d(5.33, 2.8, Rotation2d.fromDegrees(120));
+                    destination = new Pose2d(5.28,2.775,Rotation2d.fromDegrees(120));
                     break;
                 default:
                     destination = null;

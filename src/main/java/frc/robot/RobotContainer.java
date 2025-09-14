@@ -886,7 +886,7 @@ public class RobotContainer {
         new Trigger(() -> tenRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TEN_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH/*OFF_REEF*/)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
                        
@@ -901,7 +901,7 @@ public class RobotContainer {
         new Trigger(() -> twelveRightButton.getAsBoolean() && ElevatorHasDestination() &&!m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWELVE_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH/*OFF_REEF*/)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
        
@@ -916,7 +916,7 @@ public class RobotContainer {
         new Trigger(() -> twoRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.TWO_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH/*OFF_REEF*/)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
@@ -931,7 +931,7 @@ public class RobotContainer {
         new Trigger(() -> fourRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.FOUR_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH/*OFF_REEF*/)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
@@ -947,7 +947,7 @@ public class RobotContainer {
         new Trigger(() -> sixRightButton.getAsBoolean() && ElevatorHasDestination()&& !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.SIX_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH/*OFF_REEF*/)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 
@@ -963,7 +963,7 @@ public class RobotContainer {
         new Trigger(() -> eightRightButton.getAsBoolean() && ElevatorHasDestination() && !m_L1Scoring)
                 .onTrue(new InstantCommand(() -> NewScoreAttempt())
                         .andThen(new InstantCommand(() -> SetReefBranch(Constants.ReefOperatorConstants.EIGHT_RIGHT)))
-                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.OFF_REEF)))
+                        .andThen(new InstantCommand(() -> this.AlignRobot(Constants.Alignment.BRANCH/*OFF_REEF*/)))
                         .andThen(new WaitUntilCommand(() -> !autoPathActive()))
                         .andThen(new InstantCommand(() -> SetScoreTrigger(ScoringState.CorrectPositionEx))));
 

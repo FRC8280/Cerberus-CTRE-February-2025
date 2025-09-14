@@ -59,6 +59,11 @@ import edu.wpi.first.math.util.Units;
         
         public static double AutoApproachReefSpeed = 0.55;
         public static double AutoApproachReefSpeedFast = 0.55;//0.70;
+
+        public static double rightPoleOffset = 0.05;
+        public static double rightPoleOffsetAngleX = 0.04330;
+        public static double rightPoleOffsetAngleY = 0.025;
+        
         
         //AutoAlignment
     }
