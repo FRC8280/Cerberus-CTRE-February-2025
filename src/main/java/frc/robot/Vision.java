@@ -683,7 +683,7 @@ public class Vision {
                     destination = new Pose2d(3.93,5.416,Rotation2d.fromDegrees((-60)));
                     break;
                 case Constants.ReefOperatorConstants.EIGHT_RIGHT: // 19 right UPDATED 9/14
-                    destination = new Pose2d(3.752,5.240, Rotation2d.fromDegrees(-60));
+                    destination = new Pose2d(3.703,5.290, Rotation2d.fromDegrees(-60));
                     break;
                 case Constants.ReefOperatorConstants.SIX_LEFT: // 18 left UPDATED 8/3
                     destination = new Pose2d(3.0, 4.29, Rotation2d.fromDegrees(0));
