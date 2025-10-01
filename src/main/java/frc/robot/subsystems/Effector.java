@@ -22,6 +22,7 @@ public class Effector extends SubsystemBase  {
         Intaking,
         ManualIntake,
         Scoring,
+        ScoringL1,
         Ejecting
       }
     
@@ -236,7 +237,7 @@ public class Effector extends SubsystemBase  {
 
     public void ScoreL1()
     {
-        m_EffectorState = EffectorState.Scoring;
+        m_EffectorState = EffectorState.ScoringL1;
         RunEffector(40);
     }
 
@@ -257,6 +258,14 @@ public class Effector extends SubsystemBase  {
         ResetAlgeaArm();
         //m_EffectorTimer.reset();
     }
+
+    public void StopL1()
+    {
+        m_EffectorState = EffectorState.None;
+        m_EffectorMotor.set(0);
+        m_EffectorTimer.stop();
+    }
+
 
     public boolean DetectCoral()
     {    
@@ -307,6 +316,8 @@ public class Effector extends SubsystemBase  {
             Stop();
         else if(m_EffectorState == EffectorState.Scoring && !DetectCoralFront())
             Stop();
+        else if(m_EffectorState == EffectorState.ScoringL1 && !DetectCoralFront())
+            StopL1();
         else if(m_EffectorState == EffectorState.Ejecting && !DetectCoralRear())
             Stop();
         //emergency measure

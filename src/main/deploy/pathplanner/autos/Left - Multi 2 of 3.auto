@@ -1,0 +1,152 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Blue Side Approach"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.2
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Level 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.15
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score Coral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.2
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stow Elevator"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset Elevator Zero"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Approach Coral Station"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Score 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Level 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.15
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score Coral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.2
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stow Elevator"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reached Set State"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

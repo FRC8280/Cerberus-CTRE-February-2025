@@ -35,18 +35,29 @@ public class CANdleSystem extends SubsystemBase {
         
         changeAnimation(AnimationTypes.SetAll);
         CANdleConfiguration configAll = new CANdleConfiguration();
-        configAll.statusLedOffWhenActive = true;
+        configAll.statusLedOffWhenActive = false;
         configAll.disableWhenLOS = false;
-        configAll.stripType = LEDStripType.RGB;
-        configAll.brightnessScalar = 0.1;
+        configAll.stripType = LEDStripType.GRB;
+        configAll.brightnessScalar = 0.5;
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
+        
         //m_currentAnimation = AnimationTypes.Fire;
-        //m_candle.setLEDs(255, 0, 00);
+        m_candle.setLEDs(255, 255, 255);
+        //changeAnimation(AnimationTypes.Fire);
+        //m_candle.animate(m_toAnimate);
+    }
+
+    public void setWhite()
+    {
+        m_candle.setLEDs(255, 255, 255);
+    }
+
+    public void setFireAnimation()
+    {
         changeAnimation(AnimationTypes.Fire);
         m_candle.animate(m_toAnimate);
     }
-
     public void incrementAnimation() {
         switch(m_currentAnimation) {
             case ColorFlow: changeAnimation(AnimationTypes.Fire); break;
@@ -128,8 +139,11 @@ public class CANdleSystem extends SubsystemBase {
         System.out.println("Changed to " + m_currentAnimation.toString());
     }
 
+    
     @Override
     public void periodic() {
+
+        m_candle.animate(m_toAnimate);
         // This method will be called once per scheduler run
         
         /*if(m_toAnimate == null) {
@@ -137,7 +151,7 @@ public class CANdleSystem extends SubsystemBase {
                               (int)(joystick.getRightTriggerAxis() * 255), 
                               (int)(joystick.getLeftX() * 255));
         } else {
-            m_candle.animate(m_toAnimate);
+           m_candle.animate(m_toAnimate);
         }
         m_candle.modulateVBatOutput(joystick.getRightY());*/
     }

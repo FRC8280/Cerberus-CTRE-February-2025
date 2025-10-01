@@ -29,8 +29,8 @@ public class Climber extends SubsystemBase {
 
     private final double canCoderZero = +0.1067;
     private final double climberOut = -0.067;
-    private final double climberIn = 0.113525;
-    private final double maxExtension = 0.153;
+    private final double climberIn = 0.145;//0.113525;
+    private final double maxExtension = 0.145;//0.153;
     private final double minExtension = -0.059;
     
     private static final double kP = 350.0;   // Position loop P (Volts/rotation error with PositionVoltage)

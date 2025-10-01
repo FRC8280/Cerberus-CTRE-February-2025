@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.28,
-        "y": 2.775
+        "x": 3.955942622950819,
+        "y": 5.325665983606557
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.489084586843089,
-        "y": 2.6379465960121573
+        "x": 4.165027209793908,
+        "y": 5.188612579618715
       },
       "isLocked": true,
       "linkedName": "Left Final Score"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 120.2522889298053
+    "rotation": -56.91514707126506
   },
   "useDefaultConstraints": true
 }

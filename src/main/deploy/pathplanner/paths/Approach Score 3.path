@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.311072362119253,
-        "y": 6.826225990809457
+        "x": 2.199283805675153,
+        "y": 6.829046386638895
       },
       "isLocked": false,
       "linkedName": "Coral Station"
     },
     {
       "anchor": {
-        "x": 5.28,
-        "y": 2.775
+        "x": 3.955942622950819,
+        "y": 5.325665983606557
       },
       "prevControl": {
-        "x": 4.894264599526329,
-        "y": 3.1571183207534896
+        "x": 3.761725567833261,
+        "y": 5.506926116457066
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 120.2522889298053
+    "rotation": -56.91514707126506
   },
   "reversed": false,
   "folder": null,

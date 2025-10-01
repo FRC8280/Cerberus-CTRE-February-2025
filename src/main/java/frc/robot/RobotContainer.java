@@ -86,7 +86,7 @@ public class RobotContainer {
     public final Climber m_Climber = new Climber();
     public final Elevator m_Elevator = new Elevator();
     public final Effector m_Effector = new Effector();
-    // private final CANdleSystem m_candleSubsystem = new CANdleSystem();
+    private final CANdleSystem m_candleSubsystem = new CANdleSystem();
     public ReefTargets m_ReefTargets = new ReefTargets();
     public DistanceSensorSystem m_DistanceSensorSystem = new DistanceSensorSystem();
     public double m_SlowSpeedMod = 1;
@@ -197,12 +197,16 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
 
         configureBindings();
-        // m_candleSubsystem.m_candle.setLEDs(255, 51, 51, 0, 0, 4);
+        m_candleSubsystem.setWhite();
+        //m_candleSubsystem.setFireAnimation();
+        //m_candleSubsystem.m_candle.setLEDs(100, 100, 100);
+        //m_candleSubsystem.m_candle.setLEDs(100, 100, 100);// 0, 0, 4);
     }
 
     public void EnableManualMode() {
         m_AutoAlignOff = true;
         System.out.println("Enabling Manual Mode");
+        m_candleSubsystem.setWhite();
     }
 
     public void DisableManualMode() {
@@ -1178,7 +1182,7 @@ public class RobotContainer {
             .andThen(new InstantCommand(() -> m_Elevator.LevelOne()))
             .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()))
             .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArmNoEffector()))
-            .andThen(new WaitCommand(1))//0.5))
+            .andThen(new WaitCommand(0.5))//0.5))
             .andThen(() -> SetScoreTrigger(ScoringState.CorrectDistanceL1))
         );
 
@@ -1198,7 +1202,6 @@ public class RobotContainer {
             new InstantCommand(() -> SetScoreTrigger(ScoringState.NotScoring))
                 .andThen(new InstantCommand(() -> m_Effector.ScoreL1()))
                 .andThen(new WaitUntilCommand(() -> !m_Effector.Scoring()))
-                //.andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
 
                 .andThen(new WaitCommand(1))
                 .andThen(new InstantCommand(() -> this.backUp(0.5)))
