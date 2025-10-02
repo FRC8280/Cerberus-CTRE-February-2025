@@ -29,7 +29,7 @@ public class Climber extends SubsystemBase {
 
     private final double canCoderZero = +0.1067;
     private final double climberOut = -0.067;
-    private final double climberIn = 0.145;//0.113525;
+    private final double m_candleSubsystemrIn = 0.145;//0.113525;
     private final double maxExtension = 0.145;//0.153;
     private final double minExtension = -0.059;
     
@@ -115,8 +115,18 @@ public class Climber extends SubsystemBase {
 
         // Display the position of the motor's internal encoder
        // SmartDashboard.putNumber("Motor Internal Encoder Position", m_ClimbMotor.getPosition().getValueAsDouble());
+       SmartDashboard.getBoolean("Ready to Climb",  AtMaxExtensions());
+
     }
 
+    public boolean IsClimberCaptured(){
+        double canRangeDistance =  m_ClimberRange.getDistance().refresh().getValueAsDouble();
+        if(canRangeDistance < 0.085)
+            return true;
+        else
+            return false;
+    }
+    
     public boolean AtMaxExtensions()
     {
         if(m_ThroughBoreEncoder.getPosition().getValueAsDouble()>=maxExtension)
@@ -178,13 +188,12 @@ public class Climber extends SubsystemBase {
     }
 
     public void retractClimber(){
-        moveToPosition(climberOut);
+        //moveToPosition(climberOut);
     }
 
     public void engageClimber(){
-        moveToPosition(climberIn);
+        //moveToPosition(climberIn);
     }
-
 
 
 }

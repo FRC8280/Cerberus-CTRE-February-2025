@@ -28,7 +28,10 @@ private final Climber m_climber;
  
   @Override
   public void execute() {
-       
+    if(!m_climber.AtMaxExtensions())
+        m_climber.runClimber(ClimberConstants.CLIMBER_SPEED_UP);
+    else
+        m_climber.runClimber(0); 
   }
 
   // Called once the command ends or is interrupted.. Here we ensure the climber is not
@@ -41,7 +44,11 @@ private final Climber m_climber;
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+
+    if(m_climber.AtMaxExtensions())
+        return true;
+    else
+        return false;
   }
 
 }

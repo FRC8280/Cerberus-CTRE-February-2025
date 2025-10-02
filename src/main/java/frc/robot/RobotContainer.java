@@ -26,6 +26,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -45,6 +46,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.RobotContainer.ScoringState;
 import frc.robot.commands.ClimberDownCommand;
 import frc.robot.commands.ClimberUpCommand;
+import frc.robot.commands.ExtendClimber;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -72,6 +74,8 @@ public class RobotContainer {
         CompleteScoreEx
     };
 
+    private PWM m_blinkin;
+    
     // private Timer m_cancelAutomovementTimer = new Timer();
     private Timer m_autoAlignTimer = new Timer();
     private boolean m_alignmentInactive = true;
@@ -86,7 +90,7 @@ public class RobotContainer {
     public final Climber m_Climber = new Climber();
     public final Elevator m_Elevator = new Elevator();
     public final Effector m_Effector = new Effector();
-    private final CANdleSystem m_candleSubsystem = new CANdleSystem();
+    //private final CANdleSystem m_candleSubsystem = new CANdleSystem();
     public ReefTargets m_ReefTargets = new ReefTargets();
     public DistanceSensorSystem m_DistanceSensorSystem = new DistanceSensorSystem();
     public double m_SlowSpeedMod = 1;
@@ -151,7 +155,15 @@ public class RobotContainer {
                 Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10))).ignoringDisable(true);
     }
 
+    private void setLEDPattern(double value)
+    {
+        m_blinkin.setSpeed(value);
+    }
+
     public RobotContainer() {
+
+        m_blinkin = new PWM(8);
+        setLEDPattern(0.85); //Set to a default color.
 
         // Register Named Commands
         NamedCommands.registerCommand("Intake Complete", new WaitUntilCommand(() -> m_Effector.IntakeComplete()));
@@ -197,7 +209,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
 
         configureBindings();
-        m_candleSubsystem.setWhite();
+        //m_candleSubsystem.setWhite();
         //m_candleSubsystem.setFireAnimation();
         //m_candleSubsystem.m_candle.setLEDs(100, 100, 100);
         //m_candleSubsystem.m_candle.setLEDs(100, 100, 100);// 0, 0, 4);
@@ -206,7 +218,7 @@ public class RobotContainer {
     public void EnableManualMode() {
         m_AutoAlignOff = true;
         System.out.println("Enabling Manual Mode");
-        m_candleSubsystem.setWhite();
+        //m_candleSubsystem.setWhite();
     }
 
     public void DisableManualMode() {
@@ -824,21 +836,28 @@ public class RobotContainer {
         driverController.start().and(driverController.x())
                 .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        /*Shyann add the command here */
+        /*Automate extending the climber command */
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.ARM_CLIMBER)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
                 .onTrue(new InstantCommand(() -> ArmClimber()))
-                .onTrue(new InstantCommand(() -> m_Climber.engageClimber())); 
-                
+                //.onTrue(new InstantCommand(() -> m_Climber.engageClimber()));
+                .onTrue(new ExtendClimber(m_Climber));
         
+        new Trigger(() -> m_ArmedClimber && m_Climber.IsClimberCaptured() && m_Climber.AtMaxExtensions())
+                .onTrue(new InstantCommand(() -> setLEDPattern(0.75)));
+        new Trigger(() -> m_ArmedClimber && !m_Climber.IsClimberCaptured() && m_Climber.AtMaxExtensions())
+                .onTrue(new InstantCommand(() -> setLEDPattern(0.69)));
+        new Trigger(() -> m_ArmedClimber && !m_Climber.IsClimberCaptured() && !m_Climber.AtMaxExtensions())
+                .onTrue(new InstantCommand(() -> setLEDPattern(0.61)));
+                      
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_UP)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
                 //.onTrue(new InstantCommand(() -> m_Climber.retractClimber())); 
                 .whileTrue(new ClimberDownCommand(m_Climber));
         new JoystickButton(ManualOperator, Constants.ManualOperatorConstants.CLIMBER_DN)
                 .onTrue(new InstantCommand(() -> m_Elevator.SetLevel(Constants.Elevator.levelTwo)))
-                .onTrue(new InstantCommand(() -> m_Climber.engageClimber())); 
-                //.whileTrue(new ClimberUpCommand(m_Climber));
+                //.onTrue(new InstantCommand(() -> m_Climber.engageClimber())); 
+                .whileTrue(new ClimberUpCommand(m_Climber));
 
         // Code to make buttons set elevator destination
         JoystickButton l1Button = new JoystickButton(ElevatorOperator, Constants.ElevatorOperatorConstants.L1);
