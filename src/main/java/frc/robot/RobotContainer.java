@@ -1224,14 +1224,14 @@ public class RobotContainer {
 
                 .andThen(new WaitCommand(1))
                 .andThen(new InstantCommand(() -> this.backUp(0.5)))
-                .andThen(new WaitCommand(1))
+                .andThen(new WaitCommand(.5))
                 .andThen(new InstantCommand(() -> m_Effector.StopNewArm()))
-                .andThen(new WaitCommand(1))
+                .andThen(new WaitCommand(.25))
                 .andThen(new InstantCommand(() -> m_Elevator.Stow()))
                 .andThen(new InstantCommand(() -> this.SetSingleTargetMode(false)))
 
                 .andThen(new WaitUntilCommand(() -> m_Elevator.reachedSetState()).withTimeout(0.5))
-                .andThen(new WaitCommand(1.2))//0.6))
+                .andThen(new WaitCommand(0.25))//0.6))
                 .andThen(m_Elevator.RunCurrentZeroing()) 
                 .andThen(new WaitUntilCommand(()->m_Elevator.ZeroCompleted()))
                 .andThen(new InstantCommand(() -> resetElevatorDestination()))
