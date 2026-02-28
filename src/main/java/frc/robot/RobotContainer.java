@@ -656,6 +656,49 @@ public class RobotContainer {
         return AlgeaHeight.Low;
     }
 
+    private void DriveToFeeder(boolean leftSide)
+    {
+        Pose2d currentPose = drivetrain.getState().Pose;
+        Pose2d destinationPos;
+
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        if (ally.get() == Alliance.Red) {
+            if(leftSide)
+                //left side from path planner
+                destinationPos = new Pose2d(16.133, 0.648, Rotation2d.fromDegrees(127));
+            else
+                //Right side from pathplanner
+                 destinationPos = new Pose2d(16.05, 7.431, Rotation2d.fromDegrees(-127));
+        } else {
+            if(leftSide)
+                //Blue left from pathplanner
+                destinationPos = new Pose2d(1.579, 7.476, Rotation2d.fromDegrees(128.138));
+            else
+                //Blue right from pathplanner
+                destinationPos = new Pose2d(1.433, 0.554, Rotation2d.fromDegrees(32.644));
+        }
+
+        // The rotation component in these poses represents the direction of travel
+        Pose2d startPos = new Pose2d(currentPose.getTranslation(), currentPose.getRotation());
+
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPos, destinationPos);
+        PathPlannerPath path = new PathPlannerPath(
+                waypoints,
+                new PathConstraints(
+                        3, 3, // Velocity was 2.5
+                        Units.degreesToRadians(360), Units.degreesToRadians(540)),
+                null, // Ideal starting state can be null for on-the-fly paths
+                new GoalEndState(0.0, destinationPos.getRotation())// currentPose.getRotation())
+        );
+
+        // Prevent this path from being flipped on the red alliance, since the given
+        // positions are already correct
+        path.preventFlipping = true;
+        automaticPath = AutoBuilder.followPath(path).withTimeout(5); // Maybe longer timeout.
+        automaticPath.schedule();
+    }
+
+
     private void AlignRobot(Constants.Alignment alignment) {
         Pose2d currentPose = drivetrain.getState().Pose;
         Pose2d destinationPos = RetrieveDestination(alignment);
@@ -809,6 +852,18 @@ public class RobotContainer {
           .andThen(new InstantCommand(() -> m_Effector.MoveAlgeaArm()))
           .andThen(new InstantCommand(() -> m_Elevator.AlgeaLow()))
           );
+
+          //New Navigation Code. 
+          driverController.x().onTrue(
+                new InstantCommand(() -> NewScoreAttempt())
+                .andThen(new InstantCommand(() -> this.DriveToFeeder(true)))
+                .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+          );
+          driverController.b().onTrue(
+            new InstantCommand(() -> NewScoreAttempt())
+            .andThen(new InstantCommand(() -> this.DriveToFeeder(false)))
+            .andThen(new WaitUntilCommand(() -> !autoPathActive()))
+      );
           
           driverController.rightBumper().onTrue(
           new InstantCommand(() -> m_Effector.Stop())

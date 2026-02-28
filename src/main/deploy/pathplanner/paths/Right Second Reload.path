@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 3.5483606557377048,
-        "y": 3.024026639344262
+        "y": 3.0120389344262293
       },
       "prevControl": null,
       "nextControl": {
         "x": 4.021066837417674,
-        "y": 3.3298074608223867
+        "y": 3.317819755904354
       },
       "isLocked": false,
       "linkedName": "Right Second Score"
